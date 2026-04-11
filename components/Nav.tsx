@@ -48,8 +48,8 @@ function HudCluster() {
 
   const monoStyle: React.CSSProperties = {
     fontFamily: "var(--font-jetbrains-mono)",
-    fontSize: "0.625rem",
-    color: "#333333",
+    fontSize: "var(--text-label)",
+    color: "#999999",
     letterSpacing: "0.08em",
     lineHeight: 1,
   };
@@ -59,8 +59,8 @@ function HudCluster() {
       style={{
         display: "inline-block",
         width: "1px",
-        height: "10px",
-        background: "rgba(255,255,255,0.1)",
+        height: "14px",
+        background: "rgba(255,255,255,0.15)",
         flexShrink: 0,
       }}
     />
@@ -171,7 +171,7 @@ export default function Nav() {
           style={{
             fontFamily: "var(--font-space-grotesk)",
             fontWeight: 700,
-            fontSize: "1.125rem",
+            fontSize: "var(--text-heading)",
             color: "#ffffff",
             textDecoration: "none",
             letterSpacing: "-0.02em",
@@ -197,8 +197,8 @@ export default function Nav() {
               data-text={link.label}
               style={{
                 fontFamily: "var(--font-inter)",
-                fontSize: "0.8125rem",
-                color: "#666666",
+                fontSize: "var(--text-label)",
+                color: "#999999",
                 textDecoration: "none",
                 letterSpacing: "0.02em",
                 transition: "color 0.2s ease",
@@ -207,7 +207,7 @@ export default function Nav() {
                 ((e.target as HTMLElement).style.color = "#ffffff")
               }
               onMouseLeave={(e) =>
-                ((e.target as HTMLElement).style.color = "#666666")
+                ((e.target as HTMLElement).style.color = "#999999")
               }
             >
               {link.label}
@@ -225,11 +225,11 @@ export default function Nav() {
             data-text="Get in touch"
             style={{
               fontFamily: "var(--font-inter)",
-              fontSize: "0.8125rem",
+              fontSize: "var(--text-body)",
               color: "#ffffff",
               textDecoration: "none",
               border: "1px solid rgba(255,255,255,0.2)",
-              padding: "8px 20px",
+              padding: "12px 24px",
               borderRadius: "2px",
               letterSpacing: "0.02em",
               transition:
@@ -323,10 +323,10 @@ export default function Nav() {
             onClick={() => setMenuOpen(false)}
             style={{
               fontFamily: "var(--font-inter)",
-              fontSize: "0.875rem",
+              fontSize: "var(--text-body)",
               color: "#ffffff",
               border: "1px solid rgba(255,255,255,0.2)",
-              padding: "12px 20px",
+              padding: "14px 24px",
               textDecoration: "none",
               display: "inline-block",
               marginTop: "8px",
