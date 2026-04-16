@@ -96,9 +96,9 @@ export function Button(props: ButtonProps) {
       // Pull toward cursor — max 3px
       const max = 3;
       const dist = Math.sqrt(dx * dx + dy * dy);
-      const factor = Math.min(max / dist, 1) * (max / 8);
-      mx.set(dx * factor);
-      my.set(dy * factor);
+      const factor = Math.min(max / dist, 1);
+      mx.set(dx * factor * 0.08);
+      my.set(dy * factor * 0.08);
     },
     [isMagnetic, mx, my]
   );

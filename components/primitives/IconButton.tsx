@@ -66,15 +66,18 @@ export function IconButton(props: IconButtonProps) {
     ...rest
   } = props;
 
+  // Clamp size to WCAG minimum touch target (24px)
+  const safeSize = Math.max(24, size);
+
   // icon size is roughly 40% of button diameter, clamped 14–24
-  const iconSize = Math.min(24, Math.max(14, Math.round(size * 0.4)));
+  const iconSize = Math.min(24, Math.max(14, Math.round(safeSize * 0.4)));
 
   const style: React.CSSProperties = {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    width: size,
-    height: size,
+    width: safeSize,
+    height: safeSize,
     borderRadius: "50%",
     flexShrink: 0,
     transition: `
