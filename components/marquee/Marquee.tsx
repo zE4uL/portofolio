@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useReducedMotion } from "framer-motion";
 
 /* ─── Types ─────────────────────────────────────────────────────────────── */
@@ -34,6 +35,7 @@ export function Marquee({
   direction = "left",
   className,
 }: MarqueeProps) {
+  const [paused, setPaused] = useState(false);
   const reduce = useReducedMotion();
 
   // Duplicate for seamless wrap — we translate by -50% (one full set width)
@@ -86,14 +88,14 @@ export function Marquee({
             : {
                 gap: "2rem",
                 animation: `${animName} ${durationSec}s linear infinite`,
-                animationPlayState: "running",
+                animationPlayState: paused ? "paused" : "running",
               }
         }
-        onMouseEnter={(e) => {
-          if (!reduce) e.currentTarget.style.animationPlayState = "paused";
+        onMouseEnter={() => {
+          if (!reduce) setPaused(true);
         }}
-        onMouseLeave={(e) => {
-          if (!reduce) e.currentTarget.style.animationPlayState = "running";
+        onMouseLeave={() => {
+          if (!reduce) setPaused(false);
         }}
       >
         {doubled.map((label, i) => (
