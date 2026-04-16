@@ -16,6 +16,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${sans.variable} ${mono.variable} ${serif.variable}`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body>
         <SmoothScroll>{children}</SmoothScroll>
       </body>
