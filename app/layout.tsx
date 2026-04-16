@@ -4,6 +4,7 @@ import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import { Nav } from "@/components/layout/Nav";
 import { ScrollProgress } from "@/components/layout/ScrollProgress";
+import { Cursor } from "@/components/cursor/Cursor";
 
 export const metadata: Metadata = {
   title: "Ziaul Islam — Product Designer. AI-native. Also a gamer.",
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
             <div id="contact" aria-hidden="true" />
           </div>
+          <Cursor />
         </SmoothScroll>
       </body>
     </html>

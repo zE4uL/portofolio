@@ -58,3 +58,13 @@ button[data-cursor="link"]:focus-visible {
   outline-offset: 2px;
   border-radius: 9999px;
 }
+
+/* Hide native cursor on fine-pointer (non-touch) devices — custom Cursor takes over */
+@media (hover: hover) and (pointer: fine) {
+  html, body {
+    cursor: none;
+  }
+  * {
+    cursor: none !important;
+  }
+}
