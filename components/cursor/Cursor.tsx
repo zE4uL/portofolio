@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { motion, useMotionValue, useSpring, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useSpring, useReducedMotion } from "framer-motion";
 
 type Mode = "default" | "link" | "card" | "throw";
 
@@ -88,19 +88,21 @@ export function Cursor() {
         style={{ position: "relative" }}
       >
         {/* Label — floats to the right of the bubble, outside the circle */}
-        {label && mode !== "default" && (
-          <motion.span
-            key={label}
-            initial={{ opacity: 0, x: 4 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -4 }}
-            transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute left-full font-mono text-[10px] text-black whitespace-nowrap"
-            style={{ marginLeft: 10, top: "50%", translateY: "-50%", mixBlendMode: "normal" }}
-          >
-            {label}
-          </motion.span>
-        )}
+        <AnimatePresence mode="wait">
+          {label && mode !== "default" && (
+            <motion.span
+              key={label}
+              initial={{ opacity: 0, x: 4 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -4 }}
+              transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute left-full font-mono text-[10px] text-black whitespace-nowrap"
+              style={{ marginLeft: 10, top: "50%", translateY: "-50%", mixBlendMode: "normal" }}
+            >
+              {label}
+            </motion.span>
+          )}
+        </AnimatePresence>
       </motion.div>
     </motion.div>
   );
