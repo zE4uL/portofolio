@@ -74,13 +74,13 @@ const FRAG = /* glsl */ `
     float n = fbm(uv * 2.8 + vec2(uTime * 0.018, uTime * 0.012));
 
     // Lighter power curve — lifts midtones so violet reads across more of the field
-    n = pow(max(n, 0.0), 1.15);
+    n = pow(max(n, 0.0), 1.35);
 
     // Boosted color mix peak — noise highs pull toward pure accent
-    vec3 color = mix(uColorB, uColorA, n * 1.1);
+    vec3 color = mix(uColorB, uColorA, n * 0.85);
 
     // ── Edge vignette — only the very outer rim fades; centre stays bright ──
-    float vignette = smoothstep(0.0, 0.2,
+    float vignette = smoothstep(0.0, 0.3,
       min(vUv.x, min(vUv.y, min(1.0 - vUv.x, 1.0 - vUv.y)))
     );
     // Second radial vignette centred on the middle for depth
@@ -88,7 +88,7 @@ const FRAG = /* glsl */ `
     color *= vignette * (0.65 + 0.35 * radial);
 
     // uOpacity drives the JS-side mount fade
-    gl_FragColor = vec4(color, 0.97 * uOpacity);
+    gl_FragColor = vec4(color, 0.85 * uOpacity);
   }
 `;
 
@@ -221,7 +221,7 @@ export function ShaderField() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(124,92,255,0.45) 0%, rgba(10,10,11,0) 70%)",
+            "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(124,92,255,0.28) 0%, rgba(10,10,11,0) 70%)",
         }}
       />
     );
@@ -234,7 +234,7 @@ export function ShaderField() {
       className="absolute inset-0 pointer-events-none"
       // Wrapper opacity raised so the nebula reads as a present colour layer,
       // not a ghost — still ambient, never foreground.
-      style={{ opacity: 0.92 }}
+      style={{ opacity: 0.65 }}
     >
       <Canvas
         // Cap DPR: 1.5 is plenty for a blurry nebula; no need for 2–3×
