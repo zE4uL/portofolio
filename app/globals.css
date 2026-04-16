@@ -129,6 +129,14 @@ a[data-cursor="link"]:focus-visible {
   to   { transform: translateX(0); }
 }
 
+/* ─── CraftStrip keyframe ────────────────────────────────────────────────── */
+/* Used by components/work/CraftStrip.tsx — same -50% technique as marquee   */
+
+@keyframes craft-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
 /* Hide native cursor on fine-pointer (non-touch) devices — custom Cursor takes over */
 @media (hover: hover) and (pointer: fine) {
   html, body {
