@@ -776,7 +776,7 @@ export function Cursor() {
 
 - [ ] **Step 1:** Read the existing file, verify it wraps Lenis and mounts on layout.
 
-- [ ] **Step 2:** Confirm it's mounted once in `app/layout.tsx`. If not, add.
+- [x] **Step 2:** Mount `<SmoothScroll>` around `{children}` in `app/layout.tsx`. (DONE by Task 0.4 — verify the wiring is still present.)
 
 - [ ] **Step 3:** Verify `npm run dev` — scrolling is smooth.
 

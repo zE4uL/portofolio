@@ -22,6 +22,10 @@
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --stagger: 40ms;
+  --dur-hover: 180ms;
+  --dur-intro: 800ms;
+
+  color-scheme: dark;
 }
 
 [data-theme="light"] {
@@ -31,6 +35,8 @@
   --text-primary: #111113;
   --text-secondary: #4B4D55;
   --border: rgba(0, 0, 0, 0.08);
+
+  color-scheme: light;
 }
 
 html {
@@ -42,6 +48,7 @@ html {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
