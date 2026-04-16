@@ -4,7 +4,6 @@ import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import { Nav } from "@/components/layout/Nav";
 import { ScrollProgress } from "@/components/layout/ScrollProgress";
-import { Footer } from "@/components/layout/Footer";
 import { Cursor } from "@/components/cursor/Cursor";
 
 export const metadata: Metadata = {
@@ -33,7 +32,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ScrollProgress />
           <div className="pt-16">
             {children}
-            <Footer />
           </div>
           <Cursor />
         </SmoothScroll>
