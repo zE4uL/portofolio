@@ -3,6 +3,7 @@ import { sans, mono, serif } from "@/lib/fonts";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import { Nav } from "@/components/layout/Nav";
+import { ScrollProgress } from "@/components/layout/ScrollProgress";
 
 export const metadata: Metadata = {
   title: "Ziaul Islam — Product Designer. AI-native. Also a gamer.",
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <SmoothScroll>
           <Nav />
+          <ScrollProgress />
           <div className="pt-16">
             {children}
             <div id="contact" aria-hidden="true" />
