@@ -45,16 +45,20 @@ export type TypeRevealProps = {
  * the Web Animations API.
  *
  * Accessibility:
- *   - `aria-label={text}` on the container → screen reader reads the full string.
- *   - `aria-hidden="true"` on every split char span → chars are invisible to AT.
+ *   - A visually-hidden `<span className="sr-only">` holds the full text for
+ *     screen readers.
+ *   - The visible animated span carries `aria-hidden="true"` so AT don't
+ *     double-read the split chars.
+ *   - `aria-label` on span/div is unreliable across AT and has been removed.
  *
  * Reduced-motion:
- *   - When `prefers-reduced-motion` is set, SplitType is never called; the text
- *     renders as plain text with `aria-label` still applied.
+ *   - When `prefers-reduced-motion` is set, SplitType is never called on the
+ *     visual span; it renders as plain unsplit text.
  *
  * Cleanup:
- *   - `split.revert()` is called on unmount so stray spans don't persist on
- *     remount cycles.
+ *   - Every `Animation` returned by `el.animate(...)` is collected and
+ *     cancelled before `split.revert()` runs, preventing orphaned running
+ *     animations on unmount or dependency change.
  */
 export function TypeReveal({
   text,
@@ -69,12 +73,14 @@ export function TypeReveal({
   // Refs & hooks
   // ------------------------------------------------------------------
 
-  // `ref` is typed as the most permissive common ancestor so it works for
-  // every allowed Tag. We cast at the JSX spread site.
-  const ref = useRef<HTMLElement>(null);
+  // outerRef tracks the Tag element (layout container only).
+  const outerRef = useRef<HTMLElement>(null);
 
-  // useInView from Framer Motion — tracks viewport entry.
-  const inView = useInView(ref, { once });
+  // visualRef targets the inner visible span that SplitType splits.
+  const visualRef = useRef<HTMLSpanElement>(null);
+
+  // useInView from Framer Motion — tracks viewport entry via outerRef.
+  const inView = useInView(outerRef, { once });
 
   // useReducedMotion from Framer Motion — respects OS / browser preference.
   const reduce = useReducedMotion();
@@ -89,8 +95,7 @@ export function TypeReveal({
   // ------------------------------------------------------------------
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    if (!visualRef.current) return;
 
     // Honour prefers-reduced-motion: leave the DOM untouched.
     if (reduce) return;
@@ -99,25 +104,29 @@ export function TypeReveal({
     if (startOnView && !shouldReveal) return;
 
     // Split the text into individual character spans.
-    const split = new SplitType(el, { types: "chars" });
+    const split = new SplitType(visualRef.current, { types: "chars" });
     const chars = split.chars ?? [];
 
+    // Collect every Animation handle so we can cancel them on cleanup.
+    const animations: Animation[] = [];
+
     chars.forEach((char, i) => {
-      const c = char as HTMLElement;
+      const el = char as HTMLElement;
 
       // Accessibility: hide individual chars from assistive technology.
-      c.setAttribute("aria-hidden", "true");
+      // The sr-only sibling span covers the full text for screen readers.
+      el.setAttribute("aria-hidden", "true");
 
       // Required for translateY to work on inline elements.
-      c.style.display = "inline-block";
+      el.style.display = "inline-block";
 
       // Set initial state so the character is invisible before the animation
       // fills in (prevents a brief flash on slower devices).
-      c.style.opacity = "0";
-      c.style.transform = "translateY(0.4em)";
+      el.style.opacity = "0";
+      el.style.transform = "translateY(0.4em)";
 
       // Web Animations API — matches the `--ease-out` design token.
-      c.animate(
+      const anim = el.animate(
         [
           { opacity: 0, transform: "translateY(0.4em)" },
           { opacity: 1, transform: "translateY(0)" },
@@ -129,11 +138,20 @@ export function TypeReveal({
           easing: "cubic-bezier(0.22, 1, 0.36, 1)",
         }
       );
+      animations.push(anim);
     });
 
-    // Cleanup: revert SplitType's DOM mutations when the component unmounts
-    // or when any dependency changes, preventing stray spans on remount.
+    // Cleanup: cancel all running animations FIRST, then revert SplitType's
+    // DOM mutations. This prevents orphaned animations when the component
+    // unmounts mid-animation, when `text` changes, or on reduced-motion toggle.
     return () => {
+      animations.forEach((a) => {
+        try {
+          a.cancel();
+        } catch {
+          /* noop */
+        }
+      });
       try {
         split.revert();
       } catch {
@@ -146,17 +164,17 @@ export function TypeReveal({
   // Render
   // ------------------------------------------------------------------
 
-  // Polymorphic element.
-  // `ref` is cast to `never` to satisfy the union of possible element refs
-  // without reaching for `any`. TypeScript accepts this because the actual
-  // runtime ref object is always the correct shape.
+  // The outer Tag is a pure layout container — no aria-label (unreliable on
+  // span/div elements across AT). Screen readers get the full text from the
+  // sr-only sibling; AT is kept away from the split chars via aria-hidden.
   return (
-    <Tag
-      ref={ref as never}
-      className={className}
-      aria-label={text}
-    >
-      {text}
+    <Tag ref={outerRef as never} className={className}>
+      {/* Visually hidden — read by screen readers */}
+      <span className="sr-only">{text}</span>
+      {/* Visible animated copy — hidden from AT */}
+      <span ref={visualRef} aria-hidden="true">
+        {text}
+      </span>
     </Tag>
   );
 }
