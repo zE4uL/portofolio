@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
 import { ArrowUpRight, Menu, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 const LINKS = [
@@ -18,15 +18,19 @@ export function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const reduce = useReducedMotion();
+  const hamburgerRef = useRef<HTMLButtonElement | null>(null);
 
-  // Close drawer on Escape
+  // Close drawer on Escape and restore focus to hamburger
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape" && open) {
+        setOpen(false);
+        hamburgerRef.current?.focus();
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [open]);
 
   // Close drawer on route change
   useEffect(() => {
@@ -35,13 +39,13 @@ export function Nav() {
 
   const isActive = (href: string) => {
     if (href.startsWith("#")) return false;
-    return pathname === href;
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(href + "/");
   };
 
   return (
     <header
       className="fixed top-0 inset-x-0 z-50 border-b border-[var(--border)] bg-[var(--canvas)]/70 backdrop-blur-md"
-      style={{ backdropFilter: "blur(12px)" }}
     >
       <nav
         aria-label="Primary"
@@ -98,6 +102,7 @@ export function Nav() {
 
         {/* Mobile hamburger */}
         <button
+          ref={hamburgerRef}
           type="button"
           className="md:hidden w-11 h-11 grid place-items-center text-[var(--text-primary)] cursor-pointer transition-colors duration-[180ms] hover:text-[var(--accent-primary)] rounded-md"
           onClick={() => setOpen((v) => !v)}
@@ -141,6 +146,7 @@ export function Nav() {
             id="mobile-drawer"
             role="navigation"
             aria-label="Mobile menu"
+            aria-hidden={!open}
             initial={
               reduce
                 ? { opacity: 0 }

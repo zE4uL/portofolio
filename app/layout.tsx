@@ -27,7 +27,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <SmoothScroll>
           <Nav />
-          <div className="pt-16">{children}</div>
+          <div className="pt-16">
+            {children}
+            <div id="contact" aria-hidden="true" />
+          </div>
         </SmoothScroll>
       </body>
     </html>
