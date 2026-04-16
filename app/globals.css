@@ -115,6 +115,20 @@ a[data-cursor="link"]:focus-visible {
   color: var(--text-primary) !important;
 }
 
+/* ─── Marquee keyframes ──────────────────────────────────────────────────── */
+/* Used by components/marquee/Marquee.tsx — defined here so they're cached   */
+/* and scoped to the stylesheet rather than injected inline per-component.   */
+
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
 /* Hide native cursor on fine-pointer (non-touch) devices — custom Cursor takes over */
 @media (hover: hover) and (pointer: fine) {
   html, body {
