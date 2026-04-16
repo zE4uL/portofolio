@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Sun, Moon } from "lucide-react";
 
 type Theme = "dark" | "light";
@@ -17,12 +17,13 @@ interface Sparkle {
 function getInitialTheme(): Theme {
   if (typeof window === "undefined") return "dark";
   try {
-    const saved = localStorage.getItem("theme") as Theme | null;
+    const saved = localStorage.getItem("theme");
     if (saved === "dark" || saved === "light") return saved;
-  } catch {
-    // ignore
+  } catch {}
+  if (typeof window.matchMedia === "function") {
+    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
   }
-  return matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  return "dark";
 }
 
 export function ThemeToggle() {
@@ -30,15 +31,28 @@ export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
   const [sparkleKey, setSparkleKey] = useState(0);
+  const reduce = useReducedMotion();
+  const timeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const initial = getInitialTheme();
-    setTheme(initial);
-    document.documentElement.setAttribute("data-theme", initial);
+    const domTheme = document.documentElement.dataset.theme as Theme | undefined;
+    const resolved: Theme = domTheme === "light" || domTheme === "dark" ? domTheme : getInitialTheme();
+    setTheme(resolved);
     setMounted(true);
+    // Do not re-write data-theme here — FOUC script already did.
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
+    };
   }, []);
 
   const spawnSparkles = useCallback(() => {
+    if (reduce) return;
+    if (timeoutRef.current !== null) {
+      window.clearTimeout(timeoutRef.current);
+    }
     const count = 5;
     const next: Sparkle[] = Array.from({ length: count }, (_, i) => ({
       id: i,
@@ -49,8 +63,8 @@ export function ThemeToggle() {
     }));
     setSparkles(next);
     setSparkleKey((k) => k + 1);
-    setTimeout(() => setSparkles([]), 500);
-  }, []);
+    timeoutRef.current = window.setTimeout(() => setSparkles([]), 500);
+  }, [reduce]);
 
   const toggle = useCallback(() => {
     setTheme((current) => {
@@ -58,9 +72,7 @@ export function ThemeToggle() {
       document.documentElement.setAttribute("data-theme", next);
       try {
         localStorage.setItem("theme", next);
-      } catch {
-        // ignore
-      }
+      } catch {}
       return next;
     });
     spawnSparkles();
@@ -109,31 +121,15 @@ export function ThemeToggle() {
           color: "var(--text-primary)",
           transition: "background 180ms var(--ease-out), border-color 180ms var(--ease-out)",
         }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            toggle();
-          }
-        }}
       >
-        {/* Focus ring */}
-        <span
-          className="pointer-events-none absolute inset-0 rounded-full"
-          style={{
-            outline: "2px solid transparent",
-            outlineOffset: 2,
-            transition: "outline-color 120ms ease",
-          }}
-        />
-
         <AnimatePresence mode="wait" initial={false}>
           {mounted && (
             <motion.span
               key={theme}
-              initial={{ opacity: 0, rotate: isDark ? -90 : 90, scale: 0.6 }}
+              initial={reduce ? false : { opacity: 0, rotate: isDark ? -90 : 90, scale: 0.6 }}
               animate={{ opacity: 1, rotate: 0, scale: 1 }}
-              exit={{ opacity: 0, rotate: isDark ? 90 : -90, scale: 0.6 }}
-              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              exit={reduce ? { opacity: 0 } : { opacity: 0, rotate: isDark ? 90 : -90, scale: 0.6 }}
+              transition={{ duration: reduce ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }}
               className="flex items-center justify-center"
               style={{ color: "var(--text-primary)" }}
             >
@@ -155,14 +151,6 @@ export function ThemeToggle() {
             </motion.span>
           )}
         </AnimatePresence>
-
-        {/* Inline focus style — avoids Tailwind v4 variant quirks */}
-        <style>{`
-          button[data-cursor="link"]:focus-visible {
-            outline: 2px solid var(--accent-primary);
-            outline-offset: 3px;
-          }
-        `}</style>
       </button>
     </div>
   );
