@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
-import Cursor from "@/components/Cursor";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -49,7 +48,6 @@ export default function RootLayout({
         style={{ background: "#080808", color: "#ffffff" }}
       >
         <SmoothScroll>
-          <Cursor />
           {children}
         </SmoothScroll>
       </body>

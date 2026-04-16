@@ -5,8 +5,6 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import Link from "next/link";
-import Nav from "@/components/Nav";
-
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /* ─── Sub-components ─────────────────────────────────────────── */
@@ -259,7 +257,6 @@ export default function NowStudioPage() {
 
   return (
     <>
-      <Nav />
       <div
         ref={pageRef}
         style={{
