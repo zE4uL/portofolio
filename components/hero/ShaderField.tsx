@@ -23,7 +23,7 @@ const VERT = /* glsl */ `
  * Alpha vignette fades all four edges so the field dissolves into the page bg.
  */
 const FRAG = /* glsl */ `
-  precision mediump float;
+  precision highp float;
 
   varying vec2 vUv;
 
@@ -97,11 +97,11 @@ const FRAG = /* glsl */ `
 // ---------------------------------------------------------------------------
 
 interface FieldProps {
-  mouse: { x: number; y: number };
+  mouseRef: React.RefObject<{ x: number; y: number }>;
   opacity: number;
 }
 
-function Field({ mouse, opacity }: FieldProps) {
+function Field({ mouseRef, opacity }: FieldProps) {
   const mat = useRef<THREE.ShaderMaterial>(null);
 
   // Memoised so uniforms are never recreated per frame
@@ -130,7 +130,8 @@ function Field({ mouse, opacity }: FieldProps) {
     mat.current.uniforms.uTime.value    = clock.getElapsedTime();
     mat.current.uniforms.uOpacity.value = opacity;
     // Flip Y: pointer (0,0) is top-left; GL (0,0) is bottom-left
-    mat.current.uniforms.uMouse.value.set(mouse.x, 1 - mouse.y);
+    const m = mouseRef.current;
+    mat.current.uniforms.uMouse.value.set(m.x, 1 - m.y);
   });
 
   return (
@@ -174,7 +175,7 @@ export function ShaderField() {
   const inView = useInView(wrapRef, { margin: "-10%" });
 
   // Normalised pointer position [0..1]
-  const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
+  const mouseRef = useRef({ x: 0.5, y: 0.5 });
 
   // Fade-in opacity controlled in JS so we avoid a flash of white canvas
   const [opacity, setOpacity] = useState(0);
@@ -202,10 +203,10 @@ export function ShaderField() {
     if (reducedMotion) return;
 
     const onMove = (e: PointerEvent) => {
-      setMouse({
+      mouseRef.current = {
         x: e.clientX / window.innerWidth,
         y: e.clientY / window.innerHeight,
-      });
+      };
     };
 
     window.addEventListener("pointermove", onMove, { passive: true });
@@ -249,7 +250,7 @@ export function ShaderField() {
         camera={{ position: [0, 0, 1] }}
         style={{ width: "100%", height: "100%" }}
       >
-        <Field mouse={mouse} opacity={opacity} />
+        <Field mouseRef={mouseRef} opacity={opacity} />
       </Canvas>
     </div>
   );
