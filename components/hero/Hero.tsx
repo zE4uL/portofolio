@@ -34,7 +34,7 @@ export function Hero() {
   return (
     <section
       id="home"
-      className="relative flex flex-col items-center justify-center min-h-[100svh] px-6 overflow-hidden"
+      className="relative flex flex-col items-center justify-center min-h-[calc(100svh-4rem)] px-6 overflow-hidden"
     >
       {/* ── Layer 0: WebGL shader background ─────────────────────────────── */}
       <ShaderField />
