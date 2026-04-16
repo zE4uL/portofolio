@@ -53,10 +53,66 @@ html {
   }
 }
 
-button[data-cursor="link"]:focus-visible {
+button[data-cursor="link"]:focus-visible,
+a[data-cursor="link"]:focus-visible {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
   border-radius: 9999px;
+}
+
+/* ─── Primitive: Button ─────────────────────────────────────────────────── */
+
+.btn-base {
+  /* Base reset handled by inline styles in Button.tsx */
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent-primary) 85%, #000) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent-primary) 40%, transparent),
+    0 4px 20px color-mix(in srgb, var(--accent-primary) 30%, transparent);
+}
+
+.btn-primary:active:not(:disabled) {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 50%, transparent);
+}
+
+.btn-primary:disabled {
+  opacity: 0.45;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--text-secondary) 25%, transparent) !important;
+  background: color-mix(in srgb, var(--surface-raised) 80%, var(--text-primary) 5%) !important;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--surface-raised) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ─── Primitive: IconButton ─────────────────────────────────────────────── */
+
+.ib-base:disabled {
+  opacity: 0.45;
+}
+
+.ib-solid:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent-primary) 85%, #000) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent-primary) 40%, transparent),
+    0 4px 16px color-mix(in srgb, var(--accent-primary) 28%, transparent);
+}
+
+.ib-outline:hover:not(:disabled) {
+  background: var(--surface-raised) !important;
+  border-color: color-mix(in srgb, var(--text-secondary) 30%, transparent) !important;
+  color: var(--text-primary) !important;
+}
+
+.ib-ghost:hover:not(:disabled) {
+  background: var(--surface-raised) !important;
+  color: var(--text-primary) !important;
 }
 
 /* Hide native cursor on fine-pointer (non-touch) devices — custom Cursor takes over */
