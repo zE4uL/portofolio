@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hero Swap — Options</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --ink: #f5f1e8;
+    --ink-2: #9a958a;
+    --ink-3: #4a453d;
+    --accent: #ff3b1f;
+    --ease: cubic-bezier(.7, 0, .2, 1);
+    --ease-snap: cubic-bezier(.22, 1, .36, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body { min-height: 100vh; padding: 48px 56px 96px; }
+
+  .topbar {
+    display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center;
+    border-bottom: 1px solid var(--ink-3); padding-bottom: 18px; margin-bottom: 28px;
+  }
+  .topbar h1 {
+    font-size: 13px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--ink-2); margin-right: auto;
+  }
+  .topbar h1 b { color: var(--ink); font-weight: 500; }
+
+  .ctrls { display: flex; gap: 8px; flex-wrap: wrap; }
+  .ctrls button {
+    appearance: none; background: transparent; color: var(--ink-2);
+    border: 1px solid var(--ink-3); padding: 8px 14px;
+    font: inherit; font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+    cursor: pointer; transition: color .25s var(--ease), border-color .25s var(--ease), background .25s var(--ease);
+  }
+  .ctrls button:hover { color: var(--ink); border-color: var(--ink); }
+  .ctrls button.is-active { color: #0a0a0a; background: var(--accent); border-color: var(--accent); }
+
+  .speed { display: flex; align-items: center; gap: 10px; color: var(--ink-2); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; }
+  .speed input { width: 120px; accent-color: var(--accent); }
+
+  .stage {
+    margin-top: 56px;
+    display: grid; grid-template-columns: 1fr; gap: 0;
+  }
+
+  .demo {
+    display: none;
+    align-items: flex-end;
+    min-height: clamp(220px, 32vw, 360px);
+  }
+  .demo.is-active { display: flex; }
+
+  /* shared "huge" hero typography */
+  .huge {
+    font-weight: 500;
+    font-size: clamp(64px, 11.5vw, 200px);
+    line-height: .9;
+    letter-spacing: -0.055em;
+  }
+  .row { display: flex; align-items: baseline; gap: .25em; }
+  .lead { color: var(--ink-2); }
+  em { font-style: italic; font-weight: 300; color: var(--accent); }
+
+  .meta {
+    margin-top: 36px;
+    color: var(--ink-2); font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    border-top: 1px solid var(--ink-3); padding-top: 16px;
+  }
+  .meta b { color: var(--ink); font-weight: 500; }
+  .meta code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--accent); letter-spacing: 0; text-transform: none; font-size: 12px; }
+
+  /* ============================================================
+     OPTION 1 — MASK SLIDE  (matches hero entry "lineUp")
+     ============================================================ */
+  .swap-mask {
+    position: relative; display: inline-block;
+    overflow: hidden;
+    padding: .18em 0 .04em;
+  }
+  .swap-mask .word {
+    display: inline-block;
+    transform: translateY(0);
+    transition: transform .9s var(--ease);
+  }
+  .swap-mask .word.is-out { transform: translateY(-110%); }
+  .swap-mask .word.is-in  { transform: translateY(110%); }
+  .swap-mask .word.is-in.is-active { transform: translateY(0); }
+
+  /* ============================================================
+     OPTION 2 — SOFT BLUR CROSSFADE
+     ============================================================ */
+  .swap-blur {
+    position: relative; display: inline-grid; grid-template-columns: 1fr;
+  }
+  .swap-blur .word {
+    grid-column: 1; grid-row: 1;
+    opacity: 1; filter: blur(0); transform: translateY(0);
+    transition: opacity .55s var(--ease-snap), filter .65s var(--ease-snap), transform .7s var(--ease-snap);
+  }
+  .swap-blur .word.is-out {
+    opacity: 0; filter: blur(14px); transform: translateY(-.12em);
+  }
+  .swap-blur .word.is-in {
+    opacity: 0; filter: blur(14px); transform: translateY(.16em);
+  }
+  .swap-blur .word.is-in.is-active {
+    opacity: 1; filter: blur(0); transform: translateY(0);
+  }
+
+  /* ============================================================
+     OPTION 3 — MAGNETIC LIFT  (rhymes with HeroDotMatrix attract)
+     ============================================================ */
+  .swap-magnet {
+    position: relative; display: inline-grid; grid-template-columns: 1fr;
+  }
+  .swap-magnet .word {
+    grid-column: 1; grid-row: 1;
+    opacity: 1; filter: blur(0);
+    transform: translateY(0) scale(1);
+    transition:
+      transform .9s var(--ease-snap),
+      filter   .7s var(--ease-snap),
+      opacity  .55s var(--ease-snap);
+  }
+  .swap-magnet .word.is-out {
+    opacity: 0; filter: blur(8px);
+    transform: translateY(-.18em) scale(.96);
+  }
+  .swap-magnet .word.is-in {
+    opacity: 0; filter: blur(10px);
+    transform: translateY(.22em) scale(1.04);
+  }
+  .swap-magnet .word.is-in.is-active {
+    opacity: 1; filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+
+  /* ============================================================
+     OPTION 4 — ODOMETER  (mechanical, rhymes with link underline swap)
+     ============================================================ */
+  .swap-odo {
+    position: relative; display: inline-block;
+    overflow: hidden;
+    padding: .18em 0 .04em;
+  }
+  .swap-odo .word {
+    display: inline-block;
+    transform: translateY(0);
+    transition: transform .55s var(--ease);
+  }
+  .swap-odo .word.is-out { transform: translateY(-100%); }
+  .swap-odo .word.is-in  { transform: translateY(100%); }
+  .swap-odo .word.is-in.is-active { transform: translateY(0); }
+
+  /* ============================================================
+     OPTION 6 — PER-LETTER MASK  (chkstepan.com style)
+     Each letter has its own mask. Outgoing letters slide up
+     out the top with L→R stagger. Incoming letters slide up
+     from below into the mask, also L→R staggered, slightly
+     offset so the change reads as a sweep across the word.
+     ============================================================ */
+  .swap-letters {
+    position: relative;
+    display: inline-grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+  }
+  .swap-letters .word {
+    grid-column: 1; grid-row: 1;
+    display: inline-flex;
+    align-items: baseline;
+    white-space: nowrap;
+  }
+  .swap-letters .ch {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    padding: .18em 0 .04em;
+    margin: -.18em 0 -.04em;
+  }
+  .swap-letters .ch > span {
+    display: inline-block;
+    transform: translateY(0);
+    transition: transform .68s cubic-bezier(.7, 0, .2, 1);
+    will-change: transform;
+  }
+  /* incoming starts hidden BELOW the mask */
+  .swap-letters .word.is-in .ch > span { transform: translateY(110%); }
+  /* incoming active = settled */
+  .swap-letters .word.is-in.is-active .ch > span { transform: translateY(0); }
+  /* outgoing exits ABOVE the mask */
+  .swap-letters .word.is-out .ch > span { transform: translateY(-110%); }
+
+  /* ============================================================
+     OPTION 5 — INERTIA  (exponential, rhymes with work preview lerp)
+     ============================================================ */
+  .swap-inertia {
+    position: relative; display: inline-grid; grid-template-columns: 1fr;
+  }
+  .swap-inertia .word {
+    grid-column: 1; grid-row: 1;
+    opacity: 1;
+    transform: translateX(0);
+    transition:
+      transform .9s cubic-bezier(.16, 1, .3, 1),
+      opacity   .45s var(--ease);
+  }
+  .swap-inertia .word.is-out {
+    opacity: 0;
+    transform: translateX(-.35em);
+    transition:
+      transform .55s cubic-bezier(.7, 0, .84, 0),
+      opacity   .35s var(--ease);
+  }
+  .swap-inertia .word.is-in {
+    opacity: 0;
+    transform: translateX(.55em);
+  }
+  .swap-inertia .word.is-in.is-active {
+    opacity: 1;
+    transform: translateX(0);
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <h1>HERO SWAP — <b>OPTIONS</b></h1>
+  <div class="ctrls" id="ctrls">
+    <button data-opt="letters" class="is-active">★ Per-Letter Mask</button>
+    <button data-opt="mask">1 · Mask Slide</button>
+    <button data-opt="blur">2 · Blur Crossfade</button>
+    <button data-opt="magnet">3 · Magnetic Lift</button>
+    <button data-opt="odo">4 · Odometer</button>
+    <button data-opt="inertia">5 · Inertia</button>
+  </div>
+  <label class="speed">Cycle <input id="speed" type="range" min="1400" max="5000" step="200" value="2800"><span id="speedV">2.8s</span></label>
+</header>
+
+<section class="stage">
+
+  <!-- ★ PER-LETTER MASK (chkstepan-style) -->
+  <div class="demo is-active" data-demo="letters">
+    <div class="huge">
+      <div class="row">
+        <span class="lead">design for</span>
+        <span class="swap-letters" data-swap="letters" data-mode="letters"><span class="word is-active" data-letters>payments</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1 · MASK SLIDE -->
+  <div class="demo" data-demo="mask">
+    <div class="huge">
+      <div class="row">
+        <span class="lead">design for</span>
+        <span class="swap-mask" data-swap="mask"><span class="word is-active">payments</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 · BLUR CROSSFADE -->
+  <div class="demo" data-demo="blur">
+    <div class="huge">
+      <div class="row">
+        <span class="lead">design for</span>
+        <span class="swap-blur" data-swap="blur"><span class="word is-active">payments</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 · MAGNETIC LIFT -->
+  <div class="demo" data-demo="magnet">
+    <div class="huge">
+      <div class="row">
+        <span class="lead">design for</span>
+        <span class="swap-magnet" data-swap="magnet"><span class="word is-active">payments</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 · ODOMETER -->
+  <div class="demo" data-demo="odo">
+    <div class="huge">
+      <div class="row">
+        <span class="lead">design for</span>
+        <span class="swap-odo" data-swap="odo"><span class="word is-active">payments</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 · INERTIA -->
+  <div class="demo" data-demo="inertia">
+    <div class="huge">
+      <div class="row">
+        <span class="lead">design for</span>
+        <span class="swap-inertia" data-swap="inertia"><span class="word is-active">payments</span></span>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<p class="meta" id="meta"></p>
+
+<script>
+  const WORDS = ["payments","platforms","dashboards","systems","agents","SDKs","flows","tools","interfaces","analytics"];
+
+  const META = {
+    letters: { title: "Per-Letter Mask  ★",  desc: "Each letter has its own clip mask. Outgoing letters slide up out the top with a left→right stagger; incoming letters slide up from below the mask, also staggered. Reads as a sweep across the word — chkstepan.com style.", curve: "cubic-bezier(.7, 0, .2, 1) · 680ms · 28ms per-letter stagger" },
+    mask:    { title: "Mask Slide",       desc: "Word slides out the top, next slides up from below — same `lineUp` family as the hero entry animation. Crisp, on-brand.", curve: "cubic-bezier(.7, 0, .2, 1) · 900ms" },
+    blur:    { title: "Blur Crossfade",   desc: "Soft optical blur + small Y drift. No character stagger — calm, expensive feel. Closest to magazine masthead pacing.", curve: "cubic-bezier(.22, 1, .36, 1) · 550–700ms" },
+    magnet:  { title: "Magnetic Lift",    desc: "Word lifts and shrinks slightly as it leaves; new word emerges blurred and oversized then settles. Rhymes with the dot-matrix attract physics on the right of the hero.", curve: "cubic-bezier(.22, 1, .36, 1) · 700–900ms" },
+    odo:     { title: "Odometer",         desc: "Mechanical vertical scroll — same translateY(-100%) move used by the contact link underlines. Tight, precise, no blur.", curve: "cubic-bezier(.7, 0, .2, 1) · 550ms" },
+    inertia: { title: "Inertia",          desc: "Outgoing word accelerates away with ease-in; incoming word decelerates in with a long expo-out tail. Mirrors the exponential lerp on the work-list preview.", curve: "ease-in 550ms → expo-out 900ms" }
+  };
+
+  const ctrls = document.getElementById("ctrls");
+  const demos = [...document.querySelectorAll(".demo")];
+  const speed = document.getElementById("speed");
+  const speedV = document.getElementById("speedV");
+  const meta = document.getElementById("meta");
+
+  let currentOpt = "mask";
+  let cycleMs = parseInt(speed.value, 10);
+  let timer = null;
+  let idx = 0;
+
+  function setMeta() {
+    const m = META[currentOpt];
+    meta.innerHTML = `<b>${m.title}</b> &nbsp;—&nbsp; ${m.desc} &nbsp; <code>${m.curve}</code>`;
+  }
+
+  function setOpt(opt) {
+    currentOpt = opt;
+    [...ctrls.querySelectorAll("button")].forEach(b => b.classList.toggle("is-active", b.dataset.opt === opt));
+    demos.forEach(d => d.classList.toggle("is-active", d.dataset.demo === opt));
+    setMeta();
+  }
+
+  ctrls.addEventListener("click", e => {
+    const b = e.target.closest("button[data-opt]");
+    if (!b) return;
+    setOpt(b.dataset.opt);
+  });
+
+  speed.addEventListener("input", () => {
+    cycleMs = parseInt(speed.value, 10);
+    speedV.textContent = (cycleMs / 1000).toFixed(1) + "s";
+  });
+
+  // Per-letter stagger config (chkstepan style)
+  const LETTER_STAGGER_MS = 28;     // delay between consecutive letters
+  const INCOMING_OFFSET_MS = 80;    // incoming starts this much after outgoing
+
+  // Build a word as <span class="ch"><span>X</span></span> per character,
+  // with a transition-delay scaled by index for L→R stagger.
+  function buildLetters(text, baseDelayMs) {
+    const frag = document.createDocumentFragment();
+    [...text].forEach((char, i) => {
+      const wrap = document.createElement("span");
+      wrap.className = "ch";
+      const inner = document.createElement("span");
+      inner.textContent = char === " " ? " " : char;
+      inner.style.transitionDelay = (baseDelayMs + i * LETTER_STAGGER_MS) + "ms";
+      wrap.appendChild(inner);
+      frag.appendChild(wrap);
+    });
+    return frag;
+  }
+
+  // Convert any pre-rendered .word[data-letters] into per-letter markup at boot.
+  function hydrateLetters() {
+    document.querySelectorAll(".word[data-letters]").forEach(node => {
+      if (node.querySelector(".ch")) return; // already hydrated
+      const txt = node.textContent;
+      node.textContent = "";
+      node.appendChild(buildLetters(txt, 0));
+    });
+  }
+
+  // The swap engine — works for every option via the .word / is-active / is-in / is-out
+  // class API. When holder has data-mode="letters", letters are wrapped + staggered.
+  function swap(holder, nextWord) {
+    const isLetters = holder.dataset.mode === "letters";
+    const out = holder.querySelector(".word.is-active");
+
+    const incoming = document.createElement("span");
+    incoming.className = "word is-in";
+    if (isLetters) {
+      incoming.dataset.letters = "";
+      incoming.appendChild(buildLetters(nextWord, INCOMING_OFFSET_MS));
+    } else {
+      incoming.textContent = nextWord;
+    }
+    holder.appendChild(incoming);
+
+    // force layout so transition fires
+    void incoming.offsetWidth;
+
+    // animate out
+    if (out) {
+      // For per-letter mode, reset outgoing letter delays to 0..i*stagger
+      // so the exit sweep starts from 0 (not inherited 80ms offset from arrival).
+      if (isLetters) {
+        out.querySelectorAll(".ch > span").forEach((s, i) => {
+          s.style.transitionDelay = (i * LETTER_STAGGER_MS) + "ms";
+        });
+      }
+      out.classList.remove("is-active");
+      out.classList.add("is-out");
+    }
+    // animate in
+    requestAnimationFrame(() => {
+      incoming.classList.add("is-active");
+    });
+
+    // cleanup outgoing after transition completes (longest letter delay + duration)
+    if (out) {
+      const lastLetterDelay = isLetters ? (nextWord.length * LETTER_STAGGER_MS) : 0;
+      const cleanupDelay = 1400 + lastLetterDelay;
+      setTimeout(() => out.remove(), cleanupDelay);
+    }
+  }
+
+  function tick() {
+    idx = (idx + 1) % WORDS.length;
+    const next = WORDS[idx];
+    document.querySelectorAll("[data-swap]").forEach(h => swap(h, next));
+  }
+
+  function start() {
+    stop();
+    timer = setInterval(tick, cycleMs);
+  }
+  function stop() { if (timer) { clearInterval(timer); timer = null; } }
+
+  speed.addEventListener("change", start);
+  document.addEventListener("visibilitychange", () => document.hidden ? stop() : start());
+
+  hydrateLetters();
+  setMeta();
+  speedV.textContent = (cycleMs / 1000).toFixed(1) + "s";
+  start();
+</script>
+</body>
+</html>

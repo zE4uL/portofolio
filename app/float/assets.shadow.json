@@ -1,0 +1,80 @@
+{
+  "coverHero": null,
+  "tokenSheet": {
+    "kind": "image",
+    "src": "/images/work/float/tokenSheet.jpg",
+    "alt": "tokenSheet",
+    "width": 2001,
+    "height": 858
+  },
+  "iconGrid": {
+    "kind": "image",
+    "src": "/images/work/float/iconGrid.jpg",
+    "alt": "iconGrid",
+    "width": 3552,
+    "height": 2194
+  },
+  "inputAnatomy": {
+    "kind": "image",
+    "src": "/images/work/float/inputAnatomy.jpg",
+    "alt": "inputAnatomy",
+    "width": 2667,
+    "height": 1143
+  },
+  "buttonMatrix": {
+    "kind": "image",
+    "src": "/images/work/float/buttonMatrix.jpg",
+    "alt": "buttonMatrix",
+    "width": 3840,
+    "height": 2400
+  },
+  "themeSplit01": {
+    "kind": "image",
+    "src": "/images/work/float/themeSplit01.jpg",
+    "alt": "themeSplit01",
+    "width": 3200,
+    "height": 1800
+  },
+  "themeSplit02": {
+    "kind": "image",
+    "src": "/images/work/float/themeSplit02.png",
+    "alt": "themeSplit02",
+    "width": 3200,
+    "height": 1800
+  },
+  "themeSplit03": {
+    "kind": "image",
+    "src": "/images/work/float/themeSplit03.png",
+    "alt": "themeSplit03",
+    "width": 3200,
+    "height": 1800
+  },
+  "themeSplit04": {
+    "kind": "image",
+    "src": "/images/work/float/themeSplit04.png",
+    "alt": "themeSplit04",
+    "width": 3200,
+    "height": 1800
+  },
+  "bluePrintDocs": {
+    "kind": "image",
+    "src": "/images/work/float/bluePrintDocs.jpg",
+    "alt": "bluePrintDocs",
+    "width": 1920,
+    "height": 1080
+  },
+  "workshopShot": {
+    "kind": "image",
+    "src": "/images/work/float/workshopShot.png",
+    "alt": "workshopShot",
+    "width": 3200,
+    "height": 1368
+  },
+  "apparatusShot": {
+    "kind": "image",
+    "src": "/images/work/float/apparatusShot.jpg",
+    "alt": "apparatusShot",
+    "width": 1920,
+    "height": 1080
+  }
+}

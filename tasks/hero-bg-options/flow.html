@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Hero BG · Flow lines</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0a0a0a; --bg-2:#111; --ink:#f5f1e8; --ink-2:#9a958a; --ink-3:#4a453d;
+    --line:#1f1d1a; --line-2:#2a2822; --accent:#ff3b1f;
+    --ease:cubic-bezier(.7,0,.2,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  /* GRAIN */
+  .grain{
+    position:fixed;inset:0;pointer-events:none;z-index:90;
+    opacity:.09;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.9'/></svg>");
+  }
+
+  /* CONTROL PANEL */
+  .ctrl{
+    position:fixed;top:14px;left:14px;z-index:100;
+    background:rgba(10,10,10,.7);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--line-2);
+    padding:14px 16px;border-radius:14px;
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2);
+    display:flex;flex-direction:column;gap:8px;
+    min-width:280px;
+  }
+  .ctrl b{color:var(--ink)}
+  .ctrl .row{display:flex;align-items:center;gap:10px}
+  .ctrl .row label{flex:0 0 100px;color:var(--ink-3)}
+  .ctrl .row input[type=range]{flex:1;accent-color:var(--accent)}
+  .ctrl .row .val{flex:0 0 36px;text-align:right;color:var(--ink)}
+  .ctrl button{
+    margin-top:4px;font:inherit;border:1px solid var(--line-2);background:transparent;color:var(--ink-2);
+    padding:6px 10px;border-radius:8px;cursor:pointer;letter-spacing:.18em;
+  }
+  .ctrl button.on{background:var(--accent);color:#0a0a0a;border-color:var(--accent)}
+
+  /* HERO */
+  .hero{
+    position:relative;min-height:100vh;
+    padding:140px 60px 80px;
+    overflow:hidden;
+    isolation:isolate;
+  }
+  .hero-bg{
+    position:absolute;inset:0;z-index:0;pointer-events:none;
+  }
+  .hero-bg canvas{display:block;width:100%;height:100%}
+  .hero-bg .glow{
+    position:absolute;inset:-10%;
+    background:
+      radial-gradient(40% 40% at var(--mx,50%) var(--my,50%),
+        rgba(255,59,31,0.10), transparent 60%);
+    filter:blur(20px);
+    opacity:0;transition:opacity .25s var(--ease);
+  }
+  .hero-bg.on .glow{opacity:1}
+  .hero-bg .scan{
+    position:absolute;left:0;right:0;height:1px;
+    background:linear-gradient(90deg, transparent, rgba(255,59,31,.4), transparent);
+    animation:scanSweep 9s ease-in-out infinite;
+  }
+  .hero-bg .scan.s1{top:34%;animation-delay:0s}
+  .hero-bg .scan.s2{top:62%;animation-delay:4s}
+  @keyframes scanSweep{
+    0%,100%{transform:translateX(-30%);opacity:0}
+    50%{transform:translateX(20%);opacity:1}
+  }
+
+  .hero > .content{position:relative;z-index:2}
+  .lead{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    margin-bottom:40px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2);
+  }
+  .lead .tag{max-width:280px;line-height:1.7}
+  .lead .tag b{color:var(--ink)}
+  .huge{
+    font-family:'Space Grotesk',sans-serif;font-weight:500;
+    font-size:clamp(64px,15vw,260px);
+    line-height:.86;letter-spacing:-.055em;text-wrap:balance;
+  }
+  .huge em{font-style:italic;font-weight:300;color:var(--accent)}
+  .huge .row{display:block}
+  .label{
+    margin-top:48px;padding-top:24px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;
+    font-family:'JetBrains Mono',monospace;font-size:10px;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2);
+  }
+  .label b{color:var(--ink)}
+  .label .accent{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<aside class="ctrl">
+  <div><b>Flow lines</b> — push fast, lines spring back</div>
+  <div class="row"><label>Lines</label>
+    <input type="range" id="lines" min="20" max="80" step="2" value="40" />
+    <span class="val" id="vLines">40</span>
+  </div>
+  <div class="row"><label>Reach (px)</label>
+    <input type="range" id="reach" min="80" max="500" step="10" value="220" />
+    <span class="val" id="vReach">220</span>
+  </div>
+  <div class="row"><label>Push</label>
+    <input type="range" id="push" min="10" max="400" step="5" value="140" />
+    <span class="val" id="vPush">140</span>
+  </div>
+  <div class="row"><label>Spring</label>
+    <input type="range" id="spring" min="2" max="20" step="1" value="8" />
+    <span class="val" id="vSpring">8</span>
+  </div>
+  <div class="row"><label>Damping</label>
+    <input type="range" id="damping" min="60" max="98" step="1" value="86" />
+    <span class="val" id="vDamping">86</span>
+  </div>
+  <div class="row"><label>Ambient drift</label>
+    <input type="range" id="drift" min="0" max="100" step="2" value="40" />
+    <span class="val" id="vDrift">40</span>
+  </div>
+  <div class="row"><label>Hot accent</label>
+    <button id="hot" class="on">On</button>
+  </div>
+</aside>
+
+<section class="hero" id="hero">
+  <div class="hero-bg" id="bg">
+    <canvas id="flow"></canvas>
+    <div class="glow" id="glow"></div>
+    <div class="scan s1"></div>
+    <div class="scan s2"></div>
+  </div>
+
+  <div class="content">
+    <div class="lead">
+      <div>§01 / THE GREETING</div>
+      <div class="tag">
+        <b>Senior Product Designer</b> — shipping B2B &amp; B2C at the awkward seam where payments, gameplay, and AI agree to coexist.
+      </div>
+      <div>Portfolio — Vol. 26<br />Hand-set on the web, 2026</div>
+    </div>
+    <h1 class="huge">
+      <span class="row">Designing</span>
+      <span class="row"><em>payments</em></span>
+      <span class="row">that <em>ship</em>.</span>
+    </h1>
+    <div class="label">
+      <span><b>HERO BG</b> · Flow lines — <span class="accent">move fast through the field</span></span>
+      <span>Lines push with mouse velocity, spring back, retain a small ambient drift</span>
+    </div>
+  </div>
+</section>
+
+<script>
+(() => {
+  const canvas = document.getElementById('flow');
+  const ctx = canvas.getContext('2d');
+  const hero = document.getElementById('hero');
+  const bg   = document.getElementById('bg');
+  const glow = document.getElementById('glow');
+
+  const cfg = {
+    lines: 40,
+    pointsPerLine: 0,    // computed from width
+    reach: 220,
+    push: 140,           // multiplier on mouse velocity (px/sec → px displacement)
+    spring: 8,           // /1000 → 0.008 spring constant per ms
+    damping: 0.86,
+    drift: 0.40,         // ambient drift amplitude
+    hot: true,
+  };
+
+  let dpr=1, w=0, h=0;
+  let lines = [];
+  let raf=0;
+  let prev = performance.now();
+
+  // mouse + velocity
+  const m = {
+    x:-9999, y:-9999,
+    px:-9999, py:-9999,
+    vx:0, vy:0,
+    speed:0,
+    lastT: performance.now(),
+    inside:false,
+  };
+
+  function size(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const r = canvas.parentElement.getBoundingClientRect();
+    w = r.width; h = r.height;
+    canvas.width = Math.floor(w*dpr); canvas.height = Math.floor(h*dpr);
+    canvas.style.width = w+'px'; canvas.style.height = h+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    build();
+  }
+
+  function build(){
+    lines = [];
+    // points-per-line scales with width so segments are ~22px each
+    const SEG = 22;
+    cfg.pointsPerLine = Math.max(40, Math.ceil(w / SEG) + 4);
+    // distribute lines vertically with extra above/below for safety
+    const vSpan = h * 1.2;
+    const yStart = -h*0.1;
+    for(let i=0; i<cfg.lines; i++){
+      const ly = yStart + (i+0.5)/cfg.lines * vSpan;
+      const seedA = i*0.43 + 1.7;
+      const seedB = i*0.27 - 0.8;
+      const seedC = i*0.91 + 5.2;
+      const points = [];
+      for(let p=0; p<cfg.pointsPerLine; p++){
+        const t = p/(cfg.pointsPerLine-1);
+        const x = -w*0.05 + t*w*1.10; // extend beyond edges
+        // multi-octave baseline: each line has its own organic shape
+        const baseY =
+          ly +
+          Math.sin(x*0.0030 + seedA) * 22 +
+          Math.cos(x*0.0070 - seedB) * 12 +
+          Math.sin(x*0.0140 + seedC) *  6;
+        points.push({
+          bx:x, by:baseY,
+          x:x,  y:baseY,
+          vx:0, vy:0,
+          // per-point ambient phase
+          ph: seedA*0.3 + p*0.07,
+        });
+      }
+      lines.push({points, seed: seedA + seedB});
+    }
+  }
+
+  function onMove(e){
+    const r = bg.getBoundingClientRect();
+    m.px = m.x; m.py = m.y;
+    m.x = e.clientX - r.left;
+    m.y = e.clientY - r.top;
+    if (!m.inside){
+      m.inside = true;
+      m.px = m.x; m.py = m.y;
+      bg.classList.add('on');
+    }
+    const now = performance.now();
+    const dt = Math.max(1, now - m.lastT) / 1000; // sec
+    m.lastT = now;
+    // smoothed velocity (px/sec)
+    const ivx = (m.x - m.px) / dt;
+    const ivy = (m.y - m.py) / dt;
+    // low-pass blend
+    m.vx = m.vx * 0.5 + ivx * 0.5;
+    m.vy = m.vy * 0.5 + ivy * 0.5;
+    m.speed = Math.sqrt(m.vx*m.vx + m.vy*m.vy);
+
+    glow.style.setProperty('--mx', m.x+'px');
+    glow.style.setProperty('--my', m.y+'px');
+  }
+  function onLeave(){
+    m.inside = false;
+    m.x = m.y = -9999; m.px = m.py = -9999;
+    m.vx = m.vy = 0; m.speed = 0;
+    bg.classList.remove('on');
+  }
+
+  function loop(now){
+    const dtMs = Math.min(40, now - prev); // cap to 40ms to avoid jumps after tab-switch
+    prev = now;
+    const dt = dtMs / 16.67; // normalized to 60fps "frame"
+
+    // velocity decays even if mouse stops
+    m.vx *= 0.85;
+    m.vy *= 0.85;
+    m.speed = Math.sqrt(m.vx*m.vx + m.vy*m.vy);
+
+    const reach = cfg.reach;
+    const reach2 = reach*reach;
+    // velocity-scaled push: faster mouse → stronger push, capped
+    const speedNorm = Math.min(1, m.speed / 1500); // 0..1
+    const pushK = (cfg.push/100) * (0.25 + speedNorm); // base + velocity
+    const k = (cfg.spring/1000) * dt;
+    const damp = Math.pow(cfg.damping, dt);
+    const t = now/1000;
+    const driftAmp = cfg.drift * 8; // px amplitude max
+
+    // === update + draw ===
+    ctx.clearRect(0,0,w,h);
+    for (let li=0; li<lines.length; li++){
+      const ln = lines[li];
+      const pts = ln.points;
+      const seed = ln.seed;
+
+      // ambient breathing baseline shift (per line)
+      const ambDx = Math.sin(t*0.4 + seed) * 1.2;
+      const ambDy = Math.cos(t*0.35 + seed*0.7) * 1.2;
+
+      // compute physics
+      for (let i=0; i<pts.length; i++){
+        const p = pts[i];
+
+        // ambient micro-drift (so lines never look frozen)
+        const aDy = Math.sin(t*0.6 + p.ph) * driftAmp;
+        const aDx = Math.cos(t*0.5 + p.ph*0.7) * driftAmp * 0.4;
+
+        // spring toward base+ambient target
+        const tx = p.bx + ambDx + aDx;
+        const ty = p.by + ambDy + aDy;
+        p.vx += (tx - p.x) * k * 1000 / 16.67; // re-scale because k already had dt
+        p.vy += (ty - p.y) * k * 1000 / 16.67;
+
+        // mouse velocity push
+        if (m.inside){
+          const dx = p.x - m.x, dy = p.y - m.y;
+          const d2 = dx*dx + dy*dy;
+          if (d2 < reach2){
+            const d = Math.sqrt(d2) || 0.0001;
+            const falloff = 1 - d/reach;
+            const f = falloff * falloff * pushK; // smoothstep-ish
+            p.vx += m.vx * f * dt;
+            p.vy += m.vy * f * dt;
+          }
+        }
+
+        p.vx *= damp;
+        p.vy *= damp;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+      }
+
+      // draw smooth line via quadratic curves through midpoints
+      // brightness varies with average proximity to cursor
+      let avgK = 0;
+      if (m.inside){
+        const midIdx = Math.floor(pts.length/2);
+        const samples = [pts[midIdx], pts[Math.floor(pts.length*0.25)], pts[Math.floor(pts.length*0.75)]];
+        for (const s of samples){
+          const dx = s.x - m.x, dy = s.y - m.y;
+          const d = Math.sqrt(dx*dx+dy*dy);
+          avgK += Math.max(0, 1 - d/(reach*1.6));
+        }
+        avgK /= samples.length;
+      }
+
+      const baseAlpha = 0.10;
+      const hotAlpha  = 0.55;
+      const alpha = baseAlpha + (hotAlpha - baseAlpha) * avgK;
+      const useAccent = cfg.hot && avgK > 0.55;
+
+      ctx.strokeStyle = useAccent
+        ? `rgba(255,59,31,${(0.45 + avgK*0.4).toFixed(3)})`
+        : `rgba(245,241,232,${alpha.toFixed(3)})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i=1; i<pts.length-1; i++){
+        const cx = (pts[i].x + pts[i+1].x)/2;
+        const cy = (pts[i].y + pts[i+1].y)/2;
+        ctx.quadraticCurveTo(pts[i].x, pts[i].y, cx, cy);
+      }
+      const last = pts[pts.length-1];
+      ctx.lineTo(last.x, last.y);
+      ctx.stroke();
+    }
+
+    raf = requestAnimationFrame(loop);
+  }
+
+  // ===== controls =====
+  function bindRange(id, key, scale){
+    const el = document.getElementById(id);
+    const out = document.getElementById('v' + id[0].toUpperCase() + id.slice(1));
+    el.addEventListener('input', () => {
+      const v = parseFloat(el.value);
+      cfg[key] = scale ? scale(v) : v;
+      if (out) out.textContent = el.value;
+      if (key === 'lines') build();
+    });
+  }
+  bindRange('lines', 'lines');
+  bindRange('reach', 'reach');
+  bindRange('push', 'push');
+  bindRange('spring', 'spring');
+  bindRange('damping', 'damping', v => v/100);
+  bindRange('drift', 'drift', v => v/100);
+  document.getElementById('hot').addEventListener('click', e => {
+    cfg.hot = !cfg.hot;
+    e.currentTarget.classList.toggle('on', cfg.hot);
+    e.currentTarget.textContent = cfg.hot ? 'On' : 'Off';
+  });
+
+  // ===== boot =====
+  size();
+  window.addEventListener('resize', size);
+  hero.addEventListener('mousemove', onMove);
+  hero.addEventListener('mouseleave', onLeave);
+  raf = requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

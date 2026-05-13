@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Hero BG — Constellation Wireframe</title>
+<style>
+  :root {
+    --bg-1: #07142b;
+    --bg-2: #0c2148;
+    --ink: #d6f2ff;
+    --line: #4ad7ff;
+    --node: #aef5ff;
+    --accent: #ff3b1f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: radial-gradient(120% 90% at 70% 50%, var(--bg-2) 0%, var(--bg-1) 60%, #04091a 100%);
+    color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    overflow: hidden; cursor: none;
+  }
+  #stage { position: fixed; inset: 0; }
+  canvas#wire { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .hero {
+    position: relative; z-index: 2;
+    height: 100%; width: 100%;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 32px 40px;
+    pointer-events: none;
+  }
+  .top { display: flex; justify-content: space-between; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
+  .center { align-self: flex-start; max-width: 50%; transform: translateY(8vh); }
+  .eyebrow { font-size: 12px; letter-spacing: .3em; text-transform: uppercase; margin-bottom: 24px; opacity: .8; color: var(--line); }
+  h1 {
+    font-family: "Instrument Serif", "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(56px, 10vw, 160px);
+    line-height: .92;
+    letter-spacing: -.02em;
+  }
+  h1 em { font-style: normal; color: var(--line); }
+  .sub { margin-top: 28px; font-size: 14px; letter-spacing: .04em; opacity: .8; max-width: 460px; }
+  .bottom { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
+  .hud {
+    position: fixed; bottom: 24px; right: 24px; z-index: 5;
+    display: flex; gap: 8px; flex-direction: column;
+    background: rgba(10,20,40,.6); backdrop-filter: blur(8px);
+    border: 1px solid rgba(170,230,255,.14);
+    padding: 14px 16px; border-radius: 12px;
+    font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    pointer-events: auto;
+  }
+  .hud label { display: flex; justify-content: space-between; gap: 14px; align-items: center; opacity: .85; }
+  .hud input[type=range] { width: 140px; accent-color: var(--line); }
+  .hud .row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .hud button {
+    background: transparent; color: var(--ink);
+    border: 1px solid rgba(170,230,255,.22);
+    padding: 6px 10px; border-radius: 6px; cursor: pointer;
+    font: inherit; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .hud button.on { background: var(--line); border-color: var(--line); color: #03132a; }
+  .cursor-ring {
+    position: fixed; top: 0; left: 0; width: 28px; height: 28px;
+    border: 1.5px solid var(--line); border-radius: 50%;
+    pointer-events: none; z-index: 4;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 18px rgba(74,215,255,.6);
+  }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <canvas id="wire"></canvas>
+    <div class="hero">
+      <div class="top">
+        <span>Ziaul Islam</span>
+        <span>Portfolio · 2026</span>
+      </div>
+      <div class="center">
+        <div class="eyebrow">Senior Product Designer</div>
+        <h1>Built from<br/><em>signal</em>.</h1>
+        <p class="sub">Move your cursor — the mesh distorts around it.</p>
+      </div>
+      <div class="bottom">
+        <span>SCROLL ↓</span>
+        <span>v0.1 · wireframe</span>
+      </div>
+    </div>
+    <div class="cursor-ring" id="ring"></div>
+  </div>
+
+  <div class="hud">
+    <label>Points <input id="points" type="range" min="400" max="2400" step="50" value="1100"></label>
+    <label>Link R <input id="linkR" type="range" min="20" max="120" step="2" value="56"></label>
+    <label>Magnet R <input id="magR" type="range" min="40" max="320" step="10" value="170"></label>
+    <label>Force <input id="force" type="range" min="0" max="100" step="1" value="60"></label>
+    <label>Flow <input id="flow" type="range" min="0" max="100" step="1" value="25"></label>
+    <div class="row">
+      <button id="modeAttract">Attract</button>
+      <button id="modeRepel" class="on">Repel</button>
+      <button id="modeScatter">Scatter</button>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('wire');
+  const ctx = canvas.getContext('2d', { alpha: true });
+  const ring = document.getElementById('ring');
+
+  const IMG_SRC = '/images/profile/NanoBanana-2026-04-28.png';
+
+  const state = {
+    dpr: Math.min(window.devicePixelRatio || 1, 2),
+    w: 0, h: 0,
+    nodes: [],
+    edges: [],
+    mouse: { x: -9999, y: -9999, active: false },
+    config: {
+      points: 1100,
+      linkR: 56,
+      magnetR: 170,
+      force: 0.6,
+      flow: 0.25,
+      mode: 'repel',
+    },
+    img: null,
+    imgData: null,
+    imgSize: null,
+    bg: null,
+    layout: null,
+  };
+
+  function resize() {
+    state.w = window.innerWidth;
+    state.h = window.innerHeight;
+    canvas.width = state.w * state.dpr;
+    canvas.height = state.h * state.dpr;
+    canvas.style.width = state.w + 'px';
+    canvas.style.height = state.h + 'px';
+    ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+    if (state.img) buildNodes();
+  }
+
+  function loadImage() {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = IMG_SRC;
+    });
+  }
+
+  function sampleImage(img) {
+    const targetW = 480;
+    const ratio = img.height / img.width;
+    const targetH = Math.round(targetW * ratio);
+    const off = document.createElement('canvas');
+    off.width = targetW; off.height = targetH;
+    const octx = off.getContext('2d');
+    octx.drawImage(img, 0, 0, targetW, targetH);
+    state.imgData = octx.getImageData(0, 0, targetW, targetH);
+    state.imgSize = { w: targetW, h: targetH };
+
+    const sampleCorner = (cx, cy) => {
+      let r = 0, g = 0, b = 0, n = 0;
+      for (let y = cy; y < cy + 8; y++) {
+        for (let x = cx; x < cx + 8; x++) {
+          const i = (y * targetW + x) * 4;
+          r += state.imgData.data[i]; g += state.imgData.data[i + 1]; b += state.imgData.data[i + 2]; n++;
+        }
+      }
+      return [r / n, g / n, b / n];
+    };
+    const corners = [
+      sampleCorner(0, 0),
+      sampleCorner(targetW - 8, 0),
+      sampleCorner(0, targetH - 8),
+      sampleCorner(targetW - 8, targetH - 8),
+    ];
+    const bg = corners.reduce((a, c) => [a[0] + c[0], a[1] + c[1], a[2] + c[2]], [0, 0, 0])
+      .map(v => v / corners.length);
+    state.bg = { r: bg[0], g: bg[1], b: bg[2] };
+  }
+
+  // detect feature edges: high local contrast in luminance
+  function buildEdgeMap() {
+    const { imgData, imgSize, bg } = state;
+    const { w: iw, h: ih } = imgSize;
+    const lum = new Float32Array(iw * ih);
+    const mask = new Uint8Array(iw * ih);
+    const data = imgData.data;
+    for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+      const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+      const dr = r - bg.r, dg2 = g - bg.g, db2 = b - bg.b;
+      const isBg = (dr * dr + dg2 * dg2 + db2 * db2) < 28 * 28 * 3;
+      mask[p] = (a > 64 && !isBg) ? 1 : 0;
+      lum[p] = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    }
+    // sobel-ish edge magnitude
+    const edge = new Float32Array(iw * ih);
+    let maxE = 0;
+    for (let y = 1; y < ih - 1; y++) {
+      for (let x = 1; x < iw - 1; x++) {
+        const i = y * iw + x;
+        if (!mask[i]) continue;
+        const gx =
+          -lum[i - iw - 1] - 2 * lum[i - 1] - lum[i + iw - 1] +
+           lum[i - iw + 1] + 2 * lum[i + 1] + lum[i + iw + 1];
+        const gy =
+          -lum[i - iw - 1] - 2 * lum[i - iw] - lum[i - iw + 1] +
+           lum[i + iw - 1] + 2 * lum[i + iw] + lum[i + iw + 1];
+        const m = Math.sqrt(gx * gx + gy * gy);
+        edge[i] = m;
+        if (m > maxE) maxE = m;
+      }
+    }
+    return { edge, mask, lum, maxE, iw, ih };
+  }
+
+  function buildNodes() {
+    const { w, h } = state;
+    const { imgSize } = state;
+
+    const margin = Math.min(w, h) * 0.04;
+    const maxW = w - margin * 2;
+    const maxH = h - margin * 2;
+    const imgRatio = imgSize.w / imgSize.h;
+    const boxRatio = maxW / maxH;
+    let drawW, drawH;
+    if (boxRatio > imgRatio) {
+      drawH = maxH * 0.92;
+      drawW = drawH * imgRatio;
+    } else {
+      drawW = maxW * 0.86;
+      drawH = drawW / imgRatio;
+    }
+    // bias slightly to right side so headline can sit on the left
+    const drawX = w - drawW - margin * 4;
+    const drawY = (h - drawH) / 2;
+    state.layout = { x: drawX, y: drawY, w: drawW, h: drawH };
+
+    const { edge, mask, lum, maxE, iw, ih } = buildEdgeMap();
+
+    // weighted reservoir: place nodes preferring high-edge / high-contrast pixels
+    // weight = 0.3 + 0.7 * (edgeNorm) + 0.2 * (lum) — favors silhouette and feature edges
+    const want = state.config.points;
+    const candidates = [];
+    for (let y = 0; y < ih; y++) {
+      for (let x = 0; x < iw; x++) {
+        const i = y * iw + x;
+        if (!mask[i]) continue;
+        const eN = maxE > 0 ? edge[i] / maxE : 0;
+        const w = 0.15 + 0.85 * eN + 0.18 * lum[i];
+        candidates.push({ x, y, w });
+      }
+    }
+    // sort by weighted random key (Efraimidis–Spirakis reservoir)
+    for (let i = 0; i < candidates.length; i++) {
+      candidates[i].k = Math.random() ** (1 / Math.max(1e-4, candidates[i].w));
+    }
+    candidates.sort((a, b) => b.k - a.k);
+    const picked = candidates.slice(0, Math.min(want, candidates.length));
+
+    const nodes = picked.map(p => {
+      const ox = drawX + (p.x / iw) * drawW;
+      const oy = drawY + (p.y / ih) * drawH;
+      return {
+        ox, oy,
+        x: ox, y: oy,
+        vx: 0, vy: 0,
+        phase: Math.random() * Math.PI * 2,
+        freq: 0.5 + Math.random() * 0.7,
+        size: 0.8 + Math.random() * 1.6,
+      };
+    });
+
+    // build edges: for each node, link to nearest K neighbors within linkR
+    const linkR = state.config.linkR;
+    const linkR2 = linkR * linkR;
+    const K = 4;
+    // spatial hash for nearest-neighbor speed
+    const cell = linkR;
+    const grid = new Map();
+    nodes.forEach((n, idx) => {
+      const cx = Math.floor(n.ox / cell);
+      const cy = Math.floor(n.oy / cell);
+      const key = cx + ',' + cy;
+      if (!grid.has(key)) grid.set(key, []);
+      grid.get(key).push(idx);
+    });
+
+    const edges = [];
+    const seen = new Set();
+    for (let i = 0; i < nodes.length; i++) {
+      const a = nodes[i];
+      const cx = Math.floor(a.ox / cell);
+      const cy = Math.floor(a.oy / cell);
+      const cand = [];
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          const arr = grid.get((cx + dx) + ',' + (cy + dy));
+          if (arr) for (const j of arr) if (j !== i) cand.push(j);
+        }
+      }
+      // pick K closest within radius
+      const scored = [];
+      for (const j of cand) {
+        const b = nodes[j];
+        const dx = b.ox - a.ox, dy = b.oy - a.oy;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < linkR2) scored.push([d2, j]);
+      }
+      scored.sort((u, v) => u[0] - v[0]);
+      for (let k = 0; k < Math.min(K, scored.length); k++) {
+        const j = scored[k][1];
+        const key = i < j ? (i + '_' + j) : (j + '_' + i);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        edges.push([i, j, scored[k][0]]);
+      }
+    }
+
+    state.nodes = nodes;
+    state.edges = edges;
+    state.linkR2 = linkR2;
+  }
+
+  let t0 = performance.now();
+  function frame(now) {
+    t0 = now;
+    const time = now / 1000;
+    const cfg = state.config;
+    const { w, h } = state;
+
+    ctx.clearRect(0, 0, w, h);
+
+    const mx = state.mouse.x, my = state.mouse.y;
+    const r2 = cfg.magnetR * cfg.magnetR;
+    const flowAmp = cfg.flow * 6;
+    const force = cfg.force;
+
+    // update nodes
+    const ns = state.nodes;
+    for (let i = 0; i < ns.length; i++) {
+      const p = ns[i];
+      const wx = Math.sin(time * p.freq + p.phase) * flowAmp;
+      const wy = Math.cos(time * (p.freq * 0.8) + p.phase * 1.3) * flowAmp;
+      let tx = p.ox + wx;
+      let ty = p.oy + wy;
+
+      const dx = mx - p.x, dy = my - p.y;
+      const d2 = dx * dx + dy * dy;
+      if (state.mouse.active && d2 < r2) {
+        const d = Math.sqrt(d2) || 1;
+        const f = (1 - d / cfg.magnetR);
+        const strength = f * f * 70 * force;
+        if (cfg.mode === 'attract') {
+          tx += (dx / d) * strength;
+          ty += (dy / d) * strength;
+        } else if (cfg.mode === 'repel') {
+          tx -= (dx / d) * strength;
+          ty -= (dy / d) * strength;
+        } else {
+          tx += (-dy / d) * strength * 1.2;
+          ty += (dx / d) * strength * 1.2;
+        }
+      }
+
+      const ax = (tx - p.x) * 0.18;
+      const ay = (ty - p.y) * 0.18;
+      p.vx = (p.vx + ax) * 0.78;
+      p.vy = (p.vy + ay) * 0.78;
+      p.x += p.vx;
+      p.y += p.vy;
+    }
+
+    // draw edges
+    const linkR2 = state.linkR2;
+    ctx.lineWidth = 0.7;
+    for (let e = 0; e < state.edges.length; e++) {
+      const [i, j] = state.edges[e];
+      const a = ns[i], b = ns[j];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const d2 = dx * dx + dy * dy;
+      // fade out edges that stretch too far during cursor warp
+      const stretch = Math.min(1.6, Math.sqrt(d2 / linkR2));
+      const alpha = Math.max(0, 0.55 - (stretch - 0.5) * 0.55);
+      if (alpha <= 0.02) continue;
+      ctx.strokeStyle = `rgba(110,220,255,${alpha})`;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    }
+
+    // draw nodes
+    for (let i = 0; i < ns.length; i++) {
+      const p = ns[i];
+      const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3);
+      grad.addColorStop(0, 'rgba(220,250,255,0.95)');
+      grad.addColorStop(1, 'rgba(110,220,255,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(230,250,255,1)';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, Math.max(0.6, p.size * 0.7), 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  function bindMouse() {
+    window.addEventListener('pointermove', (e) => {
+      state.mouse.x = e.clientX;
+      state.mouse.y = e.clientY;
+      state.mouse.active = true;
+      ring.style.transform = `translate(${e.clientX}px, ${e.clientY}px) translate(-50%,-50%)`;
+    });
+    window.addEventListener('pointerleave', () => { state.mouse.active = false; });
+  }
+
+  function bindHud() {
+    const $ = (id) => document.getElementById(id);
+    $('points').addEventListener('input', (e) => {
+      state.config.points = +e.target.value;
+      buildNodes();
+    });
+    $('linkR').addEventListener('input', (e) => {
+      state.config.linkR = +e.target.value;
+      buildNodes();
+    });
+    $('magR').addEventListener('input', (e) => { state.config.magnetR = +e.target.value; });
+    $('force').addEventListener('input', (e) => { state.config.force = +e.target.value / 100; });
+    $('flow').addEventListener('input', (e) => { state.config.flow = +e.target.value / 100; });
+
+    const setMode = (m) => {
+      state.config.mode = m;
+      ['modeAttract', 'modeRepel', 'modeScatter'].forEach(id => $(id).classList.remove('on'));
+      $('mode' + m[0].toUpperCase() + m.slice(1)).classList.add('on');
+    };
+    $('modeAttract').onclick = () => setMode('attract');
+    $('modeRepel').onclick   = () => setMode('repel');
+    $('modeScatter').onclick = () => setMode('scatter');
+  }
+
+  async function init() {
+    bindMouse();
+    bindHud();
+    window.addEventListener('resize', resize);
+
+    try {
+      state.img = await loadImage();
+      sampleImage(state.img);
+    } catch (err) {
+      console.error('Failed to load image at', IMG_SRC, err);
+      return;
+    }
+
+    resize();
+    requestAnimationFrame((t) => { t0 = t; requestAnimationFrame(frame); });
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

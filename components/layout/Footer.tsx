@@ -116,16 +116,17 @@ export function Footer() {
             </a>
           ))}
 
-          {/* Resume — distinct pill style */}
+          {/* CV — distinct pill style, same file as playground cassette */}
           <a
-            href="/resume.pdf"
+            href="/cv.pdf"
             target="_blank"
             rel="noopener noreferrer"
+            download="Ziaul-Islam-Resume-2026.pdf"
             data-cursor="link"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/30 text-sm text-[var(--accent-primary)] hover:bg-[var(--accent-primary)]/20 hover:border-[var(--accent-primary)]/50 transition-colors duration-[180ms] focus-visible:outline-2 focus-visible:outline-[var(--accent-primary)] focus-visible:outline-offset-2"
           >
             <FileText size={15} strokeWidth={1.75} aria-hidden="true" />
-            Resume PDF
+            CV
           </a>
         </nav>
 

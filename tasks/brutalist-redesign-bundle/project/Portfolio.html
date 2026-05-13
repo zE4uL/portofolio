@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Portfolio — Senior Product Designer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #08070d;
+    --ink-0: #f5f1e8;
+    --ink-1: #c9c1d9;
+    --ink-2: #8a82a0;
+    --ink-3: #4a4560;
+    --accent: #5eead4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink-0);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    overflow: hidden;
+  }
+  #canvas { position: fixed; inset: 0; display: block; }
+
+  /* UI overlay */
+  .ui { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+  .ui > * { pointer-events: auto; }
+
+  /* Top bar */
+  .topbar {
+    position: absolute; top: 24px; left: 28px; right: 28px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--ink-2);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-mark {
+    width: 30px; height: 30px;
+    border: 1.5px solid var(--accent);
+    border-radius: 8px;
+    display: grid; place-items: center;
+    font-family: 'Instrument Serif', serif;
+    font-size: 20px;
+    color: var(--accent);
+    letter-spacing: 0;
+  }
+  .brand strong { color: var(--ink-0); letter-spacing: 0.1em; font-weight: 600; }
+  .status { display: flex; gap: 18px; }
+  .status .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: inline-block; margin-right: 7px; box-shadow: 0 0 10px var(--accent); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: 0.3; } }
+
+  /* Bottom nav */
+  .nav {
+    position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px;
+    padding: 8px;
+    background: rgba(8, 7, 13, 0.7);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 100px;
+  }
+  .nav button {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--ink-2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 9px 16px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.08em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .nav button:hover { color: var(--ink-0); background: rgba(255,255,255,0.04); }
+  .nav button.active {
+    color: var(--bg);
+    background: var(--accent);
+    box-shadow: 0 0 24px -6px var(--accent);
+  }
+  .nav button .num { opacity: 0.5; font-size: 9px; }
+  .nav button.active .num { opacity: 0.7; }
+
+  /* Content panel */
+  .panel {
+    position: absolute; left: 48px; top: 50%; transform: translateY(-50%) translateX(-10px);
+    width: 420px;
+    max-height: 65vh;
+    padding: 32px 34px;
+    background: linear-gradient(160deg, rgba(20,17,30,0.75), rgba(8,7,13,0.75));
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 22px;
+    opacity: 0;
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.25,0.8,0.25,1);
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .panel::-webkit-scrollbar { display: none; }
+  .panel.visible { opacity: 1; transform: translateY(-50%) translateX(0); }
+
+  .kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .kicker::before { content: ''; width: 18px; height: 1px; background: var(--accent); }
+  .panel h1 {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    margin-bottom: 22px;
+    padding-bottom: 4px;
+    text-wrap: balance;
+  }
+  .panel h1 em { font-style: italic; color: var(--accent); }
+  .panel p {
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--ink-1);
+    margin-bottom: 12px;
+    text-wrap: pretty;
+  }
+  .panel p strong { color: var(--ink-0); font-weight: 600; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+  .chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 5px 11px;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--ink-1);
+    letter-spacing: 0.05em;
+  }
+  .chip.hot {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(94,234,212,0.05);
+  }
+
+  .rows { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .row {
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .row:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: var(--accent);
+    transform: translateX(3px);
+  }
+  .row .title { font-weight: 600; font-size: 14px; }
+  .row .meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-2); letter-spacing: 0.05em; margin-top: 2px; }
+  .row .arr { color: var(--accent); opacity: 0.6; font-size: 16px; }
+  .row:hover .arr { opacity: 1; }
+
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+  .stat {
+    padding: 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+  }
+  .stat-v { font-family: 'Instrument Serif', serif; font-size: 30px; line-height: 1; color: var(--accent); }
+  .stat-l { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-2); letter-spacing: 0.06em; margin-top: 6px; }
+
+  /* Interaction hints */
+  .hint {
+    position: absolute;
+    right: 36px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    text-align: right;
+    opacity: 0;
+    transition: opacity 0.6s;
+  }
+  .hint.visible { opacity: 1; }
+  .hint-title { color: var(--accent); letter-spacing: 0.2em; }
+  .hint-action {
+    display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+    padding: 10px 14px;
+    background: rgba(8,7,13,0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.3s;
+    pointer-events: auto;
+  }
+  .hint-action:hover {
+    border-color: var(--accent);
+    color: var(--ink-0);
+  }
+  .hint-action kbd {
+    padding: 2px 6px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 4px;
+    color: var(--ink-1);
+    font-family: inherit;
+  }
+
+  /* Loader */
+  #loader {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: grid; place-items: center;
+    z-index: 100;
+    transition: opacity 0.8s;
+  }
+  #loader.hide { opacity: 0; pointer-events: none; }
+  .load-inner {
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--ink-2);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+  }
+  .load-bar {
+    width: 240px; height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 16px auto;
+    overflow: hidden;
+  }
+  .load-bar span {
+    display: block; width: 0%; height: 100%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+    animation: loadFill 2s ease forwards;
+  }
+  @keyframes loadFill { to { width: 100%; } }
+
+  /* Scroll hint */
+  .scroll-hint {
+    position: absolute;
+    bottom: 100px; left: 50%; transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--ink-2);
+    opacity: 0;
+    animation: fadeIn 1s 2s forwards;
+    text-align: center;
+  }
+  @keyframes fadeIn { to { opacity: 1; } }
+  .scroll-hint .arrow {
+    display: block;
+    margin-top: 8px;
+    animation: bob 2s ease-in-out infinite;
+  }
+  @keyframes bob { 50% { transform: translateY(4px); } }
+
+  /* Mobile */
+  @media (max-width: 900px) {
+    .panel { left: 16px; right: 16px; width: auto; top: auto; bottom: 100px; transform: translateY(20px); max-height: 45vh; }
+    .panel.visible { transform: translateY(0); }
+    .panel h1 { font-size: 32px; }
+    .hint { display: none; }
+    .nav button { padding: 8px 10px; font-size: 10px; }
+    .nav button .num { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="load-inner">
+    <div>LOADING 3D WORKSPACE</div>
+    <div class="load-bar"><span></span></div>
+    <div style="opacity:0.5">ziaul / now studio — v.2026.04</div>
+  </div>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div class="ui">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">ø</div>
+      <div>ZIAUL&nbsp;ISLAM / <strong>NOW&nbsp;STUDIO</strong></div>
+    </div>
+    <div class="status">
+      <span><span class="dot"></span><span id="mode-label">DESK VIEW</span></span>
+      <span id="coords">x:0 y:0 z:0</span>
+    </div>
+  </div>
+
+  <div class="panel" id="panel"></div>
+
+  <div class="hint" id="hint">
+    <div class="hint-title" id="hint-title">INTERACT</div>
+    <div class="hint-action" id="hint-action"><kbd>E</kbd> <span id="hint-action-label">activate</span></div>
+  </div>
+
+  <nav class="nav" id="nav"></nav>
+
+  <div class="scroll-hint">
+    SCROLL · DRAG · OR CLICK BELOW
+    <span class="arrow">↓</span>
+  </div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.162.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.162.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="scene.js"></script>
+</body>
+</html>

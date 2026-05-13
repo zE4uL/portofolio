@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Hero BG — Dot Matrix Magnet</title>
+<style>
+  :root {
+    --bg: #000;
+    --ink: #f3f0e8;
+    --accent: #ff3b1f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--ink);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+  }
+  #stage { position: fixed; inset: 0; }
+  canvas#dots { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .hero {
+    position: relative; z-index: 2;
+    height: 100%; width: 100%;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 40px 56px;
+    pointer-events: none;
+  }
+  .top { display: flex; justify-content: space-between; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
+  .center {
+    align-self: flex-start;
+    text-align: left;
+    max-width: 56%;
+    transform: translateY(-2vh);
+  }
+  .eyebrow { font-size: 12px; letter-spacing: .3em; text-transform: uppercase; margin-bottom: 28px; opacity: .8; }
+  h1 {
+    font-family: "Instrument Serif", "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(56px, 10vw, 168px);
+    line-height: .92;
+    letter-spacing: -.02em;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .sub { margin-top: 28px; font-size: 14px; letter-spacing: .04em; opacity: .8; max-width: 460px; }
+  .bottom { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .7; }
+  /* HUD controls */
+  .hud {
+    position: fixed; bottom: 24px; right: 24px; z-index: 5;
+    display: flex; gap: 8px; flex-direction: column;
+    background: rgba(15,15,15,.65); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,.08);
+    padding: 14px 16px; border-radius: 12px;
+    font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    pointer-events: auto;
+  }
+  .hud label { display: flex; justify-content: space-between; gap: 14px; align-items: center; opacity: .85; }
+  .hud input[type=range] { width: 140px; accent-color: var(--accent); }
+  .hud .row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .hud button {
+    background: transparent; color: var(--ink);
+    border: 1px solid rgba(255,255,255,.18);
+    padding: 6px 10px; border-radius: 6px; cursor: pointer;
+    font: inherit; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .hud button.on { background: var(--accent); border-color: var(--accent); color: #0a0a0a; }
+</style>
+</head>
+<body>
+  <div id="stage">
+    <canvas id="dots"></canvas>
+    <div class="hero">
+      <div class="top">
+        <span>Ziaul Islam</span>
+        <span>Portfolio · 2026</span>
+      </div>
+      <div class="center">
+        <div class="eyebrow">Senior Product Designer</div>
+        <h1>Pixels with<br/><em>presence</em>.</h1>
+        <p class="sub">Move your cursor — the field flexes around it.</p>
+      </div>
+      <div class="bottom">
+        <span>SCROLL ↓</span>
+        <span>v0.1</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hud">
+    <label>Density <input id="density" type="range" min="3" max="14" step="1" value="8"></label>
+    <label>Magnet R <input id="radius" type="range" min="40" max="320" step="10" value="250"></label>
+    <label>Force <input id="force" type="range" min="0" max="100" step="1" value="90"></label>
+    <label>Flow <input id="flow" type="range" min="0" max="100" step="1" value="30"></label>
+    <div class="row">
+      <button id="modeAttract" class="on">Attract</button>
+      <button id="modeRepel">Repel</button>
+      <button id="modeScatter">Scatter</button>
+    </div>
+    <div class="row">
+      <button id="toggleColor">Sampled color</button>
+      <button id="toggleMono" class="on">Mono ink</button>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('dots');
+  const ctx = canvas.getContext('2d', { alpha: true });
+
+  const IMG_SRC = '/images/profile/NanoBanana-2026-04-28.png';
+
+  const state = {
+    dpr: Math.min(window.devicePixelRatio || 1, 2),
+    w: 0, h: 0,
+    particles: [],
+    mouse: { x: -9999, y: -9999, active: false },
+    config: {
+      step: 8,
+      magnetR: 250,
+      force: 0.90,
+      flow: 0.30,
+      mode: 'attract',
+      mono: true,
+      stipple: true,
+    },
+    img: null,
+    imgData: null,
+    layout: null,         // {x, y, w, h} placement of sampled image on canvas
+  };
+
+  function resize() {
+    state.w = window.innerWidth;
+    state.h = window.innerHeight;
+    canvas.width = state.w * state.dpr;
+    canvas.height = state.h * state.dpr;
+    canvas.style.width = state.w + 'px';
+    canvas.style.height = state.h + 'px';
+    ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+    if (state.img) buildParticles();
+  }
+
+  function loadImage() {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = IMG_SRC;
+    });
+  }
+
+  // sample image into pixel grid + detect background color from corners
+  function sampleImage(img) {
+    const targetW = 480;
+    const ratio = img.height / img.width;
+    const targetH = Math.round(targetW * ratio);
+    const off = document.createElement('canvas');
+    off.width = targetW; off.height = targetH;
+    const octx = off.getContext('2d');
+    octx.drawImage(img, 0, 0, targetW, targetH);
+    const data = octx.getImageData(0, 0, targetW, targetH);
+    state.imgData = data;
+    state.imgSize = { w: targetW, h: targetH };
+
+    // average the four corners (8x8 patches) to estimate solid background color
+    const sampleCorner = (cx, cy) => {
+      let r = 0, g = 0, b = 0, n = 0;
+      for (let y = cy; y < cy + 8; y++) {
+        for (let x = cx; x < cx + 8; x++) {
+          const i = (y * targetW + x) * 4;
+          r += data.data[i]; g += data.data[i + 1]; b += data.data[i + 2]; n++;
+        }
+      }
+      return [r / n, g / n, b / n];
+    };
+    const corners = [
+      sampleCorner(0, 0),
+      sampleCorner(targetW - 8, 0),
+      sampleCorner(0, targetH - 8),
+      sampleCorner(targetW - 8, targetH - 8),
+    ];
+    const bg = corners.reduce((a, c) => [a[0] + c[0], a[1] + c[1], a[2] + c[2]], [0, 0, 0])
+      .map(v => v / corners.length);
+    state.bg = { r: bg[0], g: bg[1], b: bg[2] };
+  }
+
+  function buildParticles() {
+    const { w, h } = state;
+    const { imgData, imgSize } = state;
+    const step = state.config.step;
+
+    // Fit image into the right half of the viewport, leaving the left for copy.
+    const margin = Math.min(w, h) * 0.04;
+    const imgRatio = imgSize.w / imgSize.h;
+    // size: take ~46% of viewport width, capped by viewport height
+    let drawH = (h - margin * 2) * 0.92;
+    let drawW = drawH * imgRatio;
+    const maxW = w * 0.46;
+    if (drawW > maxW) {
+      drawW = maxW;
+      drawH = drawW / imgRatio;
+    }
+    // place: right edge with a comfortable inset
+    const drawX = w - drawW - margin * 1.5;
+    const drawY = (h - drawH) / 2;
+    state.layout = { x: drawX, y: drawY, w: drawW, h: drawH };
+
+    const sxStep = imgSize.w / (drawW / step);
+    const syStep = imgSize.h / (drawH / step);
+
+    const particles = [];
+    const occupied = new Set();
+    for (let py = 0; py < drawH; py += step) {
+      for (let px = 0; px < drawW; px += step) {
+        const sx = Math.floor(px / drawW * imgSize.w);
+        const sy = Math.floor(py / drawH * imgSize.h);
+        const idx = (sy * imgSize.w + sx) * 4;
+        const r = imgData.data[idx];
+        const g = imgData.data[idx + 1];
+        const b = imgData.data[idx + 2];
+        const a = imgData.data[idx + 3];
+        if (a < 64) continue;
+        // drop pixels close to the sampled solid background color
+        if (state.bg) {
+          const dr = r - state.bg.r, dg = g - state.bg.g, db = b - state.bg.b;
+          const dist2 = dr * dr + dg * dg + db * db;
+          if (dist2 < 28 * 28 * 3) continue;
+        }
+        const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        // only drop the deepest shadow — keep all other detail
+        if (lum < 0.06) continue;
+
+        const ox = drawX + px;
+        const oy = drawY + py;
+        occupied.add(px + ',' + py);
+        particles.push({
+          ox, oy,
+          x: ox, y: oy,
+          vx: 0, vy: 0,
+          r, g, b,
+          lum,
+          gx: px, gy: py,
+          edge: 0,
+          rad: 0.5 + Math.pow(lum, 0.7) * 1.8,
+          phase: Math.random() * Math.PI * 2,
+          freq: 0.6 + Math.random() * 0.8,
+        });
+      }
+    }
+    // edge-falloff pass — sample a 5x5 ring around each particle in the
+    // sample grid; particles missing many neighbors are silhouette edges
+    // and get attenuated alpha + size
+    const ringSteps = [];
+    for (let dy = -2; dy <= 2; dy++) {
+      for (let dx = -2; dx <= 2; dx++) {
+        if (dx === 0 && dy === 0) continue;
+        ringSteps.push([dx * step, dy * step]);
+      }
+    }
+    const total = ringSteps.length;
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      let kept = 0;
+      for (let k = 0; k < total; k++) {
+        if (occupied.has((p.gx + ringSteps[k][0]) + ',' + (p.gy + ringSteps[k][1]))) kept++;
+      }
+      // 0 = deep interior, 1 = totally isolated edge
+      p.edge = 1 - kept / total;
+    }
+
+    state.particles = particles;
+  }
+
+  // animation
+  let t0 = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - t0) / 1000);
+    t0 = now;
+    const time = now / 1000;
+
+    ctx.clearRect(0, 0, state.w, state.h);
+
+    const cfg = state.config;
+    const mx = state.mouse.x;
+    const my = state.mouse.y;
+    const r2 = cfg.magnetR * cfg.magnetR;
+    const flowAmp = cfg.flow * 6;     // px max wobble
+    const force = cfg.force;
+
+    const ps = state.particles;
+    for (let i = 0; i < ps.length; i++) {
+      const p = ps[i];
+
+      // flow target — origin + sine wobble
+      const wx = Math.sin(time * p.freq + p.phase) * flowAmp;
+      const wy = Math.cos(time * (p.freq * 0.8) + p.phase * 1.3) * flowAmp;
+      let tx = p.ox + wx;
+      let ty = p.oy + wy;
+
+      // cursor influence
+      const dx = mx - p.x;
+      const dy = my - p.y;
+      const d2 = dx * dx + dy * dy;
+      if (state.mouse.active && d2 < r2) {
+        const d = Math.sqrt(d2) || 1;
+        const f = (1 - d / cfg.magnetR);   // 0..1 falloff
+        const strength = f * f * 60 * force;
+        if (cfg.mode === 'attract') {
+          tx += (dx / d) * strength;
+          ty += (dy / d) * strength;
+        } else if (cfg.mode === 'repel') {
+          tx -= (dx / d) * strength;
+          ty -= (dy / d) * strength;
+        } else if (cfg.mode === 'scatter') {
+          // perpendicular swirl
+          tx += (-dy / d) * strength * 1.2;
+          ty += (dx / d) * strength * 1.2;
+        }
+      }
+
+      // spring toward target
+      const ax = (tx - p.x) * 0.18;
+      const ay = (ty - p.y) * 0.18;
+      p.vx = (p.vx + ax) * 0.78;
+      p.vy = (p.vy + ay) * 0.78;
+      p.x += p.vx;
+      p.y += p.vy;
+
+      // edge falloff — particles near silhouette edge fade out
+      const edgeMul = 1 - p.edge * 0.75;
+      const radMul = 1 - p.edge * 0.45;
+
+      if (cfg.mono) {
+        const a = cfg.stipple ? Math.min(1, 0.15 + Math.pow(p.lum, 0.6) * 0.95) : 1;
+        ctx.fillStyle = `rgba(243,240,232,${a * edgeMul})`;
+      } else {
+        ctx.fillStyle = `rgba(${p.r},${p.g},${p.b},${edgeMul})`;
+      }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.rad * radMul, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  // events
+  function bindMouse() {
+    window.addEventListener('pointermove', (e) => {
+      state.mouse.x = e.clientX;
+      state.mouse.y = e.clientY;
+      state.mouse.active = true;
+    });
+    window.addEventListener('pointerleave', () => { state.mouse.active = false; });
+  }
+
+  function bindHud() {
+    const $ = (id) => document.getElementById(id);
+    $('density').addEventListener('input', (e) => {
+      state.config.step = +e.target.value;
+      buildParticles();
+    });
+    $('radius').addEventListener('input', (e) => { state.config.magnetR = +e.target.value; });
+    $('force').addEventListener('input', (e) => { state.config.force = +e.target.value / 100; });
+    $('flow').addEventListener('input', (e) => { state.config.flow = +e.target.value / 100; });
+
+    const setMode = (m) => {
+      state.config.mode = m;
+      ['modeAttract', 'modeRepel', 'modeScatter'].forEach(id => $(id).classList.remove('on'));
+      $('mode' + m[0].toUpperCase() + m.slice(1)).classList.add('on');
+    };
+    $('modeAttract').onclick = () => setMode('attract');
+    $('modeRepel').onclick   = () => setMode('repel');
+    $('modeScatter').onclick = () => setMode('scatter');
+
+    $('toggleColor').onclick = () => {
+      state.config.mono = false;
+      $('toggleColor').classList.add('on');
+      $('toggleMono').classList.remove('on');
+    };
+    $('toggleMono').onclick = () => {
+      state.config.mono = true;
+      $('toggleMono').classList.add('on');
+      $('toggleColor').classList.remove('on');
+    };
+  }
+
+  async function init() {
+    bindMouse();
+    bindHud();
+    window.addEventListener('resize', resize);
+
+    try {
+      state.img = await loadImage();
+      sampleImage(state.img);
+    } catch (err) {
+      console.error('Failed to load profile image at', IMG_SRC, err);
+    }
+
+    resize();
+    requestAnimationFrame((t) => { t0 = t; requestAnimationFrame(frame); });
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

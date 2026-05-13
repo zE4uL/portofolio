@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Portfolio Hero — Blue / Grey color exploration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Page chrome — for comparison only, not part of any option */
+  :root {
+    --font-grotesk: "Hanken Grotesk", system-ui, sans-serif;
+    --font-jetbrains: "JetBrains Mono", ui-monospace, monospace;
+    --font-serif: "Instrument Serif", serif;
+    --ease: cubic-bezier(.2,.8,.2,1);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-grotesk);
+    background: #2a2a2a;
+    color: #fff;
+  }
+  .pg-head {
+    padding: 28px 40px 16px;
+    border-bottom: 1px dashed #555;
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--font-jetbrains);
+    font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+    color: #b8b8b8;
+  }
+  .pg-head h1 {
+    font-family: var(--font-grotesk);
+    font-size: 14px; font-weight: 500; margin: 0;
+    color: #fff; letter-spacing: 0; text-transform: none;
+  }
+  .pg-head em { color: #9a9a9a; font-style: normal; }
+  .pg-grid { display: flex; flex-direction: column; }
+
+  .opt-label {
+    position: sticky; top: 0; z-index: 50;
+    font-family: var(--font-jetbrains);
+    font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+    padding: 10px 40px;
+    background: #1a1a1a; color: #fff;
+    border-top: 1px solid #333; border-bottom: 1px solid #333;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .opt-label .swatches { display: flex; gap: 6px; align-items: center; }
+  .opt-label .sw { width: 14px; height: 14px; border-radius: 2px; border: 1px solid rgba(255,255,255,.2); }
+
+  /* ======================================================
+     Shared HERO scaffolding — each .hero gets its own theme
+     via CSS variables defined on its parent .opt-{n}
+     ====================================================== */
+  .hero {
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 120px 40px 0;
+    position: relative;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .hero-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background-image: radial-gradient(circle at 1px 1px, var(--dot) 1px, transparent 0);
+    background-size: 40px 40px;
+    opacity: .35;
+    mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+  }
+  .hero > * { position: relative; z-index: 1; }
+
+  .hero-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--font-jetbrains);
+    font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink-2);
+    margin-bottom: auto;
+  }
+  .hero-nav .logo { color: var(--ink); font-weight: 700; letter-spacing: .14em; }
+  .hero-nav .logo .slash { color: var(--accent); font-weight: 700; }
+  .hero-nav ul { list-style: none; display: flex; gap: 28px; margin: 0; padding: 0; }
+  .hero-nav ul a { color: var(--ink-2); text-decoration: none; }
+  .hero-nav ul a:hover { color: var(--accent); }
+  .hero-nav .cta {
+    border: 1px solid var(--ink-3);
+    padding: 8px 14px;
+    color: var(--ink);
+    text-decoration: none;
+    transition: all .25s var(--ease);
+  }
+  .hero-nav .cta:hover { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+
+  .hero-tag {
+    font-family: var(--font-jetbrains);
+    font-size: 13px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-2);
+    line-height: 1.7;
+    max-width: 64ch;
+    margin: 0 0 24px;
+  }
+  .hero-tag b { color: var(--ink); font-weight: 700; }
+  .hero-tag .accent { color: var(--accent); }
+
+  .huge {
+    font-family: var(--font-grotesk);
+    font-weight: 500;
+    font-size: clamp(48px, 9vw, 156px);
+    line-height: .9;
+    letter-spacing: -.055em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .huge .row { display: block; overflow: visible; }
+  .huge em {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+  .huge sup {
+    font-size: .3em;
+    color: var(--accent);
+    vertical-align: top;
+  }
+
+  .morph {
+    position: relative;
+    display: inline-block;
+    vertical-align: baseline;
+    color: var(--accent);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    padding: 0 .04em;
+  }
+
+  .hero-foot {
+    display: grid;
+    grid-template-columns: 0.85fr 1.6fr 1fr;
+    gap: 40px;
+    padding: 56px 0 64px;
+    margin-top: auto;
+    border-top: 1px dashed var(--ink-3);
+    padding-top: 32px;
+  }
+  .hero-foot h5 {
+    font-family: var(--font-jetbrains);
+    font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--ink-2);
+    margin: 0 0 14px;
+    font-weight: 400;
+  }
+  .hero-foot p {
+    font-family: var(--font-grotesk);
+    font-size: 17px; line-height: 1.45;
+    color: var(--ink);
+    margin: 0;
+    max-width: 46ch;
+  }
+  .hero-foot p.small {
+    font-family: var(--font-jetbrains);
+    font-size: 12px; line-height: 1.7;
+    color: var(--ink-2);
+  }
+  .hero-foot p.small b { color: var(--ink); font-weight: 500; }
+
+  .stamp {
+    position: absolute;
+    top: 140px; right: 40px;
+    width: 134px; height: 134px;
+    border-radius: 50%;
+    border: 1px dashed var(--ink-3);
+    display: grid; place-items: center;
+    font-family: var(--font-jetbrains);
+    font-size: 9px; letter-spacing: .14em; color: var(--ink-2);
+    text-transform: uppercase;
+    animation: spin 16s linear infinite;
+  }
+  .stamp .glyph { color: var(--accent); font-size: 22px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .corner-mark {
+    position: absolute; bottom: 24px; right: 40px; z-index: 2;
+    font-family: var(--font-jetbrains);
+    font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .corner-mark .accent { color: var(--accent); }
+
+  /* ======================================================
+     OPTION 1 — "COBALT / SLATE"
+     Deep cool grey with electric cobalt blue accent
+     ====================================================== */
+  .opt-1 {
+    --bg: #15171b;
+    --bg-2: #1c1f25;
+    --ink: #f5f1e8;
+    --ink-2: #8c9099;
+    --ink-3: #3a3f48;
+    --accent: #2f6bff;
+    --dot: rgba(245, 241, 232, .14);
+  }
+
+  /* ======================================================
+     OPTION 2 — "ROYAL / GRAPHITE"
+     Warm-tinted graphite with rich royal blue
+     ====================================================== */
+  .opt-2 {
+    --bg: #18181a;
+    --bg-2: #1f1f22;
+    --ink: #f0ece2;
+    --ink-2: #8e8a82;
+    --ink-3: #44413c;
+    --accent: #4361ff;
+    --dot: rgba(240, 236, 226, .12);
+  }
+
+  /* ======================================================
+     OPTION 3 — "ELECTRIC / CARBON"
+     Cool charcoal with bright electric/cyan blue
+     ====================================================== */
+  .opt-3 {
+    --bg: #14171c;
+    --bg-2: #1a1e25;
+    --ink: #f5f1e8;
+    --ink-2: #828a96;
+    --ink-3: #353c47;
+    --accent: #2da6ff;
+    --dot: rgba(245, 241, 232, .14);
+  }
+
+  /* ======================================================
+     OPTION 4 — "INDIGO / INK"
+     Slightly purple-tinted dark grey with deep indigo blue
+     ====================================================== */
+  .opt-4 {
+    --bg: #17171c;
+    --bg-2: #1d1d24;
+    --ink: #f3efe5;
+    --ink-2: #8b8893;
+    --ink-3: #3d3a45;
+    --accent: #5b78ff;
+    --dot: rgba(243, 239, 229, .13);
+  }
+
+  @media (max-width: 900px) {
+    .hero { padding: 80px 24px 0; }
+    .hero-nav ul { display: none; }
+    .stamp { display: none; }
+    .hero-foot { grid-template-columns: 1fr; gap: 24px; padding: 32px 0 48px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="pg-head">
+  <h1>Portfolio Hero — Blue accent / darker grey BG <em>· 4 options to compare</em></h1>
+  <span>v0.1 · 2026-04-29</span>
+</header>
+
+<div class="pg-grid">
+
+  <!-- ============== OPTION 1 ============== -->
+  <div class="opt-label">
+    <span>Option 01 — Cobalt / Slate</span>
+    <span class="swatches">
+      <span class="sw" style="background:#15171b" title="bg #15171b"></span>
+      <span class="sw" style="background:#1c1f25" title="bg-2 #1c1f25"></span>
+      <span class="sw" style="background:#2f6bff" title="accent #2f6bff"></span>
+      <span class="sw" style="background:#f5f1e8" title="ink #f5f1e8"></span>
+    </span>
+  </div>
+  <section class="opt-1">
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <nav class="hero-nav">
+        <span class="logo">ZIAUL<span class="slash">/</span>ISLAM</span>
+        <ul>
+          <li><a href="#">Index</a></li>
+          <li><a href="#">Work</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Process</a></li>
+        </ul>
+        <a class="cta" href="#">Menu →</a>
+      </nav>
+
+      <p class="hero-tag"><b>Senior Product Designer</b> · Payments · Gamification · AI <span class="accent">/ open to Sr/Lead</span></p>
+      <h1 class="huge">
+        <span class="row">Designing</span>
+        <span class="row"><span class="morph" data-words>payments</span></span>
+        <span class="row">that <em>ship</em>.<sup>®</sup></span>
+      </h1>
+
+      <div class="hero-foot">
+        <div>
+          <h5>The short pitch</h5>
+          <p>Senior Product Designer at the awkward seam where payments, gameplay, and AI coexist. Seven years, ~30 shipped products across B2B + B2C — design systems that don&apos;t crumble when the third PM joins.</p>
+        </div>
+        <div>
+          <h5>Currently</h5>
+          <p class="small">
+            → Lead designer on <b>6labs.ai</b> (AI gameplay analytics).<br>
+            → Vibe-coding Figma plugins &amp; agents.<br>
+            → Scaling design systems across <b>BlueStacks</b> &amp; <b>now.gg</b>.<br>
+            → Destroying lobbies in Battlefield 6.
+          </p>
+        </div>
+        <div>
+          <h5>Index</h5>
+          <p class="small">01 Index · 02 Work · 03 About<br>04 Process · 05 Contact</p>
+        </div>
+      </div>
+
+      <div class="stamp">
+        <div style="text-align:center;line-height:1.4">
+          OPEN TO<br>SR / LEAD<br><span class="glyph">✦</span>
+        </div>
+      </div>
+      <div class="corner-mark">PORTFOLIO <span class="accent">/ 2026</span></div>
+    </div>
+  </section>
+
+  <!-- ============== OPTION 2 ============== -->
+  <div class="opt-label">
+    <span>Option 02 — Royal / Graphite</span>
+    <span class="swatches">
+      <span class="sw" style="background:#18181a" title="bg #18181a"></span>
+      <span class="sw" style="background:#1f1f22" title="bg-2 #1f1f22"></span>
+      <span class="sw" style="background:#4361ff" title="accent #4361ff"></span>
+      <span class="sw" style="background:#f0ece2" title="ink #f0ece2"></span>
+    </span>
+  </div>
+  <section class="opt-2">
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <nav class="hero-nav">
+        <span class="logo">ZIAUL<span class="slash">/</span>ISLAM</span>
+        <ul>
+          <li><a href="#">Index</a></li>
+          <li><a href="#">Work</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Process</a></li>
+        </ul>
+        <a class="cta" href="#">Menu →</a>
+      </nav>
+
+      <p class="hero-tag"><b>Senior Product Designer</b> · Payments · Gamification · AI <span class="accent">/ open to Sr/Lead</span></p>
+      <h1 class="huge">
+        <span class="row">Designing</span>
+        <span class="row"><span class="morph" data-words>platforms</span></span>
+        <span class="row">that <em>ship</em>.<sup>®</sup></span>
+      </h1>
+
+      <div class="hero-foot">
+        <div>
+          <h5>The short pitch</h5>
+          <p>Senior Product Designer at the awkward seam where payments, gameplay, and AI coexist. Seven years, ~30 shipped products across B2B + B2C — design systems that don&apos;t crumble when the third PM joins.</p>
+        </div>
+        <div>
+          <h5>Currently</h5>
+          <p class="small">
+            → Lead designer on <b>6labs.ai</b> (AI gameplay analytics).<br>
+            → Vibe-coding Figma plugins &amp; agents.<br>
+            → Scaling design systems across <b>BlueStacks</b> &amp; <b>now.gg</b>.<br>
+            → Destroying lobbies in Battlefield 6.
+          </p>
+        </div>
+        <div>
+          <h5>Index</h5>
+          <p class="small">01 Index · 02 Work · 03 About<br>04 Process · 05 Contact</p>
+        </div>
+      </div>
+
+      <div class="stamp">
+        <div style="text-align:center;line-height:1.4">
+          OPEN TO<br>SR / LEAD<br><span class="glyph">✦</span>
+        </div>
+      </div>
+      <div class="corner-mark">PORTFOLIO <span class="accent">/ 2026</span></div>
+    </div>
+  </section>
+
+  <!-- ============== OPTION 3 ============== -->
+  <div class="opt-label">
+    <span>Option 03 — Electric / Carbon</span>
+    <span class="swatches">
+      <span class="sw" style="background:#14171c" title="bg #14171c"></span>
+      <span class="sw" style="background:#1a1e25" title="bg-2 #1a1e25"></span>
+      <span class="sw" style="background:#2da6ff" title="accent #2da6ff"></span>
+      <span class="sw" style="background:#f5f1e8" title="ink #f5f1e8"></span>
+    </span>
+  </div>
+  <section class="opt-3">
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <nav class="hero-nav">
+        <span class="logo">ZIAUL<span class="slash">/</span>ISLAM</span>
+        <ul>
+          <li><a href="#">Index</a></li>
+          <li><a href="#">Work</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Process</a></li>
+        </ul>
+        <a class="cta" href="#">Menu →</a>
+      </nav>
+
+      <p class="hero-tag"><b>Senior Product Designer</b> · Payments · Gamification · AI <span class="accent">/ open to Sr/Lead</span></p>
+      <h1 class="huge">
+        <span class="row">Designing</span>
+        <span class="row"><span class="morph" data-words>dashboards</span></span>
+        <span class="row">that <em>ship</em>.<sup>®</sup></span>
+      </h1>
+
+      <div class="hero-foot">
+        <div>
+          <h5>The short pitch</h5>
+          <p>Senior Product Designer at the awkward seam where payments, gameplay, and AI coexist. Seven years, ~30 shipped products across B2B + B2C — design systems that don&apos;t crumble when the third PM joins.</p>
+        </div>
+        <div>
+          <h5>Currently</h5>
+          <p class="small">
+            → Lead designer on <b>6labs.ai</b> (AI gameplay analytics).<br>
+            → Vibe-coding Figma plugins &amp; agents.<br>
+            → Scaling design systems across <b>BlueStacks</b> &amp; <b>now.gg</b>.<br>
+            → Destroying lobbies in Battlefield 6.
+          </p>
+        </div>
+        <div>
+          <h5>Index</h5>
+          <p class="small">01 Index · 02 Work · 03 About<br>04 Process · 05 Contact</p>
+        </div>
+      </div>
+
+      <div class="stamp">
+        <div style="text-align:center;line-height:1.4">
+          OPEN TO<br>SR / LEAD<br><span class="glyph">✦</span>
+        </div>
+      </div>
+      <div class="corner-mark">PORTFOLIO <span class="accent">/ 2026</span></div>
+    </div>
+  </section>
+
+  <!-- ============== OPTION 4 ============== -->
+  <div class="opt-label">
+    <span>Option 04 — Indigo / Ink</span>
+    <span class="swatches">
+      <span class="sw" style="background:#17171c" title="bg #17171c"></span>
+      <span class="sw" style="background:#1d1d24" title="bg-2 #1d1d24"></span>
+      <span class="sw" style="background:#5b78ff" title="accent #5b78ff"></span>
+      <span class="sw" style="background:#f3efe5" title="ink #f3efe5"></span>
+    </span>
+  </div>
+  <section class="opt-4">
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <nav class="hero-nav">
+        <span class="logo">ZIAUL<span class="slash">/</span>ISLAM</span>
+        <ul>
+          <li><a href="#">Index</a></li>
+          <li><a href="#">Work</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Process</a></li>
+        </ul>
+        <a class="cta" href="#">Menu →</a>
+      </nav>
+
+      <p class="hero-tag"><b>Senior Product Designer</b> · Payments · Gamification · AI <span class="accent">/ open to Sr/Lead</span></p>
+      <h1 class="huge">
+        <span class="row">Designing</span>
+        <span class="row"><span class="morph" data-words>systems</span></span>
+        <span class="row">that <em>ship</em>.<sup>®</sup></span>
+      </h1>
+
+      <div class="hero-foot">
+        <div>
+          <h5>The short pitch</h5>
+          <p>Senior Product Designer at the awkward seam where payments, gameplay, and AI coexist. Seven years, ~30 shipped products across B2B + B2C — design systems that don&apos;t crumble when the third PM joins.</p>
+        </div>
+        <div>
+          <h5>Currently</h5>
+          <p class="small">
+            → Lead designer on <b>6labs.ai</b> (AI gameplay analytics).<br>
+            → Vibe-coding Figma plugins &amp; agents.<br>
+            → Scaling design systems across <b>BlueStacks</b> &amp; <b>now.gg</b>.<br>
+            → Destroying lobbies in Battlefield 6.
+          </p>
+        </div>
+        <div>
+          <h5>Index</h5>
+          <p class="small">01 Index · 02 Work · 03 About<br>04 Process · 05 Contact</p>
+        </div>
+      </div>
+
+      <div class="stamp">
+        <div style="text-align:center;line-height:1.4">
+          OPEN TO<br>SR / LEAD<br><span class="glyph">✦</span>
+        </div>
+      </div>
+      <div class="corner-mark">PORTFOLIO <span class="accent">/ 2026</span></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // Lightweight word-rotation for each .morph element
+  const WORDS = ["payments","platforms","dashboards","systems","plugins","agents","games","tools"];
+  document.querySelectorAll(".morph[data-words]").forEach((el, i) => {
+    let idx = WORDS.indexOf(el.textContent.trim());
+    if (idx < 0) idx = i % WORDS.length;
+    setInterval(() => {
+      idx = (idx + 1) % WORDS.length;
+      el.style.transition = "opacity .35s ease, transform .35s ease";
+      el.style.opacity = "0";
+      el.style.transform = "translateY(-6px)";
+      setTimeout(() => {
+        el.textContent = WORDS[idx];
+        el.style.transform = "translateY(6px)";
+        requestAnimationFrame(() => {
+          el.style.opacity = "1";
+          el.style.transform = "translateY(0)";
+        });
+      }, 360);
+    }, 3200 + i * 250);
+  });
+</script>
+
+</body>
+</html>

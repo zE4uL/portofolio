@@ -1,0 +1,2078 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Hero + About — Direction Explorations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=Caveat:wght@500;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg: #f3ede2;
+    --bg-2: #efe7d7;
+    --ink: #0a0a0a;
+    --ink-2: #2a2a2a;
+    --muted: #6c655a;
+    --orange: #ff5a1f;
+    --orange-soft: #ffe2d4;
+    --green: #1f7a4c;
+    --paper: #ffffff;
+    --line: rgba(10,10,10,.12);
+    --ease: cubic-bezier(.22,1,.36,1);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'Geist', system-ui, -apple-system, Segoe UI, sans-serif; -webkit-font-smoothing: antialiased; }
+  body { overflow-x: hidden; }
+  a { color: inherit; }
+
+  /* ───────── Tab nav ───────── */
+  .tabs {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    gap: 6px;
+    padding: 12px 16px;
+    background: rgba(243,237,226,.85);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .tabs .label { font-size: 12px; color: var(--muted); margin-right: 8px; letter-spacing: .04em; text-transform: uppercase; }
+  .tab {
+    appearance: none;
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    font: 500 13px/1 'Geist', sans-serif;
+    padding: 8px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background .2s var(--ease), color .2s var(--ease);
+  }
+  .tab:hover { background: var(--ink); color: var(--bg); }
+  .tab.active { background: var(--ink); color: var(--bg); }
+
+  /* ───────── Section frame ───────── */
+  .variant {
+    display: none !important;
+    min-height: calc(100svh - 56px);
+    width: 100%;
+    position: relative;
+  }
+  .variant.show { display: block !important; }
+
+  .meta {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font: 500 11px/1 'Geist', sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .meta .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--orange); }
+
+  /* ───────────────────────────────────────────────
+     HERO A — Halftone Scatter (reference-matched)
+     ─────────────────────────────────────────────── */
+  #hero-a {
+    background:
+      radial-gradient(1200px 600px at 80% 20%, rgba(255,90,31,.08), transparent 70%),
+      var(--bg);
+    padding: 72px 48px 96px;
+    overflow: hidden;
+  }
+  .ha-wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .ha-line {
+    display: flex;
+    align-items: center;
+    line-height: .9;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    margin: 0;
+  }
+  .ha-line-1 { justify-content: flex-start; gap: 28px; align-items: flex-end; }
+  .ha-line-2 { justify-content: flex-start; gap: 24px; align-items: center; margin-top: 4px; }
+  .ha-line-3 { justify-content: flex-start; align-items: center; margin-top: -8px; }
+
+  /* Halftone canvas — sized via JS */
+  .ha-halftone {
+    position: relative;
+    display: inline-block;
+    cursor: crosshair;
+  }
+  .ha-halftone canvas { display: block; }
+
+  /* Italic serif word */
+  .ha-script {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink);
+    font-size: clamp(64px, 11vw, 168px);
+    letter-spacing: -0.02em;
+    line-height: .9;
+  }
+
+  /* Inline orange word with pill */
+  .ha-orange {
+    color: var(--orange);
+    font-size: clamp(80px, 14vw, 220px);
+    letter-spacing: -0.045em;
+    display: inline-flex;
+    align-items: center;
+    line-height: .85;
+  }
+  .ha-pill {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 6px;
+    transform: translateY(-6%);
+  }
+  .ha-pill .capsule {
+    width: clamp(140px, 20vw, 260px);
+    height: clamp(78px, 11vw, 140px);
+    border-radius: 999px;
+    background: linear-gradient(180deg, #ff7a45, #c9461a);
+    box-shadow: inset 0 -6px 14px rgba(0,0,0,.18), 0 12px 30px rgba(0,0,0,.18);
+    position: relative;
+  }
+  .ha-pill .knob {
+    position: absolute;
+    top: 50%;
+    left: 8%;
+    transform: translateY(-50%);
+    width: 38%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #ffffff, #d4cdbe 70%, #a8a193);
+    box-shadow: 0 6px 16px rgba(0,0,0,.25), inset 0 -2px 6px rgba(0,0,0,.15);
+    transition: left .8s var(--ease);
+  }
+  .ha-halftone:hover ~ * .knob,
+  .ha-pill:hover .knob { left: 54%; }
+
+  /* Massive solid word */
+  .ha-solid {
+    color: var(--ink);
+    font-size: clamp(100px, 16vw, 260px);
+    letter-spacing: -0.05em;
+    line-height: .85;
+  }
+
+  /* Inline device thumbnail */
+  .ha-device {
+    width: clamp(100px, 12vw, 180px);
+    aspect-ratio: 4/3;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ff7a45 0%, #ff5a1f 60%, #c9461a 100%);
+    box-shadow: 0 18px 40px rgba(255,90,31,.35);
+    transform: rotate(-6deg) translateY(-12px);
+    position: relative;
+    overflow: hidden;
+    margin-left: 16px;
+  }
+  .ha-device::after {
+    content: "";
+    position: absolute;
+    inset: 14% 18% 14% 50%;
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,0));
+    border: 1px solid rgba(255,255,255,.25);
+  }
+  .ha-device-cap {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    font-family: 'Instrument Serif', serif;
+    font-size: 11px;
+    color: var(--ink-2);
+    line-height: 1.3;
+    max-width: 180px;
+    transform: rotate(-6deg);
+  }
+  .ha-device-cap b { color: var(--orange); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+  .ha-device-wrap { position: relative; }
+
+  /* Sticker accent */
+  .ha-asterisk {
+    display: inline-block;
+    font-family: 'Caveat', cursive;
+    color: var(--orange);
+    font-size: clamp(64px, 9vw, 140px);
+    line-height: 1;
+    transform: translate(-8px, -28px) rotate(8deg);
+  }
+  .ha-emoji-sticker {
+    display: inline-block;
+    width: clamp(48px, 6vw, 80px);
+    aspect-ratio: 1;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #5fb4ff, #1f6cff);
+    transform: rotate(-12deg) translateY(-20px);
+    box-shadow: 0 10px 24px rgba(31,108,255,.35);
+    position: relative;
+    margin-left: 12px;
+    flex-shrink: 0;
+  }
+  .ha-emoji-sticker::before {
+    content: "";
+    position: absolute;
+    inset: 24% 24% auto 24%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #fff;
+    height: 20%;
+    box-shadow: 0 0 0 3px #1f6cff inset;
+  }
+  .ha-emoji-sticker::after {
+    content: "";
+    position: absolute;
+    inset: auto 22% 22% 22%;
+    height: 22%;
+    border-radius: 0 0 100% 100%;
+    background: #fff;
+  }
+
+  /* Bottom hint row */
+  .ha-hint {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 56px;
+    font: 500 13px/1.4 'Geist', sans-serif;
+    color: var(--muted);
+    letter-spacing: .02em;
+  }
+  .ha-hint .pulse {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+    box-shadow: 0 0 0 0 rgba(31,122,76,.6);
+    animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(31,122,76,.55); }
+    70% { box-shadow: 0 0 0 14px rgba(31,122,76,0); }
+    100% { box-shadow: 0 0 0 0 rgba(31,122,76,0); }
+  }
+
+  /* ───────────────────────────────────────────────
+     HERO B — Outline + Magnetic + Cursor Trail
+     ─────────────────────────────────────────────── */
+  #hero-b {
+    background: #0a0a0a;
+    color: #fafafa;
+    padding: 72px 48px 96px;
+    position: relative;
+    overflow: hidden;
+    cursor: none;
+  }
+  #hero-b .meta { color: rgba(255,255,255,.55); }
+  .hb-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+    background-size: 56px 56px;
+    pointer-events: none;
+  }
+  .hb-trail { position: absolute; inset: 0; pointer-events: none; }
+  .hb-cursor {
+    position: fixed;
+    width: 24px; height: 24px;
+    border: 1.5px solid var(--orange);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 60;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: difference;
+    transition: width .2s var(--ease), height .2s var(--ease);
+  }
+  .hb-wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+    padding-top: 24px;
+  }
+  .hb-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.18);
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.7);
+    margin-bottom: 32px;
+  }
+  .hb-tag .live { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 12px #4ade80; }
+  .hb-line {
+    margin: 0;
+    font-weight: 800;
+    line-height: .88;
+    letter-spacing: -0.045em;
+    font-size: clamp(80px, 14vw, 220px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 18px;
+  }
+  .hb-line .ch {
+    display: inline-block;
+    will-change: transform;
+    transition: transform .25s var(--ease), color .25s var(--ease);
+  }
+  .hb-line.outline .ch {
+    color: transparent;
+    -webkit-text-stroke: 2px #fafafa;
+  }
+  .hb-line.fill .ch { color: var(--orange); }
+  .hb-word { display: inline-flex; }
+  .hb-tail {
+    margin-top: 28px;
+    display: flex;
+    gap: 32px;
+    align-items: baseline;
+    color: rgba(255,255,255,.6);
+    font-size: 14px;
+    letter-spacing: .02em;
+  }
+  .hb-tail b { color: #fafafa; font-weight: 500; }
+  .hb-tail .sep { color: rgba(255,255,255,.25); }
+
+  /* ───────────────────────────────────────────────
+     HERO C — Pixel Dissolve (single canvas)
+     ─────────────────────────────────────────────── */
+  #hero-c {
+    background:
+      radial-gradient(800px 500px at 20% 80%, rgba(255,90,31,.10), transparent 60%),
+      radial-gradient(900px 600px at 80% 20%, rgba(31,108,255,.08), transparent 60%),
+      var(--bg);
+    padding: 0;
+    overflow: hidden;
+    min-height: calc(100svh - 56px);
+  }
+  .hc-canvas-wrap {
+    position: relative;
+    width: 100%;
+    height: calc(100svh - 56px);
+  }
+  .hc-canvas-wrap canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    cursor: none;
+  }
+  .hc-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 72px 48px;
+  }
+  .hc-top, .hc-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+  .hc-tag {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--ink);
+    background: var(--bg-2);
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .hc-tag .live { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+  .hc-hint {
+    pointer-events: none;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: .04em;
+  }
+  .hc-cursor {
+    position: fixed;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--orange);
+    pointer-events: none;
+    z-index: 60;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: multiply;
+  }
+
+  /* ───────────────────────────────────────────────
+     ABOUT 1 — Sticker Sentence (reference-matched)
+     ─────────────────────────────────────────────── */
+  #about-1 {
+    background: var(--bg);
+    padding: 96px 48px;
+  }
+  .ab-wrap { max-width: 1180px; margin: 0 auto; }
+  .ab-eyebrow {
+    display: inline-block;
+    font-family: 'Caveat', cursive;
+    color: var(--orange);
+    font-size: 32px;
+    transform: rotate(-2deg);
+    margin-bottom: 18px;
+  }
+  .ab-sentence {
+    font-family: 'Geist', sans-serif;
+    font-weight: 600;
+    font-size: clamp(28px, 4.6vw, 72px);
+    line-height: 1.16;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+  }
+  .ab-sentence .swirl { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--ink-2); }
+  .ab-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 14px 6px;
+    border-radius: 999px;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    font-size: clamp(20px, 2.8vw, 44px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin: 0 4px;
+    vertical-align: 6%;
+  }
+  .ab-chip.year { background: var(--ink); color: var(--bg); }
+  .ab-chip.dot { padding: 4px 8px; }
+  .ab-chip svg { width: 1em; height: 1em; }
+  .ab-chip .emoji { font-size: .9em; line-height: 1; }
+  .ab-skills-label {
+    margin-top: 64px;
+    color: var(--muted);
+    font-size: 14px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .ab-cluster {
+    margin-top: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .skill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    font: 500 15px/1 'Geist', sans-serif;
+    color: var(--ink);
+    transition: transform .2s var(--ease), background .2s var(--ease), color .2s var(--ease);
+  }
+  .skill:hover { transform: translateY(-2px); }
+  .skill.solid { background: var(--ink); color: var(--bg); }
+  .skill.outline { background: transparent; }
+  .skill.square { border-radius: 8px; }
+  .skill.tag {
+    background: var(--orange-soft);
+    border-color: var(--orange);
+    color: var(--orange);
+  }
+  .skill.amp {
+    width: 44px; height: 44px;
+    justify-content: center;
+    padding: 0;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 28px;
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .skill.collab {
+    background: transparent;
+    border: 1.5px dashed var(--ink);
+    transform: rotate(-2deg);
+  }
+
+  /* ───────────────────────────────────────────────
+     ABOUT 2 — Editorial / Stat-anchored
+     ─────────────────────────────────────────────── */
+  #about-2 {
+    background: var(--bg);
+    padding: 96px 48px;
+  }
+  .ed-wrap { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 1.4fr 1fr; gap: 72px; align-items: start; }
+  @media (max-width: 900px) { .ed-wrap { grid-template-columns: 1fr; gap: 48px; } }
+  .ed-quote {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(36px, 4.8vw, 72px);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .ed-quote .em { font-style: italic; color: var(--orange); }
+  .ed-quote .strike { text-decoration: line-through; text-decoration-color: var(--orange); text-decoration-thickness: 4px; }
+  .ed-meta {
+    margin-top: 32px;
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    align-items: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .ed-meta .pill { padding: 6px 12px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); color: var(--ink-2); }
+  .ed-side { display: flex; flex-direction: column; gap: 16px; }
+  .ed-stat {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+  }
+  .ed-stat .num { font-size: 48px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; color: var(--ink); }
+  .ed-stat .num.orange { color: var(--orange); }
+  .ed-stat .lbl { font-size: 13px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+  .ed-stat .desc { font-size: 14px; line-height: 1.5; color: var(--ink-2); margin-top: 4px; }
+  .ed-skills {
+    margin-top: 56px;
+    grid-column: 1 / -1;
+  }
+  .ed-skills h4 { font-size: 13px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; margin: 0 0 16px; font-weight: 500; }
+  .ed-skill-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .ed-skill-grid > div {
+    background: var(--bg);
+    padding: 18px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    transition: background .2s var(--ease);
+  }
+  .ed-skill-grid > div:hover { background: var(--paper); }
+  .ed-skill-grid > div .num { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; letter-spacing: .08em; }
+
+  /* ───────────────────────────────────────────────
+     HERO D — Sticker Collage (each word a card)
+     ─────────────────────────────────────────────── */
+  #hero-d {
+    background:
+      radial-gradient(1000px 600px at 70% 30%, rgba(31,108,255,.06), transparent 70%),
+      var(--bg);
+    padding: 80px 48px 96px;
+    overflow: hidden;
+    perspective: 1400px;
+  }
+  .hd-wrap { max-width: 1280px; margin: 0 auto; position: relative; }
+  .hd-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: flex-start;
+    transform-style: preserve-3d;
+  }
+  .hd-row { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .hd-card {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 36px 18px;
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    border-radius: 18px;
+    font-weight: 800;
+    line-height: .9;
+    letter-spacing: -0.04em;
+    box-shadow: 0 8px 0 var(--ink), 0 24px 48px rgba(0,0,0,.12);
+    transform-style: preserve-3d;
+    transition: transform .35s var(--ease), box-shadow .35s var(--ease);
+    will-change: transform;
+    cursor: default;
+  }
+  .hd-card::before {
+    content: "";
+    position: absolute;
+    width: 64px;
+    height: 18px;
+    background: rgba(255,90,31,.35);
+    border: 1px solid rgba(255,90,31,.55);
+    top: -10px;
+    left: 30%;
+    transform: rotate(-6deg);
+  }
+  .hd-card .word { font-size: clamp(56px, 10vw, 160px); }
+  .hd-card.ai { background: var(--ink); color: var(--bg); padding: 14px 28px 18px; }
+  .hd-card.native { background: var(--orange); color: #fff; border-color: var(--orange); box-shadow: 0 8px 0 #c9461a, 0 24px 48px rgba(255,90,31,.25); }
+  .hd-card.native::before { background: rgba(31,108,255,.35); border-color: rgba(31,108,255,.55); }
+  .hd-card.product { background: var(--paper); }
+  .hd-card.designer { background: var(--bg-2); }
+  .hd-card.designer::before { background: rgba(31,122,76,.3); border-color: rgba(31,122,76,.5); left: 60%; transform: rotate(8deg); }
+  .hd-image-card {
+    width: clamp(120px, 14vw, 200px);
+    aspect-ratio: 4/3;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #5fb4ff, #1f6cff 60%, #1542c4);
+    border: 1.5px solid var(--ink);
+    box-shadow: 0 8px 0 var(--ink), 0 18px 40px rgba(31,108,255,.3);
+    position: relative;
+    transform: rotate(4deg);
+    overflow: hidden;
+    transition: transform .35s var(--ease);
+  }
+  .hd-image-card::after {
+    content: "";
+    position: absolute;
+    inset: 12% 50% 12% 12%;
+    border-radius: 6px;
+    background: linear-gradient(180deg, rgba(255,255,255,.25), rgba(255,255,255,.05));
+    border: 1px solid rgba(255,255,255,.4);
+  }
+  .hd-image-card .label {
+    position: absolute;
+    inset: 12% 12% 12% 56%;
+    color: #fff;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.2;
+    display: flex;
+    align-items: flex-end;
+  }
+  .hd-confetti {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .hd-meta {
+    margin-top: 56px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: var(--muted);
+    font: 500 14px/1.4 'Geist', sans-serif;
+  }
+  .hd-meta b { color: var(--ink); font-weight: 600; }
+  .hd-meta .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 1.6s infinite; }
+
+  /* ───────────────────────────────────────────────
+     HERO E — Kinetic Marquee + Centre Anchor
+     ─────────────────────────────────────────────── */
+  #hero-e {
+    background: var(--bg);
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .he-frame {
+    position: relative;
+    width: 100%;
+    min-height: calc(100svh - 56px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .he-marquee-stack {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 56px 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .he-row {
+    display: flex;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 100%;
+  }
+  .he-track {
+    display: flex;
+    gap: 48px;
+    animation: he-scroll 60s linear infinite;
+    will-change: transform;
+    padding-right: 48px;
+    flex-shrink: 0;
+  }
+  .he-track.reverse { animation-direction: reverse; animation-duration: 80s; }
+  .he-track.fast { animation-duration: 40s; }
+  @keyframes he-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .he-row span {
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    font-size: clamp(48px, 8vw, 120px);
+    line-height: 1;
+    color: rgba(10,10,10,.08);
+    flex-shrink: 0;
+  }
+  .he-row.outline span {
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(10,10,10,.14);
+    font-style: italic;
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+  }
+  .he-row.orange span {
+    color: rgba(255,90,31,.18);
+  }
+  .he-anchor {
+    position: relative;
+    z-index: 5;
+    text-align: center;
+    padding: 48px 64px;
+    background:
+      radial-gradient(ellipse at center, var(--bg) 35%, rgba(243,237,226,.7) 70%, transparent 100%);
+  }
+  .he-anchor .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--ink);
+    color: var(--bg);
+    font: 500 12px/1 'Geist', sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+  .he-anchor .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
+  .he-anchor h1 {
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: .92;
+    font-size: clamp(56px, 9.5vw, 160px);
+    color: var(--ink);
+  }
+  .he-anchor h1 .em {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--orange);
+  }
+  .he-anchor .sub {
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 16px;
+    letter-spacing: .02em;
+  }
+  .he-anchor .sub b { color: var(--ink); font-weight: 600; }
+
+  /* ───────────────────────────────────────────────
+     HERO F — CRT / Arcade Glitch
+     ─────────────────────────────────────────────── */
+  #hero-f {
+    background: #0a0612;
+    color: #f5f0ff;
+    padding: 80px 48px 96px;
+    position: relative;
+    overflow: hidden;
+    min-height: calc(100svh - 56px);
+  }
+  #hero-f .meta { color: rgba(245,240,255,.55); }
+  #hero-f::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 1px, transparent 1px 3px),
+      radial-gradient(circle at 50% 50%, rgba(157,128,255,.08), transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+  }
+  #hero-f::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,.55) 100%);
+    pointer-events: none;
+    z-index: 2;
+  }
+  .hf-wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 3;
+    padding-top: 24px;
+  }
+  .hf-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px;
+    border: 1px solid rgba(245,240,255,.25);
+    border-radius: 4px;
+    color: #b9a7ff;
+    font: 500 11px/1 'Geist', sans-serif;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    background: rgba(157,128,255,.08);
+  }
+  .hf-tag .live { width: 6px; height: 6px; background: #4ade80; box-shadow: 0 0 12px #4ade80; }
+  .hf-line {
+    margin: 0;
+    font-weight: 800;
+    line-height: .9;
+    letter-spacing: -0.045em;
+    font-size: clamp(72px, 13vw, 200px);
+    position: relative;
+  }
+  .hf-line .glitch {
+    position: relative;
+    display: inline-block;
+    cursor: crosshair;
+    text-shadow:
+      2px 0 #ff2e6c,
+      -2px 0 #00d6ff,
+      0 0 20px rgba(255,255,255,.1);
+  }
+  .hf-line .glitch::before,
+  .hf-line .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .hf-line .glitch::before {
+    color: #ff2e6c;
+    transform: translate(2px, 0);
+    mix-blend-mode: screen;
+    clip-path: inset(0 0 60% 0);
+    animation: hf-glitch-a 4s infinite steps(1);
+  }
+  .hf-line .glitch::after {
+    color: #00d6ff;
+    transform: translate(-2px, 0);
+    mix-blend-mode: screen;
+    clip-path: inset(60% 0 0 0);
+    animation: hf-glitch-b 4s infinite steps(1);
+  }
+  @keyframes hf-glitch-a {
+    0%, 90%, 100% { clip-path: inset(0 0 60% 0); transform: translate(2px, 0); }
+    92% { clip-path: inset(20% 0 40% 0); transform: translate(6px, -2px); }
+    94% { clip-path: inset(70% 0 10% 0); transform: translate(-4px, 2px); }
+    96% { clip-path: inset(40% 0 30% 0); transform: translate(8px, 0); }
+  }
+  @keyframes hf-glitch-b {
+    0%, 90%, 100% { clip-path: inset(60% 0 0 0); transform: translate(-2px, 0); }
+    92% { clip-path: inset(40% 0 20% 0); transform: translate(-6px, 2px); }
+    94% { clip-path: inset(10% 0 70% 0); transform: translate(4px, -2px); }
+    96% { clip-path: inset(30% 0 40% 0); transform: translate(-8px, 0); }
+  }
+  .hf-line.serif {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-weight: 400;
+    color: #b9a7ff;
+    font-size: clamp(56px, 10vw, 160px);
+    letter-spacing: -0.02em;
+  }
+  .hf-canvas {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .hf-tail {
+    margin-top: 40px;
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    color: rgba(245,240,255,.55);
+    font: 500 13px/1.4 'Geist', sans-serif;
+    letter-spacing: .04em;
+  }
+  .hf-tail b { color: #f5f0ff; font-weight: 500; }
+  .hf-tail .pixel { display: inline-block; width: 8px; height: 8px; background: var(--orange); margin-right: 8px; vertical-align: 1px; }
+
+  /* ───────────────────────────────────────────────
+     HERO F — interactivity layer
+     ─────────────────────────────────────────────── */
+  .hf-wrap { padding-bottom: 110px; }
+  .hf-tail { max-width: 760px; }
+
+  .hf-line .glitch {
+    cursor: pointer;
+    user-select: none;
+    transition: text-shadow .25s var(--ease);
+  }
+  .hf-line .glitch:hover {
+    text-shadow:
+      5px 0 #ff2e6c,
+      -5px 0 #00d6ff,
+      0 0 32px rgba(255,255,255,.22);
+  }
+
+  .hf-hud-bracket {
+    position: absolute;
+    width: 28px; height: 28px;
+    border: 2px solid #b9a7ff;
+    z-index: 5;
+    pointer-events: none;
+    opacity: .7;
+  }
+  .hf-hud-bracket.tl { top: 8px; left: 8px; border-right: 0; border-bottom: 0; }
+  .hf-hud-bracket.tr { top: 8px; right: 8px; border-left: 0; border-bottom: 0; }
+  .hf-hud-bracket.bl { bottom: 8px; left: 8px; border-right: 0; border-top: 0; }
+  .hf-hud-bracket.br { bottom: 8px; right: 8px; border-left: 0; border-top: 0; }
+
+  .hf-chase {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .hf-chase::before, .hf-chase::after {
+    content: "";
+    position: absolute;
+    height: 8px;
+    background-image: radial-gradient(circle, #ff5a1f 35%, transparent 40%);
+    background-size: 14px 8px;
+    background-repeat: repeat-x;
+    opacity: .55;
+  }
+  .hf-chase::before { top: 26px; left: 56px; right: 56px; animation: hf-chase 1.4s linear infinite; }
+  .hf-chase::after { bottom: 26px; left: 56px; right: 56px; animation: hf-chase 1.4s linear infinite reverse; }
+  @keyframes hf-chase {
+    from { background-position: 0 0; }
+    to { background-position: 28px 0; }
+  }
+
+  .hf-scoreboard {
+    position: absolute;
+    top: 16px;
+    right: 56px;
+    z-index: 6;
+    display: flex;
+    gap: 22px;
+    padding: 10px 18px;
+    border: 1px solid rgba(245,240,255,.25);
+    background: rgba(157,128,255,.1);
+    font-family: 'Geist', sans-serif;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(245,240,255,.7);
+  }
+  .hf-scoreboard .item { display: flex; flex-direction: column; gap: 4px; min-width: 50px; }
+  .hf-scoreboard .lbl { color: #b9a7ff; font-size: 9px; }
+  .hf-scoreboard .val { color: #f5f0ff; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+
+  .hf-coin {
+    position: absolute;
+    bottom: 28px;
+    right: 56px;
+    z-index: 6;
+    appearance: none;
+    background: var(--orange);
+    color: #fff;
+    border: 2px solid #fff;
+    font-family: 'Geist', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 14px 22px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 #b9a7ff, 0 0 24px rgba(255,90,31,.45);
+    transition: transform .12s var(--ease), box-shadow .12s var(--ease), background .25s var(--ease), color .25s var(--ease);
+  }
+  .hf-coin:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #b9a7ff, 0 0 32px rgba(255,90,31,.65); }
+  .hf-coin:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #b9a7ff; }
+  .hf-coin.playing {
+    background: #1a1430;
+    color: #4ade80;
+    border-color: #4ade80;
+    box-shadow: 4px 4px 0 #4ade80, 0 0 28px rgba(74,222,128,.5);
+  }
+
+  .hf-rain {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 7;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hf-flicker {
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,.04);
+    pointer-events: none;
+    z-index: 8;
+    opacity: 0;
+    animation: hf-flicker 8s steps(1) infinite;
+  }
+  @keyframes hf-flicker {
+    0%, 49%, 53%, 76%, 78%, 100% { opacity: 0; }
+    50% { opacity: .25; }
+    51% { opacity: .04; }
+    52% { opacity: .15; }
+    77% { opacity: .12; }
+  }
+
+  .hf-mascot {
+    position: fixed;
+    width: 36px; height: 36px;
+    pointer-events: none;
+    z-index: 65;
+    transform: translate(-50%, -50%);
+    color: var(--orange);
+    filter: drop-shadow(0 0 14px rgba(255,90,31,.7));
+    display: none;
+  }
+  .hf-mascot.show { display: block; }
+
+  /* ───────────────────────────────────────────────
+     ABOUT 1 polish — refined chips with SVG icons
+     ─────────────────────────────────────────────── */
+  .ab-sentence-v2 {
+    font-family: 'Geist', sans-serif;
+    font-weight: 600;
+    font-size: clamp(28px, 4.4vw, 64px);
+    line-height: 1.28;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+  }
+  .ab-sentence-v2 .swirl { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--ink-2); margin: 0 .08em; }
+
+  .chipx {
+    display: inline-flex;
+    align-items: center;
+    gap: .35em;
+    padding: .12em .65em .12em .12em;
+    border-radius: 999px;
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.015em;
+    vertical-align: 4%;
+    box-shadow: 0 3px 0 var(--ink);
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+    margin: 0 .06em;
+    cursor: default;
+  }
+  .chipx:hover { transform: translateY(-2px); box-shadow: 0 5px 0 var(--ink); }
+  .chipx .ico {
+    width: 1.4em; height: 1.4em;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--orange-soft);
+    color: var(--orange);
+  }
+  .chipx .ico svg { width: 70%; height: 70%; }
+
+  .chipx.name .ico { background: var(--orange); color: #fff; }
+  .chipx.year { background: var(--ink); color: var(--bg); border-color: var(--ink); box-shadow: 0 3px 0 #000; }
+  .chipx.year .ico { background: rgba(255,255,255,.14); color: var(--bg); }
+  .chipx.ai .ico { background: #fff0e6; color: var(--orange); }
+  .chipx.systems .ico { background: #e6efff; color: #1f6cff; }
+  .chipx.scale .ico { background: #e3f7ec; color: var(--green); }
+  .chipx.company { background: #f5efff; border-color: #5b3aff; color: #2a1a72; box-shadow: 0 3px 0 #5b3aff; }
+  .chipx.company .ico { background: #5b3aff; color: #fff; }
+
+  .chipx:nth-of-type(odd) { transform: rotate(-1deg); }
+  .chipx:nth-of-type(even) { transform: rotate(.8deg); }
+  .chipx:nth-of-type(odd):hover { transform: translateY(-2px) rotate(-1.5deg); }
+  .chipx:nth-of-type(even):hover { transform: translateY(-2px) rotate(1.5deg); }
+
+  /* skill cluster polish — paper-stack shadow */
+  .ab-cluster .skill {
+    box-shadow: 0 2px 0 var(--ink);
+    border-width: 1.5px;
+  }
+  .ab-cluster .skill:hover { box-shadow: 0 4px 0 var(--ink); }
+  .ab-cluster .skill.tag { box-shadow: 0 2px 0 var(--orange); }
+  .ab-cluster .skill.tag:hover { box-shadow: 0 4px 0 var(--orange); }
+
+  /* utilities */
+  .nowrap { white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<nav class="tabs" id="tabs">
+  <span class="label">View</span>
+  <button class="tab active" data-target="hero-a">Hero A · Halftone Scatter</button>
+  <button class="tab" data-target="hero-b">Hero B · Outline + Magnetic</button>
+  <button class="tab" data-target="hero-c">Hero C · Pixel Dissolve</button>
+  <button class="tab" data-target="hero-d">Hero D · Sticker Collage</button>
+  <button class="tab" data-target="hero-e">Hero E · Kinetic Marquee</button>
+  <button class="tab" data-target="hero-f">Hero F · CRT / Arcade Glitch</button>
+  <button class="tab" data-target="about-1">About 1 · Sticker Sentence</button>
+  <button class="tab" data-target="about-2">About 2 · Editorial</button>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════
+     HERO A — Halftone Scatter
+     ════════════════════════════════════════════════════════ -->
+<section id="hero-a" class="variant show">
+  <div class="meta"><span class="dot"></span> Hero A · Halftone Scatter — hover the dotted word</div>
+
+  <div class="ha-wrap">
+    <!-- Line 1: halftone "AI" + small inline accents -->
+    <div class="ha-line ha-line-1">
+      <div class="ha-halftone" data-text="AI" data-size="220" aria-label="AI">
+        <canvas></canvas>
+      </div>
+      <div class="ha-device-wrap">
+        <div class="ha-device"></div>
+        <div class="ha-device-cap"><b>AI&nbsp;native</b><br>shipping ML-driven discovery & monetization since 2021</div>
+      </div>
+    </div>
+
+    <!-- Line 2: orange "NATIVE" with embedded toggle pill -->
+    <div class="ha-line ha-line-2">
+      <span class="ha-orange">NA<span class="ha-pill"><span class="capsule"><span class="knob"></span></span></span>TIVE</span>
+      <span class="ha-emoji-sticker" aria-hidden="true"></span>
+    </div>
+
+    <!-- Line 3: massive "PRODUCT DESIGNER" -->
+    <div class="ha-line ha-line-3">
+      <span class="ha-solid">PRODUCT&nbsp;DESIGNER</span>
+      <span class="ha-asterisk">*</span>
+    </div>
+
+    <div class="ha-hint">
+      <span class="pulse"></span>
+      <span><b style="color:var(--ink)">Available · April 2026</b> &nbsp;·&nbsp; Currently shaping AI experiences at BlueStacks &amp; now.gg</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     HERO B — Outline + Magnetic + Cursor Trail
+     ════════════════════════════════════════════════════════ -->
+<section id="hero-b" class="variant">
+  <div class="meta"><span class="dot"></span> Hero B · Outline + Magnetic — move your cursor across the type</div>
+  <div class="hb-grid"></div>
+  <canvas class="hb-trail" id="hb-trail"></canvas>
+  <div class="hb-cursor" id="hb-cursor"></div>
+
+  <div class="hb-wrap">
+    <span class="hb-tag"><span class="live"></span> Available · April 2026</span>
+    <h1 class="hb-line outline" data-magnetic>
+      <span class="hb-word">AI</span>
+      <span class="hb-word">NATIVE</span>
+    </h1>
+    <h1 class="hb-line fill" data-magnetic>
+      <span class="hb-word">PRODUCT</span>
+    </h1>
+    <h1 class="hb-line outline" data-magnetic>
+      <span class="hb-word">DESIGNER</span>
+    </h1>
+
+    <div class="hb-tail">
+      <span><b>7 years</b> shipping product</span>
+      <span class="sep">/</span>
+      <span><b>BlueStacks · now.gg</b> currently</span>
+      <span class="sep">/</span>
+      <span><b>Design systems · AI · Platforms</b></span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     HERO C — Pixel Dissolve
+     ════════════════════════════════════════════════════════ -->
+<section id="hero-c" class="variant">
+  <div class="meta"><span class="dot"></span> Hero C · Pixel Dissolve — drag your cursor across the letters</div>
+  <div class="hc-canvas-wrap">
+    <canvas id="hc-canvas"></canvas>
+    <div class="hc-overlay">
+      <div class="hc-top">
+        <span class="hc-tag"><span class="live"></span> Available · April 2026</span>
+        <span class="hc-hint">↘ pixels dissolve & reform as you move</span>
+      </div>
+      <div class="hc-bottom">
+        <span class="hc-hint"><b style="color:var(--ink)">Ziaul Islam</b> &nbsp;·&nbsp; Product Designer · 7 years · BlueStacks &amp; now.gg</span>
+        <span class="hc-hint">scroll ↓</span>
+      </div>
+    </div>
+  </div>
+  <div class="hc-cursor" id="hc-cursor"></div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     HERO D — Sticker Collage
+     ════════════════════════════════════════════════════════ -->
+<section id="hero-d" class="variant">
+  <div class="meta"><span class="dot"></span> Hero D · Sticker Collage — hover the cards to tilt &amp; pop confetti</div>
+  <div class="hd-wrap">
+    <canvas class="hd-confetti" id="hd-confetti"></canvas>
+    <div class="hd-stack" id="hd-stack">
+      <div class="hd-row">
+        <div class="hd-card ai" data-tilt><span class="word">AI</span></div>
+        <div class="hd-card native" data-tilt><span class="word">NATIVE</span></div>
+        <div class="hd-image-card" data-tilt>
+          <div class="label">App Player&nbsp;·&nbsp;ML-driven discovery</div>
+        </div>
+      </div>
+      <div class="hd-row">
+        <div class="hd-card product" data-tilt><span class="word">PRODUCT</span></div>
+      </div>
+      <div class="hd-row">
+        <div class="hd-card designer" data-tilt><span class="word">DESIGNER</span></div>
+      </div>
+    </div>
+    <div class="hd-meta">
+      <span class="pulse"></span>
+      <span><b>Available · April 2026</b> &nbsp;·&nbsp; 7 years shipping product · BlueStacks &amp; now.gg</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     HERO E — Kinetic Marquee + Centre Anchor
+     ════════════════════════════════════════════════════════ -->
+<section id="hero-e" class="variant">
+  <div class="meta"><span class="dot"></span> Hero E · Kinetic Marquee — words drift while the anchor holds</div>
+  <div class="he-frame">
+  <div class="he-marquee-stack" aria-hidden="true">
+    <div class="he-row">
+      <div class="he-track">
+        <span>UX RESEARCH</span><span>·</span><span>DESIGN SYSTEMS</span><span>·</span><span>AI EXPERIMENTATION</span><span>·</span><span>WIREFRAMING</span><span>·</span><span>A/B TESTING</span><span>·</span>
+        <span>UX RESEARCH</span><span>·</span><span>DESIGN SYSTEMS</span><span>·</span><span>AI EXPERIMENTATION</span><span>·</span><span>WIREFRAMING</span><span>·</span><span>A/B TESTING</span><span>·</span>
+      </div>
+    </div>
+    <div class="he-row outline">
+      <div class="he-track reverse">
+        <span>prototyping</span><span>·</span><span>information architecture</span><span>·</span><span>customer journey mapping</span><span>·</span><span>interaction design</span><span>·</span>
+        <span>prototyping</span><span>·</span><span>information architecture</span><span>·</span><span>customer journey mapping</span><span>·</span><span>interaction design</span><span>·</span>
+      </div>
+    </div>
+    <div class="he-row orange">
+      <div class="he-track fast">
+        <span>BLUESTACKS</span><span>★</span><span>NOW.GG</span><span>★</span><span>AMWAY</span><span>★</span><span>IKOKAS</span><span>★</span><span>ALPHA AGENCY</span><span>★</span>
+        <span>BLUESTACKS</span><span>★</span><span>NOW.GG</span><span>★</span><span>AMWAY</span><span>★</span><span>IKOKAS</span><span>★</span><span>ALPHA AGENCY</span><span>★</span>
+      </div>
+    </div>
+    <div class="he-row outline">
+      <div class="he-track">
+        <span>visual design</span><span>·</span><span>design tokens</span><span>·</span><span>cross-platform</span><span>·</span><span>design sprints</span><span>·</span>
+        <span>visual design</span><span>·</span><span>design tokens</span><span>·</span><span>cross-platform</span><span>·</span><span>design sprints</span><span>·</span>
+      </div>
+    </div>
+    <div class="he-row">
+      <div class="he-track reverse">
+        <span>USER FLOWS</span><span>·</span><span>B2B + B2C</span><span>·</span><span>PLATFORMS</span><span>·</span><span>DESIGN TO CODE</span><span>·</span>
+        <span>USER FLOWS</span><span>·</span><span>B2B + B2C</span><span>·</span><span>PLATFORMS</span><span>·</span><span>DESIGN TO CODE</span><span>·</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="he-anchor">
+    <span class="badge"><span class="dot"></span> Available · April 2026</span>
+    <h1>
+      AI <span class="em">native</span><br>
+      Product Designer
+    </h1>
+    <p class="sub"><b>Ziaul Islam</b> · 7 years shipping product · BlueStacks &amp; now.gg</p>
+  </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     HERO F — CRT / Arcade Glitch
+     ════════════════════════════════════════════════════════ -->
+<section id="hero-f" class="variant">
+  <div class="meta"><span class="dot"></span> Hero F · CRT / Arcade Glitch — hover lines · scramble · click to explode · insert coin</div>
+  <canvas class="hf-canvas" id="hf-canvas"></canvas>
+
+  <div class="hf-hud-bracket tl"></div>
+  <div class="hf-hud-bracket tr"></div>
+  <div class="hf-hud-bracket bl"></div>
+  <div class="hf-hud-bracket br"></div>
+  <div class="hf-chase"></div>
+
+  <div class="hf-scoreboard">
+    <div class="item"><span class="lbl">PLAYER</span><span class="val">P1</span></div>
+    <div class="item"><span class="lbl">LEVEL</span><span class="val" data-tick="7" data-pad="2">00</span></div>
+    <div class="item"><span class="lbl">SCORE</span><span class="val" data-tick="2026" data-pad="6">000000</span></div>
+    <div class="item"><span class="lbl">YEAR</span><span class="val">2026</span></div>
+  </div>
+
+  <button class="hf-coin" id="hf-coin" type="button">▶ INSERT COIN</button>
+  <canvas class="hf-rain" id="hf-rain"></canvas>
+  <div class="hf-flicker"></div>
+
+  <svg class="hf-mascot" id="hf-mascot" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+    <rect x="4" y="0" width="8" height="2" fill="currentColor"/>
+    <rect x="2" y="2" width="12" height="2" fill="currentColor"/>
+    <rect x="0" y="4" width="16" height="10" fill="currentColor"/>
+    <rect x="0" y="14" width="2" height="2" fill="currentColor"/>
+    <rect x="4" y="14" width="2" height="2" fill="currentColor"/>
+    <rect x="8" y="14" width="2" height="2" fill="currentColor"/>
+    <rect x="12" y="14" width="2" height="2" fill="currentColor"/>
+    <rect x="3" y="6" width="3" height="4" fill="white"/>
+    <rect x="10" y="6" width="3" height="4" fill="white"/>
+    <rect class="eye-l" x="4" y="7" width="1" height="2" fill="#1a1430"/>
+    <rect class="eye-r" x="11" y="7" width="1" height="2" fill="#1a1430"/>
+  </svg>
+
+  <div class="hf-wrap">
+    <span class="hf-tag"><span class="live"></span> SYSTEM ONLINE · APRIL 2026</span>
+    <h1 class="hf-line"><span class="glitch" data-text="AI" data-pixel>AI</span></h1>
+    <h1 class="hf-line serif"><span class="glitch" data-text="native" data-pixel>native</span></h1>
+    <h1 class="hf-line"><span class="glitch" data-text="PRODUCT" data-pixel>PRODUCT</span></h1>
+    <h1 class="hf-line"><span class="glitch" data-text="DESIGNER" data-pixel>DESIGNER</span></h1>
+
+    <div class="hf-tail">
+      <span><span class="pixel"></span><b>PLAYER 1</b> · ZIAUL ISLAM</span>
+      <span><span class="pixel"></span><b>LEVEL</b> · 07 YEARS</span>
+      <span><span class="pixel"></span><b>STAGE</b> · BLUESTACKS // NOW.GG</span>
+      <span><span class="pixel"></span><b>SKILL TREE</b> · AI · DS · PLATFORMS</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     ABOUT 1 — Sticker Sentence
+     ════════════════════════════════════════════════════════ -->
+<section id="about-1" class="variant">
+  <div class="meta"><span class="dot"></span> About 1 · Sticker Sentence — polished SVG-icon chips</div>
+  <div class="ab-wrap">
+    <span class="ab-eyebrow">a quick brief…</span>
+    <p class="ab-sentence-v2">
+      Hi, I'm
+      <span class="chipx name">
+        <span class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 1 0-4 0"/><path d="M14 10V4a2 2 0 1 0-4 0v2"/><path d="M10 10.5V6a2 2 0 1 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+        </span>Ziaul
+      </span> —
+      <span class="swirl">a Product Designer</span>
+      crafting end-to-end flows since
+      <span class="chipx year">
+        <span class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+        </span>2019
+      </span>.
+      Focused on
+      <span class="chipx ai">
+        <span class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 5a2 2 0 0 0 1.4 1.4L20 11l-5 1.6a2 2 0 0 0-1.4 1.4L12 19l-1.6-5a2 2 0 0 0-1.4-1.4L4 11l5-1.6A2 2 0 0 0 10.4 8L12 3z"/><path d="M5 3v3"/><path d="M3.5 4.5h3"/><path d="M19 17v3"/><path d="M17.5 18.5h3"/></svg>
+        </span>AI-native
+      </span> products,
+      <span class="chipx systems">
+        <span class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </span>design&nbsp;systems
+      </span>
+      and platforms that
+      <span class="chipx scale">
+        <span class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        </span>scale
+      </span>
+      across B2B + B2C — currently shaping AI at
+      <span class="chipx company">
+        <span class="ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        </span>BlueStacks&nbsp;&amp;&nbsp;now.gg
+      </span>.
+    </p>
+
+    <div class="ab-skills-label">with my skills</div>
+    <div class="ab-cluster">
+      <span class="skill">Empathy</span>
+      <span class="skill solid">User Research</span>
+      <span class="skill">Wireframing</span>
+      <span class="skill outline">Prototyping</span>
+      <span class="skill tag">User Flow</span>
+      <span class="skill square">Information Architecture</span>
+      <span class="skill solid">Critical Thinking</span>
+      <span class="skill">Communication</span>
+      <span class="skill collab">Collaboration</span>
+      <span class="skill amp">&amp;</span>
+      <span class="skill outline">Design Sprints</span>
+      <span class="skill tag">A/B Testing</span>
+      <span class="skill">Interaction Design</span>
+      <span class="skill square">Visual Design</span>
+      <span class="skill solid">Design Systems</span>
+      <span class="skill">Design Tokens</span>
+      <span class="skill tag">AI Experimentation</span>
+      <span class="skill">Cross-platform</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════
+     ABOUT 2 — Editorial / Stat-anchored
+     ════════════════════════════════════════════════════════ -->
+<section id="about-2" class="variant">
+  <div class="meta"><span class="dot"></span> About 2 · Editorial — quote + stat anchors + gridded skills</div>
+  <div class="ed-wrap">
+    <div>
+      <p class="ed-quote">
+        I design <span class="em">AI-native</span> products, scalable
+        <span class="em">design systems</span>, and end-to-end flows that
+        bridge <span class="strike">vague ideas</span> business ambition with
+        the messy reality of how people actually use software.
+      </p>
+      <div class="ed-meta">
+        <span class="pill">Senior Product Designer</span>
+        <span>·</span>
+        <span class="pill">Based in India</span>
+        <span>·</span>
+        <span class="pill">Open to collaboration</span>
+      </div>
+    </div>
+
+    <div class="ed-side">
+      <div class="ed-stat">
+        <span class="num orange">7Y</span>
+        <span class="lbl">Shipping product</span>
+        <span class="desc">From SaaS at Alpha Agency to AI experimentation at BlueStacks &amp; now.gg.</span>
+      </div>
+      <div class="ed-stat">
+        <span class="num">4</span>
+        <span class="lbl">Companies, one craft</span>
+        <span class="desc">Alpha Agency → Ikokas → Amway India (contract) → BlueStacks/now.gg.</span>
+      </div>
+      <div class="ed-stat">
+        <span class="num orange">∞</span>
+        <span class="lbl">Design systems built</span>
+        <span class="desc">Multi-theme token systems for App Player, Cloud Player, Amway India.</span>
+      </div>
+    </div>
+
+    <div class="ed-skills">
+      <h4>Capabilities</h4>
+      <div class="ed-skill-grid">
+        <div><span class="num">01</span>UX Research</div>
+        <div><span class="num">02</span>User Testing</div>
+        <div><span class="num">03</span>Customer Journey Mapping</div>
+        <div><span class="num">04</span>Information Architecture</div>
+        <div><span class="num">05</span>Wireframing</div>
+        <div><span class="num">06</span>Prototyping</div>
+        <div><span class="num">07</span>Interaction Design</div>
+        <div><span class="num">08</span>Visual Design</div>
+        <div><span class="num">09</span>Design Systems</div>
+        <div><span class="num">10</span>Design Tokens</div>
+        <div><span class="num">11</span>Design Sprints</div>
+        <div><span class="num">12</span>A/B Testing</div>
+        <div><span class="num">13</span>AI Experimentation</div>
+        <div><span class="num">14</span>Business Analysis</div>
+        <div><span class="num">15</span>Cross-platform</div>
+        <div><span class="num">16</span>HTML & CSS Fundamentals</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   Tab switching
+   ═══════════════════════════════════════════════════ */
+const tabs = document.querySelectorAll('.tab');
+const variants = document.querySelectorAll('.variant');
+tabs.forEach(t => {
+  t.addEventListener('click', () => {
+    const id = t.dataset.target;
+    tabs.forEach(x => x.classList.toggle('active', x === t));
+    variants.forEach(v => v.classList.toggle('show', v.id === id));
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (id === 'hero-c') initPixelDissolve();
+    if (id === 'hero-b') initMagneticTrail();
+    if (id === 'hero-d') initStickerCollage();
+    if (id === 'hero-f') initCRTGlitch();
+    if (id !== 'hero-f') {
+      const m = document.getElementById('hf-mascot');
+      if (m) m.classList.remove('show');
+    }
+  });
+});
+
+/* ═══════════════════════════════════════════════════
+   HERO A — Halftone particles per word
+   ═══════════════════════════════════════════════════ */
+function initHalftone(el) {
+  const text = el.dataset.text;
+  const fontSize = parseInt(el.dataset.size, 10) || 200;
+  const canvas = el.querySelector('canvas');
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  // Measure text
+  const measure = document.createElement('canvas').getContext('2d');
+  measure.font = `800 ${fontSize}px Geist, sans-serif`;
+  const metrics = measure.measureText(text);
+  const w = Math.ceil(metrics.width) + 24;
+  const h = Math.ceil(fontSize * 1.05);
+
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  ctx.scale(dpr, dpr);
+
+  // Render text to offscreen, sample
+  const off = document.createElement('canvas');
+  off.width = w; off.height = h;
+  const oc = off.getContext('2d');
+  oc.fillStyle = '#000';
+  oc.font = `800 ${fontSize}px Geist, sans-serif`;
+  oc.textBaseline = 'middle';
+  oc.fillText(text, 12, h / 2);
+
+  const data = oc.getImageData(0, 0, w, h).data;
+  const grid = 7;
+  const radius = 2.6;
+  const particles = [];
+  for (let y = 0; y < h; y += grid) {
+    for (let x = 0; x < w; x += grid) {
+      const i = (y * w + x) * 4 + 3;
+      if (data[i] > 128) {
+        particles.push({ ox: x, oy: y, x, y, vx: 0, vy: 0 });
+      }
+    }
+  }
+
+  let mx = -9999, my = -9999;
+  el.addEventListener('mousemove', e => {
+    const r = canvas.getBoundingClientRect();
+    mx = e.clientX - r.left;
+    my = e.clientY - r.top;
+  });
+  el.addEventListener('mouseleave', () => { mx = -9999; my = -9999; });
+
+  function tick() {
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#0a0a0a';
+    for (const p of particles) {
+      const dx = p.x - mx;
+      const dy = p.y - my;
+      const d2 = dx * dx + dy * dy;
+      const reach = 90;
+      if (d2 < reach * reach) {
+        const d = Math.sqrt(d2) || 0.01;
+        const force = (1 - d / reach) * 6;
+        p.vx += (dx / d) * force;
+        p.vy += (dy / d) * force;
+      }
+      // spring back
+      p.vx += (p.ox - p.x) * 0.06;
+      p.vy += (p.oy - p.y) * 0.06;
+      p.vx *= 0.82;
+      p.vy *= 0.82;
+      p.x += p.vx;
+      p.y += p.vy;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+}
+document.fonts.ready.then(() => {
+  document.querySelectorAll('.ha-halftone').forEach(initHalftone);
+});
+
+/* ═══════════════════════════════════════════════════
+   HERO B — Magnetic letters + cursor trail
+   ═══════════════════════════════════════════════════ */
+let hbInited = false;
+function initMagneticTrail() {
+  if (hbInited) return;
+  hbInited = true;
+
+  // Split words into characters
+  document.querySelectorAll('#hero-b .hb-word').forEach(w => {
+    const txt = w.textContent;
+    w.textContent = '';
+    [...txt].forEach(c => {
+      const s = document.createElement('span');
+      s.className = 'ch';
+      s.textContent = c;
+      w.appendChild(s);
+    });
+  });
+
+  const cursor = document.getElementById('hb-cursor');
+  const canvas = document.getElementById('hb-trail');
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let mx = -9999, my = -9999;
+  const trail = [];
+
+  document.addEventListener('mousemove', e => {
+    if (!document.getElementById('hero-b').classList.contains('show')) return;
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+    const rect = canvas.getBoundingClientRect();
+    trail.push({ x: mx - rect.left, y: my - rect.top, life: 1 });
+    if (trail.length > 80) trail.shift();
+
+    // Magnetic letter pull
+    document.querySelectorAll('#hero-b .ch').forEach(ch => {
+      const r = ch.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const dx = mx - cx;
+      const dy = my - cy;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      const reach = 120;
+      if (d < reach) {
+        const force = (1 - d / reach) * 24;
+        const ang = Math.atan2(dy, dx);
+        ch.style.transform = `translate(${Math.cos(ang) * force}px, ${Math.sin(ang) * force}px)`;
+        ch.style.color = 'var(--orange)';
+      } else {
+        ch.style.transform = '';
+        ch.style.color = '';
+      }
+    });
+  });
+
+  function tick() {
+    if (!document.getElementById('hero-b').classList.contains('show')) {
+      requestAnimationFrame(tick);
+      return;
+    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = trail.length - 1; i >= 0; i--) {
+      const t = trail[i];
+      t.life -= 0.018;
+      if (t.life <= 0) { trail.splice(i, 1); continue; }
+      const r = (1 - t.life) * 18 + 2;
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,90,31,${t.life * 0.5})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+/* ═══════════════════════════════════════════════════
+   HERO C — Pixel dissolve canvas
+   ═══════════════════════════════════════════════════ */
+let hcInited = false;
+function initPixelDissolve() {
+  if (hcInited) return;
+  hcInited = true;
+
+  const canvas = document.getElementById('hc-canvas');
+  const cursor = document.getElementById('hc-cursor');
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  let particles = [];
+  let W, H;
+
+  function build() {
+    const rect = canvas.getBoundingClientRect();
+    W = rect.width; H = rect.height;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // Draw text offscreen
+    const off = document.createElement('canvas');
+    off.width = W; off.height = H;
+    const oc = off.getContext('2d');
+    oc.fillStyle = '#0a0a0a';
+    oc.textAlign = 'center';
+    oc.textBaseline = 'middle';
+    const big = Math.min(W * 0.16, 220);
+    oc.font = `800 ${big}px Geist, sans-serif`;
+    oc.fillText('AI NATIVE', W / 2, H / 2 - big * 0.55);
+    const big2 = Math.min(W * 0.18, 260);
+    oc.font = `800 ${big2}px Geist, sans-serif`;
+    oc.fillStyle = '#ff5a1f';
+    oc.fillText('PRODUCT', W / 2, H / 2 + big2 * 0.05);
+    oc.fillStyle = '#0a0a0a';
+    oc.fillText('DESIGNER', W / 2, H / 2 + big2 * 0.95);
+
+    const data = oc.getImageData(0, 0, W, H).data;
+    const step = 5;
+    particles = [];
+    for (let y = 0; y < H; y += step) {
+      for (let x = 0; x < W; x += step) {
+        const i = (y * W + x) * 4;
+        if (data[i + 3] > 128) {
+          particles.push({
+            ox: x, oy: y, x, y,
+            vx: 0, vy: 0,
+            r: data[i], g: data[i + 1], b: data[i + 2]
+          });
+        }
+      }
+    }
+  }
+
+  let mx = -9999, my = -9999;
+  canvas.addEventListener('mousemove', e => {
+    const r = canvas.getBoundingClientRect();
+    mx = e.clientX - r.left;
+    my = e.clientY - r.top;
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+  canvas.addEventListener('mouseleave', () => { mx = -9999; my = -9999; });
+
+  function tick() {
+    if (!document.getElementById('hero-c').classList.contains('show')) {
+      requestAnimationFrame(tick);
+      return;
+    }
+    ctx.clearRect(0, 0, W, H);
+    for (const p of particles) {
+      const dx = p.x - mx;
+      const dy = p.y - my;
+      const d2 = dx * dx + dy * dy;
+      const reach = 110;
+      if (d2 < reach * reach) {
+        const d = Math.sqrt(d2) || 0.01;
+        const force = (1 - d / reach) * 5;
+        p.vx += (dx / d) * force;
+        p.vy += (dy / d) * force;
+      }
+      p.vx += (p.ox - p.x) * 0.045;
+      p.vy += (p.oy - p.y) * 0.045;
+      p.vx *= 0.85;
+      p.vy *= 0.85;
+      p.x += p.vx;
+      p.y += p.vy;
+      ctx.fillStyle = `rgb(${p.r},${p.g},${p.b})`;
+      ctx.fillRect(p.x, p.y, 3, 3);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  document.fonts.ready.then(() => { build(); tick(); });
+  window.addEventListener('resize', () => { setTimeout(build, 100); });
+}
+
+/* ═══════════════════════════════════════════════════
+   HERO D — Sticker collage tilt + confetti burst
+   ═══════════════════════════════════════════════════ */
+let hdInited = false;
+function initStickerCollage() {
+  if (hdInited) return;
+  hdInited = true;
+
+  const stack = document.getElementById('hd-stack');
+  const cards = stack.querySelectorAll('[data-tilt]');
+  const canvas = document.getElementById('hd-confetti');
+  const ctx = canvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  function resize() {
+    const r = canvas.getBoundingClientRect();
+    canvas.width = r.width * dpr;
+    canvas.height = r.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const particles = [];
+  const palette = ['#ff5a1f', '#1f6cff', '#1f7a4c', '#0a0a0a', '#5b3aff'];
+
+  cards.forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const dx = (e.clientX - cx) / r.width;
+      const dy = (e.clientY - cy) / r.height;
+      card.style.transform = `perspective(900px) rotateX(${-dy * 12}deg) rotateY(${dx * 12}deg) translateZ(20px)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+    card.addEventListener('mouseenter', e => {
+      const r = card.getBoundingClientRect();
+      const wrap = canvas.getBoundingClientRect();
+      for (let i = 0; i < 18; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const sp = 2 + Math.random() * 5;
+        particles.push({
+          x: r.left + r.width / 2 - wrap.left,
+          y: r.top + r.height / 2 - wrap.top,
+          vx: Math.cos(ang) * sp,
+          vy: Math.sin(ang) * sp - 2,
+          life: 1,
+          col: palette[(Math.random() * palette.length) | 0],
+          size: 4 + Math.random() * 6
+        });
+      }
+    });
+  });
+
+  function tick() {
+    if (!document.getElementById('hero-d').classList.contains('show')) {
+      requestAnimationFrame(tick);
+      return;
+    }
+    const r = canvas.getBoundingClientRect();
+    ctx.clearRect(0, 0, r.width, r.height);
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.vy += 0.18;
+      p.vx *= 0.99;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= 0.012;
+      if (p.life <= 0) { particles.splice(i, 1); continue; }
+      ctx.fillStyle = p.col;
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillRect(p.x, p.y, p.size, p.size);
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+/* ═══════════════════════════════════════════════════
+   HERO F — CRT arcade: scramble, mascot, scoreboard,
+   coin → pixel rain, click-to-explode, hover particles
+   ═══════════════════════════════════════════════════ */
+let hfInited = false;
+function initCRTGlitch() {
+  if (hfInited) return;
+  hfInited = true;
+
+  const canvas = document.getElementById('hf-canvas');
+  const ctx = canvas.getContext('2d');
+  const rainCanvas = document.getElementById('hf-rain');
+  const rctx = rainCanvas.getContext('2d');
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  function resizeAll() {
+    [[canvas, ctx], [rainCanvas, rctx]].forEach(([c, x]) => {
+      const r = c.getBoundingClientRect();
+      c.width = r.width * dpr;
+      c.height = r.height * dpr;
+      x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    });
+  }
+  resizeAll();
+  window.addEventListener('resize', resizeAll);
+
+  const particles = [];
+  const rain = [];
+  const palette = ['#ff2e6c', '#00d6ff', '#b9a7ff', '#4ade80', '#ff5a1f'];
+
+  /* ── Letter scramble + click explode + hover emit ── */
+  const SCRAMBLE_CHARS = '!<>-_\\/[]{}=+*^?#01░▒▓■';
+  function scrambleTo(el, final, duration) {
+    const myId = (parseInt(el.dataset.scrambleId, 10) || 0) + 1;
+    el.dataset.scrambleId = String(myId);
+    const start = performance.now();
+    function step(now) {
+      if (parseInt(el.dataset.scrambleId, 10) !== myId) return;
+      const t = Math.min(1, (now - start) / duration);
+      let s = '';
+      for (let i = 0; i < final.length; i++) {
+        if (i / final.length < t * 1.3) s += final[i];
+        else s += SCRAMBLE_CHARS[(Math.random() * SCRAMBLE_CHARS.length) | 0];
+      }
+      el.textContent = s;
+      el.setAttribute('data-text', s);
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  function explodeAt(x, y, n) {
+    for (let i = 0; i < n; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const sp = 2 + Math.random() * 9;
+      particles.push({
+        x: x + (Math.random() - .5) * 30,
+        y: y + (Math.random() - .5) * 30,
+        vx: Math.cos(ang) * sp,
+        vy: Math.sin(ang) * sp,
+        life: 1,
+        col: palette[(Math.random() * palette.length) | 0],
+        size: 2 + ((Math.random() * 4) | 0)
+      });
+    }
+  }
+
+  document.querySelectorAll('#hero-f .glitch').forEach(el => {
+    el.dataset.original = el.textContent;
+    el.addEventListener('mouseenter', () => scrambleTo(el, el.dataset.original, 600));
+    el.addEventListener('mousemove', e => {
+      const wrap = canvas.getBoundingClientRect();
+      for (let i = 0; i < 3; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const sp = 1 + Math.random() * 4;
+        particles.push({
+          x: e.clientX - wrap.left + (Math.random() - .5) * 30,
+          y: e.clientY - wrap.top + (Math.random() - .5) * 30,
+          vx: Math.cos(ang) * sp,
+          vy: Math.sin(ang) * sp,
+          life: 1,
+          col: palette[(Math.random() * palette.length) | 0],
+          size: 2 + ((Math.random() * 3) | 0)
+        });
+      }
+    });
+    el.addEventListener('click', () => {
+      const wrap = canvas.getBoundingClientRect();
+      const r = el.getBoundingClientRect();
+      explodeAt(r.left + r.width / 2 - wrap.left, r.top + r.height / 2 - wrap.top, 110);
+      scrambleTo(el, el.dataset.original, 800);
+    });
+  });
+
+  /* ── Mascot (pixel ghost) follow + eye tracking ── */
+  const mascot = document.getElementById('hf-mascot');
+  const eyeL = mascot.querySelector('.eye-l');
+  const eyeR = mascot.querySelector('.eye-r');
+  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  let cxF = mx, cyF = my;
+  document.addEventListener('mousemove', e => {
+    if (!document.getElementById('hero-f').classList.contains('show')) return;
+    mx = e.clientX; my = e.clientY;
+    mascot.classList.add('show');
+  });
+
+  /* ── Score ticker ── */
+  document.querySelectorAll('#hero-f [data-tick]').forEach(el => {
+    const target = parseInt(el.dataset.tick, 10);
+    const pad = parseInt(el.dataset.pad || '0', 10);
+    const start = performance.now();
+    const dur = 1600;
+    function step(now) {
+      const t = Math.min(1, (now - start) / dur);
+      const v = Math.floor(target * (1 - Math.pow(1 - t, 3)));
+      el.textContent = String(v).padStart(pad, '0');
+      if (t < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+
+  /* ── INSERT COIN → pixel rain ── */
+  const coin = document.getElementById('hf-coin');
+  let coinTimer = null;
+  coin.addEventListener('click', () => {
+    coin.classList.add('playing');
+    coin.textContent = '● ● ● PLAYING ● ● ●';
+    const r = rainCanvas.getBoundingClientRect();
+    for (let i = 0; i < 260; i++) {
+      rain.push({
+        x: Math.random() * r.width,
+        y: -10 - Math.random() * 220,
+        vy: 2 + Math.random() * 7,
+        size: 2 + ((Math.random() * 4) | 0),
+        col: palette[(Math.random() * palette.length) | 0],
+      });
+    }
+    clearTimeout(coinTimer);
+    coinTimer = setTimeout(() => {
+      coin.classList.remove('playing');
+      coin.textContent = '▶ INSERT COIN';
+    }, 4200);
+  });
+
+  /* ── Single rAF tick: mascot, particles, rain ── */
+  function tick() {
+    if (!document.getElementById('hero-f').classList.contains('show')) {
+      requestAnimationFrame(tick);
+      return;
+    }
+    cxF += (mx - cxF) * 0.08;
+    cyF += (my - cyF) * 0.08;
+    mascot.style.left = (cxF + 36) + 'px';
+    mascot.style.top = (cyF + 36) + 'px';
+    const dx = mx - cxF;
+    const dy = my - cyF;
+    const len = Math.max(1, Math.sqrt(dx * dx + dy * dy));
+    const ex = (dx / len) * 0.7;
+    const ey = (dy / len) * 0.7;
+    eyeL.setAttribute('x', (4 + ex).toFixed(2));
+    eyeL.setAttribute('y', (7 + ey).toFixed(2));
+    eyeR.setAttribute('x', (11 + ex).toFixed(2));
+    eyeR.setAttribute('y', (7 + ey).toFixed(2));
+
+    const r = canvas.getBoundingClientRect();
+    ctx.clearRect(0, 0, r.width, r.height);
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx *= 0.96;
+      p.vy *= 0.96;
+      p.life -= 0.025;
+      if (p.life <= 0) { particles.splice(i, 1); continue; }
+      ctx.fillStyle = p.col;
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillRect(p.x | 0, p.y | 0, p.size, p.size);
+    }
+    ctx.globalAlpha = 1;
+
+    const rr = rainCanvas.getBoundingClientRect();
+    rctx.clearRect(0, 0, rr.width, rr.height);
+    for (let i = rain.length - 1; i >= 0; i--) {
+      const p = rain[i];
+      p.y += p.vy;
+      if (p.y > rr.height + 10) { rain.splice(i, 1); continue; }
+      rctx.fillStyle = p.col;
+      rctx.fillRect(p.x | 0, p.y | 0, p.size, p.size);
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+/* Init initial visible variant */
+window.addEventListener('load', () => {
+  // Hero A initialised by font-ready handler
+});
+</script>
+
+</body>
+</html>

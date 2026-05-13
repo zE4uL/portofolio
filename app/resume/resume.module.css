@@ -1,0 +1,310 @@
+:root {
+  --r-ink: #0f1115;
+  --r-ink-2: #3a3f47;
+  --r-muted: #6b7280;
+  --r-line: #e6e6e6;
+  --r-accent: #1f6feb;
+  --r-band: #f3f4f6;
+}
+
+.page {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 0;
+  background: #ffffff;
+  color: var(--r-ink);
+  font-family: var(--font-sans), -apple-system, system-ui, sans-serif;
+  font-size: 9.25pt;
+  line-height: 1.38;
+  box-sizing: border-box;
+}
+
+.page * {
+  box-sizing: border-box;
+}
+
+.body section,
+.body aside,
+.body main {
+  margin: 0;
+  padding: 0;
+}
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 10mm;
+  align-items: start;
+  padding: 8mm 12mm 7mm;
+  background: var(--r-band);
+  border-bottom: 1px solid var(--r-line);
+}
+
+.name {
+  font-size: 24pt;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin: 0 0 1.5mm;
+  line-height: 1;
+}
+
+.title {
+  font-size: 11pt;
+  font-weight: 600;
+  color: var(--r-accent);
+  margin: 0 0 3mm;
+  letter-spacing: -0.005em;
+}
+
+.lede {
+  font-size: 9pt;
+  color: var(--r-ink-2);
+  margin: 0;
+  max-width: 100mm;
+  line-height: 1.42;
+}
+
+.highlights {
+  list-style: none;
+  margin: 3mm 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1mm;
+  font-size: 8.5pt;
+  color: var(--r-ink-2);
+  max-width: 100mm;
+}
+
+.highlights li {
+  padding-left: 4mm;
+  position: relative;
+  line-height: 1.3;
+}
+
+.highlights li::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: var(--r-accent);
+  font-size: 7.5pt;
+  top: 0.4mm;
+}
+
+.highlights strong {
+  color: var(--r-ink);
+  font-weight: 600;
+}
+
+.contact {
+  display: flex;
+  flex-direction: column;
+  gap: 2.2mm;
+  font-size: 8.75pt;
+}
+
+.contactRow {
+  display: grid;
+  grid-template-columns: 16mm 1fr;
+  gap: 2mm;
+  align-items: baseline;
+}
+
+.contactLabel {
+  color: var(--r-muted);
+  font-size: 8pt;
+}
+
+.contactValue {
+  font-weight: 600;
+  color: var(--r-ink);
+  word-break: break-word;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 10mm;
+  padding: 8mm 12mm 8mm;
+  align-items: start;
+}
+
+.role:last-child {
+  margin-bottom: 0;
+}
+
+.colLeft,
+.colRight {
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.colLeft > *:first-child,
+.colRight > *:first-child {
+  margin-top: 0 !important;
+}
+
+.colLeft h2,
+.colRight h2 {
+  font-size: 11.5pt;
+  font-weight: 700;
+  color: var(--r-accent);
+  margin: 0 0 3mm;
+  letter-spacing: -0.005em;
+  text-transform: none;
+}
+
+.colRight h2:not(:first-child) {
+  margin-top: 7mm;
+}
+
+.role {
+  margin-bottom: 4.5mm;
+}
+
+.roleHeader {
+  margin-bottom: 1.6mm;
+}
+
+.roleTitle {
+  font-size: 10pt;
+  font-weight: 700;
+  color: var(--r-ink);
+  letter-spacing: -0.005em;
+  margin: 0;
+}
+
+.roleMeta {
+  font-size: 8.5pt;
+  color: var(--r-muted);
+  margin: 0.3mm 0 0;
+}
+
+.roleNote {
+  font-size: 8pt;
+  color: var(--r-ink-2);
+  font-style: italic;
+  margin: 0.5mm 0 1.5mm;
+}
+
+.roleBody {
+  font-size: 8.5pt;
+  color: var(--r-ink-2);
+  margin: 0;
+  line-height: 1.36;
+}
+
+.bullets {
+  list-style: none;
+  padding: 0;
+  margin: 1.5mm 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8mm;
+}
+
+.bullets li {
+  font-size: 8.4pt;
+  color: var(--r-ink-2);
+  padding-left: 3.5mm;
+  position: relative;
+  line-height: 1.3;
+}
+
+.bullets li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--r-accent);
+}
+
+.bullets strong {
+  color: var(--r-ink);
+  font-weight: 600;
+}
+
+.bullets em {
+  color: var(--r-muted);
+  font-style: normal;
+  font-size: 8.3pt;
+}
+
+.eduItem {
+  margin-bottom: 3.2mm;
+}
+
+.eduItem strong {
+  display: block;
+  font-size: 9pt;
+  color: var(--r-ink);
+  font-weight: 700;
+}
+
+.eduItem span {
+  display: block;
+  font-size: 8.4pt;
+  color: var(--r-muted);
+}
+
+.flatList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.3mm;
+  font-size: 8.6pt;
+  color: var(--r-ink-2);
+  line-height: 1.4;
+}
+
+.skillGroup {
+  display: block;
+  margin-bottom: 3.4mm;
+  font-size: 8.5pt;
+  line-height: 1.4;
+}
+
+.skillLabel {
+  display: block;
+  font-size: 7.5pt;
+  font-weight: 600;
+  color: var(--r-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1mm;
+}
+
+.skillValue {
+  display: block;
+  color: var(--r-ink);
+}
+
+@media print {
+  html, body {
+    background: #ffffff;
+    margin: 0;
+    padding: 0;
+  }
+  .page {
+    margin: 0;
+    box-shadow: none;
+  }
+}
+
+@media screen {
+  body {
+    background: #e8e8e8;
+    padding: 24px 0;
+  }
+  .page {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  }
+}

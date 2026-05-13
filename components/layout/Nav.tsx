@@ -89,13 +89,14 @@ export function Nav() {
           <ThemeToggle />
 
           <a
-            href="/resume.pdf"
+            href="/cv.pdf"
             target="_blank"
             rel="noopener noreferrer"
+            download="Ziaul-Islam-Resume-2026.pdf"
             data-cursor="link"
             className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-[var(--border)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-raised)] hover:border-[var(--text-secondary)]/20 transition-colors duration-[180ms] cursor-pointer"
           >
-            Resume
+            CV
             <ArrowUpRight size={13} strokeWidth={1.75} aria-hidden="true" />
           </a>
         </div>
@@ -187,14 +188,15 @@ export function Nav() {
               ))}
 
               <a
-                href="/resume.pdf"
+                href="/cv.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
+                download="Ziaul-Islam-Resume-2026.pdf"
                 data-cursor="link"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-1.5 h-11 text-base text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-[180ms] cursor-pointer"
               >
-                Resume
+                CV
                 <ArrowUpRight size={14} strokeWidth={1.75} aria-hidden="true" />
               </a>
 

@@ -1,0 +1,72 @@
+{
+  "tetherScreenshot": {
+    "kind": "image",
+    "src": "/images/work/ai-native-workflow/tetherScreenshot.jpg",
+    "alt": "tetherScreenshot",
+    "width": 1800,
+    "height": 1800
+  },
+  "parityScreenshot": {
+    "kind": "image",
+    "src": "/images/work/ai-native-workflow/parityScreenshot.jpg",
+    "alt": "parityScreenshot",
+    "width": 1800,
+    "height": 1800
+  },
+  "forgeScreenshot": {
+    "kind": "image",
+    "src": "/images/work/ai-native-workflow/forgeScreenshot.jpg",
+    "alt": "forgeScreenshot",
+    "width": 1800,
+    "height": 1800
+  },
+  "landScreenshot": {
+    "kind": "image",
+    "src": "/images/work/ai-native-workflow/landScreenshot.jpg",
+    "alt": "landScreenshot",
+    "width": 1800,
+    "height": 1800
+  },
+  "glyphScreenshot": {
+    "kind": "image",
+    "src": "/images/work/ai-native-workflow/glyphScreenshot.jpg",
+    "alt": "glyphScreenshot",
+    "width": 1800,
+    "height": 1800
+  },
+  "sweepScreenshot": {
+    "kind": "image",
+    "src": "/images/work/ai-native-workflow/sweepScreenshot.jpg",
+    "alt": "sweepScreenshot",
+    "width": 1800,
+    "height": 1800
+  },
+  "tokenBinderScreenshot": {
+    "kind": "image",
+    "src": "/images/work/ai-native-workflow/tokenBinderScreenshot.jpg",
+    "alt": "tokenBinderScreenshot",
+    "width": 1800,
+    "height": 1800
+  },
+  "workshopArtifact": {
+    "kind": "image",
+    "src": "/images/work/ai-native-workflow/workshopArtifact.jpg",
+    "alt": "workshopArtifact",
+    "width": 2667,
+    "height": 1143
+  },
+  "baristaFigmaToCode": {
+    "kind": "image",
+    "src": "/images/work/ai-native-workflow/baristaFigmaToCode.jpg",
+    "alt": "baristaFigmaToCode",
+    "width": 2001,
+    "height": 858
+  },
+  "baristaCodeToFrontend": {
+    "kind": "image",
+    "src": "/images/work/ai-native-workflow/baristaCodeToFrontend.jpg",
+    "alt": "baristaCodeToFrontend",
+    "width": 2001,
+    "height": 858
+  }
+}

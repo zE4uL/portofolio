@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>now Studio — Case Study · Ziaul Islam</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg-2: #111111;
+    --ink: #f5f1e8;
+    --ink-2: #9a958a;
+    --ink-3: #4a453d;
+    --line: #1f1d1a;
+    --line-2: #2a2822;
+    --accent: #ff3b1f;
+    --ease: cubic-bezier(.7,0,.2,1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent); color: #0a0a0a; }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; }
+
+  /* Grain */
+  .grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 200;
+    opacity: 0.05; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.9'/></svg>");
+  }
+
+  /* ========== TOP BAR ========== */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 28px;
+    background: rgba(10,10,10,0.7);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+    z-index: 80;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .topbar .left, .topbar .right, .topbar .mid {
+    display: inline-flex; align-items: center; gap: 14px;
+  }
+  .topbar a:hover { color: var(--accent); }
+  .topbar .dot {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: #33ff88; box-shadow: 0 0 10px #33ff88;
+  }
+  .topbar .back { color: var(--ink); }
+  .topbar .back::before { content: '←'; margin-right: 8px; color: var(--accent); }
+  .topbar .scroll-prog {
+    position: absolute; left: 0; bottom: -1px; height: 1px;
+    background: var(--accent); width: 0%;
+  }
+
+  /* ========== HERO ========== */
+  .hero-cs {
+    min-height: 100vh;
+    padding: 140px 60px 60px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-cs::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(245,241,232,0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(245,241,232,0.035) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse at 50% 100%, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 100%, black 30%, transparent 80%);
+    pointer-events: none;
+  }
+  .hero-cs > * { position: relative; }
+
+  .breadcrumb {
+    display: flex; gap: 14px; align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin-bottom: 60px;
+  }
+  .breadcrumb b { color: var(--ink); }
+  .breadcrumb .sep { color: var(--ink-3); }
+  .breadcrumb .accent { color: var(--accent); }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 80px;
+    align-items: end;
+  }
+  .hero-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: clamp(64px, 11vw, 200px);
+    line-height: .85;
+    letter-spacing: -.055em;
+    text-wrap: balance;
+  }
+  .hero-title em { font-style: italic; font-weight: 300; color: var(--accent); }
+  .hero-title .row { display: block; overflow: hidden; }
+  .hero-title .row span {
+    display: inline-block;
+    transform: translateY(110%);
+    animation: lineUp 1s var(--ease) both;
+  }
+  .hero-title .row:nth-child(1) span { animation-delay: .1s; }
+  .hero-title .row:nth-child(2) span { animation-delay: .2s; }
+  .hero-title .row:nth-child(3) span { animation-delay: .3s; }
+  @keyframes lineUp { to { transform: translateY(0); } }
+
+  .hero-side {
+    display: flex; flex-direction: column; gap: 24px;
+    padding-bottom: 24px;
+  }
+  .hero-side .lede {
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--ink);
+    max-width: 42ch;
+    text-wrap: pretty;
+  }
+  .hero-side .lede em { font-style: italic; color: var(--accent); }
+
+  .meta-strip {
+    margin-top: 80px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 30px;
+    padding: 26px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .meta-strip h6 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    font-weight: 400;
+    margin-bottom: 8px;
+  }
+  .meta-strip p {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--ink);
+  }
+  .meta-strip p b { color: var(--accent); }
+
+  /* ========== HERO PREVIEW SLAB ========== */
+  .hero-slab {
+    margin-top: 60px;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    background: var(--bg-2);
+    border: 1px solid var(--line-2);
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+  .slab-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(245,241,232,0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(245,241,232,0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .slab-corner {
+    position: absolute;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .2em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+  }
+  .slab-corner.tl { top: 16px; left: 16px; }
+  .slab-corner.tr { top: 16px; right: 16px; }
+  .slab-corner.bl { bottom: 16px; left: 16px; }
+  .slab-corner.br { bottom: 16px; right: 16px; color: var(--accent); }
+  .slab-label {
+    position: relative;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 14px;
+    text-align: center;
+    color: var(--ink-2);
+  }
+  .slab-label .big {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 80px;
+    font-weight: 500;
+    letter-spacing: -.04em;
+    color: var(--ink);
+  }
+  .slab-label .big em { font-style: italic; font-weight: 300; color: var(--accent); }
+  .slab-label .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .slab-fill {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+  }
+
+  /* ========== SECTION CHROME ========== */
+  section.cs {
+    padding: 140px 60px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  .sec-head {
+    display: grid;
+    grid-template-columns: 100px 1fr auto;
+    gap: 30px; align-items: baseline;
+    margin-bottom: 80px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .sec-head .num { color: var(--accent); }
+  .sec-head .ttl {
+    font-family: 'Space Grotesk', sans-serif;
+    text-transform: none;
+    letter-spacing: -.02em;
+    font-size: 28px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .sec-head .ttl em { font-style: italic; font-weight: 300; color: var(--accent); }
+
+  /* ========== CONTEXT (problem) ========== */
+  .ctx-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 80px;
+  }
+  .ctx-lede {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 400;
+    font-size: clamp(28px, 3.4vw, 44px);
+    line-height: 1.18;
+    letter-spacing: -.025em;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .ctx-lede em { font-style: italic; font-weight: 300; color: var(--accent); }
+  .ctx-side { display: flex; flex-direction: column; gap: 30px; }
+  .ctx-side dl {
+    display: grid; grid-template-columns: 110px 1fr; gap: 10px 20px;
+    padding: 18px 0;
+    border-top: 1px solid var(--line);
+  }
+  .ctx-side dl:last-child { border-bottom: 1px solid var(--line); }
+  .ctx-side dt {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    padding-top: 4px;
+  }
+  .ctx-side dd {
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.55;
+  }
+  .ctx-side dd b { color: var(--accent); }
+
+  /* ========== PROBLEM PILLARS ========== */
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    margin-top: 80px;
+  }
+  .pillar {
+    padding: 36px 28px;
+    border-right: 1px solid var(--line);
+    transition: background .4s var(--ease);
+  }
+  .pillar:last-child { border-right: 0; }
+  .pillar:hover { background: var(--bg-2); }
+  .pillar .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .2em;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  .pillar h4 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -.02em;
+    line-height: 1.15;
+    margin-bottom: 14px;
+    text-wrap: balance;
+  }
+  .pillar h4 em { font-style: italic; font-weight: 300; color: var(--accent); }
+  .pillar p {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+
+  /* ========== TIMELINE / EVOLUTION ========== */
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--line);
+  }
+  .tl-step {
+    border-right: 1px solid var(--line);
+    padding: 36px 32px 36px;
+    position: relative;
+    transition: background .5s var(--ease);
+  }
+  .tl-step:last-child { border-right: 0; }
+  .tl-step:hover { background: var(--bg-2); }
+  .tl-step .vno {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin-bottom: 12px;
+  }
+  .tl-step .vno b { color: var(--accent); }
+  .tl-step .vyear {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 64px;
+    letter-spacing: -.04em;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 18px;
+  }
+  .tl-step .vyear em { color: var(--accent); font-style: italic; font-weight: 300; }
+  .tl-step h4 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 26px;
+    letter-spacing: -.02em;
+    margin-bottom: 14px;
+    line-height: 1.1;
+  }
+  .tl-step p {
+    color: var(--ink-2);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .tl-step ul {
+    list-style: none;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .tl-step ul li {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .04em;
+    color: var(--ink-2);
+    padding: 4px 0;
+    line-height: 1.6;
+  }
+  .tl-step ul li::before {
+    content: '→';
+    color: var(--accent);
+    margin-right: 10px;
+  }
+
+  /* ========== INVERSE SECTION ========== */
+  section.cs.inv {
+    background: var(--ink);
+    color: #0a0a0a;
+    border-color: rgba(10,10,10,0.15);
+  }
+  section.cs.inv .sec-head { border-bottom-color: rgba(10,10,10,0.15); color: rgba(10,10,10,0.55); }
+  section.cs.inv .sec-head .ttl { color: #0a0a0a; }
+  section.cs.inv .sec-head .num { color: var(--accent); }
+  section.cs.inv .ctx-lede,
+  section.cs.inv .meta-strip p,
+  section.cs.inv .meta-strip h6,
+  section.cs.inv .pillar p,
+  section.cs.inv .tl-step p,
+  section.cs.inv .tl-step h4,
+  section.cs.inv .tl-step .vyear,
+  section.cs.inv .tl-step .vno,
+  section.cs.inv .tl-step ul li,
+  section.cs.inv .store .stname,
+  section.cs.inv .store .stsub,
+  section.cs.inv .ctx-side dt,
+  section.cs.inv .ctx-side dd { color: #0a0a0a; }
+  section.cs.inv .tl-step .vno b { color: var(--accent); }
+  section.cs.inv .tl-step ul li { color: rgba(10,10,10,0.65); }
+  section.cs.inv .tl-step ul { border-top-color: rgba(10,10,10,0.15); }
+  section.cs.inv .reflect-block h4,
+  section.cs.inv .reflect-block ul li { color: #0a0a0a; }
+  section.cs.inv .reflect-block h4 { border-bottom-color: rgba(10,10,10,0.15); }
+  section.cs.inv .reflect-block ul li { border-bottom-color: rgba(10,10,10,0.15); }
+  section.cs.inv .stores { border-color: rgba(10,10,10,0.15); }
+  section.cs.inv .store { border-right-color: rgba(10,10,10,0.15); }
+  section.cs.inv .metric .mlbl,
+  section.cs.inv .metric .mcap { color: rgba(10,10,10,0.6); }
+  section.cs.inv .metric .mnum { color: #0a0a0a; }
+  section.cs.inv .metric { border-right-color: rgba(10,10,10,0.15); }
+  section.cs.inv .metric .mcap { border-top-color: rgba(10,10,10,0.15); }
+  section.cs.inv .metrics { border-color: rgba(10,10,10,0.15); }
+  section.cs.inv .metric:hover,
+  section.cs.inv .store:hover { background: rgba(10,10,10,0.04); }
+  section.cs.inv .pillar p,
+  section.cs.inv .tl-step p { color: rgba(10,10,10,0.65); }
+  section.cs.inv .pillars,
+  section.cs.inv .pillar,
+  section.cs.inv .timeline,
+  section.cs.inv .tl-step,
+  section.cs.inv .ctx-side dl { border-color: rgba(10,10,10,0.15) !important; }
+  section.cs.inv .pillar:hover,
+  section.cs.inv .tl-step:hover { background: rgba(10,10,10,0.04); }
+
+  /* ========== KEY DECISIONS ========== */
+  .decisions {
+    display: flex; flex-direction: column;
+  }
+  .decision {
+    display: grid;
+    grid-template-columns: 80px 1fr 1.2fr;
+    gap: 60px;
+    padding: 50px 0;
+    border-top: 1px solid var(--line);
+    align-items: start;
+  }
+  .decision:last-child { border-bottom: 1px solid var(--line); }
+  .decision .dno {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .18em;
+    color: var(--accent);
+    padding-top: 8px;
+  }
+  .decision h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: clamp(28px, 3vw, 44px);
+    line-height: 1.05;
+    letter-spacing: -.025em;
+  }
+  .decision h3 em { font-style: italic; font-weight: 300; color: var(--accent); }
+  .decision .dbody {
+    display: flex; flex-direction: column; gap: 16px;
+    color: var(--ink);
+  }
+  .decision .dbody p {
+    font-size: 16px; line-height: 1.6;
+    color: var(--ink-2);
+    max-width: 56ch;
+  }
+  .decision .dbody p b { color: var(--ink); }
+  .decision .dbody .quote {
+    border-left: 2px solid var(--accent);
+    padding: 4px 0 4px 18px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    line-height: 1.4;
+    color: var(--ink);
+    font-style: italic;
+  }
+
+  /* ========== ARTIFACT / IMAGE BLOCK ========== */
+  .art-block {
+    margin: 80px 0;
+  }
+  .art-block-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .art-block-head b { color: var(--ink); }
+  .art-block-head .accent { color: var(--accent); }
+  .art {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--bg-2);
+    border: 1px solid var(--line-2);
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+  }
+  .art.tall { aspect-ratio: 4 / 5; }
+  .art.wide { aspect-ratio: 21 / 9; }
+  .art.square { aspect-ratio: 1 / 1; }
+  .art .ph-grid {
+    position: absolute; inset: 0;
+    background-image:
+      repeating-linear-gradient(135deg, var(--line-2) 0 1px, transparent 1px 12px);
+    opacity: .5;
+  }
+  .art .ph-label {
+    position: relative;
+    text-align: center;
+    color: var(--ink-3);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    padding: 12px 18px;
+    border: 1px solid var(--line-2);
+    background: var(--bg);
+  }
+  .art .ph-label b { color: var(--accent); }
+  .art-corner {
+    position: absolute;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .2em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    z-index: 2;
+  }
+  .art-corner.tl { top: 14px; left: 14px; }
+  .art-corner.br { bottom: 14px; right: 14px; color: var(--accent); }
+
+  .art-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .art-trip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .caption {
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: var(--ink-2);
+    line-height: 1.55;
+  }
+  .caption b { color: var(--ink); }
+  .caption .accent { color: var(--accent); }
+
+  /* ========== METRICS ========== */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .metric {
+    padding: 50px 32px 36px;
+    border-right: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+    transition: background .4s var(--ease);
+  }
+  .metric:last-child { border-right: 0; }
+  .metric:hover { background: var(--bg-2); }
+  .metric .mlbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin-bottom: 30px;
+  }
+  .metric .mnum {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: clamp(56px, 7vw, 110px);
+    letter-spacing: -.05em;
+    line-height: .9;
+    color: var(--ink);
+    display: flex; align-items: baseline; gap: 4px;
+  }
+  .metric .mnum .sym {
+    font-size: .42em;
+    color: var(--accent);
+    font-style: italic;
+    font-weight: 300;
+    transform: translateY(-12px);
+    display: inline-block;
+  }
+  .metric .mcap {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+
+  /* ========== QUOTE ========== */
+  .quote-block {
+    padding: 80px 60px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    text-align: center;
+    background: var(--bg-2);
+    position: relative;
+  }
+  .quote-block::before {
+    content: '"';
+    position: absolute;
+    top: 24px; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 100px;
+    color: var(--accent);
+    line-height: 1;
+    opacity: .4;
+  }
+  .quote-block .q {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 400;
+    font-size: clamp(28px, 3.5vw, 48px);
+    line-height: 1.2;
+    letter-spacing: -.02em;
+    max-width: 24ch;
+    margin: 30px auto 24px;
+    text-wrap: balance;
+  }
+  .quote-block .q em { font-style: italic; font-weight: 300; color: var(--accent); }
+  .quote-block .q-attr {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+
+  /* ========== REFLECTION ========== */
+  .reflect-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+  }
+  .reflect-block { min-width: 0; }
+  .reflect-block ul li > *:last-child { min-width: 0; }
+  @media (max-width: 1000px) {
+    .reflect-grid { gap: 36px; }
+  }
+  @media (max-width: 880px) {
+    .reflect-grid { grid-template-columns: 1fr !important; gap: 40px; }
+  }
+  .reflect-block h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .reflect-block h4 b { color: var(--accent); }
+  .reflect-block ul { list-style: none; }
+  .reflect-block ul li {
+    padding: 16px 0 16px 42px;
+    border-bottom: 1px solid var(--line);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ink);
+    position: relative;
+  }
+  .reflect-block ul li::before {
+    content: counter(ref, decimal-leading-zero);
+    counter-increment: ref;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: .14em;
+    position: absolute;
+    left: 0;
+    top: 20px;
+  }
+  .reflect-block ul { counter-reset: ref; }
+  .reflect-block ul li b { color: var(--accent); font-weight: 500; }
+
+  /* ========== FOOTER NAV ========== */
+  .next-cs {
+    padding: 100px 60px 100px;
+    border-top: 1px solid var(--line);
+    background: var(--bg-2);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .next-cs .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin-bottom: 28px;
+  }
+  .next-cs .sub b { color: var(--accent); }
+  .next-cs .next-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: clamp(56px, 11vw, 180px);
+    line-height: .85;
+    letter-spacing: -.05em;
+    color: var(--ink);
+    transition: color .4s var(--ease);
+  }
+  .next-cs .next-title em { font-style: italic; font-weight: 300; color: var(--accent); }
+  .next-cs:hover .next-title { color: var(--accent); }
+  .next-cs .arrow {
+    display: inline-block;
+    font-size: 32px;
+    margin-left: 16px;
+    transition: transform .5s var(--ease);
+  }
+  .next-cs:hover .arrow { transform: translateX(20px) rotate(-45deg); }
+
+  footer.cs-foot {
+    padding: 28px 60px;
+    border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  footer.cs-foot a:hover { color: var(--accent); }
+
+  /* ========== STORES ROW ========== */
+  .stores {
+    margin-top: 60px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .store {
+    padding: 28px 18px;
+    border-right: 1px solid var(--line);
+    text-align: left;
+    transition: background .4s var(--ease);
+    position: relative;
+  }
+  .store:last-child { border-right: 0; }
+  .store:hover { background: var(--bg-2); }
+  .store .stno {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .2em;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .store .stname {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -.02em;
+    margin-bottom: 6px;
+    line-height: 1.05;
+  }
+  .store .stsub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+
+  /* ========== SCROLL REVEAL ========== */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity .9s var(--ease), transform .9s var(--ease);
+  }
+  [data-reveal].in { opacity: 1; transform: none; }
+
+  /* Mobile */
+  @media (max-width: 1100px) {
+    .pillars, .metrics { grid-template-columns: 1fr 1fr; }
+    .pillar:nth-child(2), .metric:nth-child(2) { border-right: 0; }
+    .pillar:nth-child(1), .pillar:nth-child(2),
+    .metric:nth-child(1), .metric:nth-child(2) { border-bottom: 1px solid var(--line); }
+    .timeline { grid-template-columns: 1fr; }
+    .tl-step { border-right: 0; border-bottom: 1px solid var(--line); }
+    .stores { grid-template-columns: 1fr 1fr 1fr; }
+    .store:nth-child(3) { border-right: 0; }
+    .store:nth-child(1), .store:nth-child(2), .store:nth-child(3) { border-bottom: 1px solid var(--line); }
+  }
+  @media (max-width: 800px) {
+    section.cs, .hero-cs, .next-cs, footer.cs-foot { padding-left: 24px; padding-right: 24px; }
+    .hero-grid, .ctx-grid, .reflect-grid { grid-template-columns: 1fr; gap: 30px; }
+    .meta-strip { grid-template-columns: 1fr 1fr; gap: 24px; }
+    .decision { grid-template-columns: 1fr; gap: 18px; }
+    .art-pair, .art-trip { grid-template-columns: 1fr; }
+    .sec-head { grid-template-columns: 1fr; }
+    .stores { grid-template-columns: 1fr 1fr; }
+    .store:nth-child(odd) { border-right: 1px solid var(--line); }
+    .store:nth-child(even) { border-right: 0; }
+    .breadcrumb { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="left">
+    <a href="Portfolio Brutalist.html" class="back">Index</a>
+  </div>
+  <div class="mid">
+    <span class="dot"></span>
+    <span>CASE STUDY · 02 / 07</span>
+  </div>
+  <div class="right">
+    <a href="https://studio.now.gg/" target="_blank" rel="noopener">Live ↗</a>
+    <span style="color:var(--ink-3);">·</span>
+    <a href="Portfolio Brutalist.html#work">All Work</a>
+  </div>
+  <div class="scroll-prog" id="scrollProg"></div>
+</header>
+
+<!-- HERO -->
+<section class="hero-cs">
+  <div class="breadcrumb">
+    <span>§02</span><span class="sep">/</span>
+    <span>Selected Work</span><span class="sep">/</span>
+    <b>now Studio</b><span class="sep">/</span>
+    <span class="accent">2022 → Now</span>
+  </div>
+
+  <div class="hero-grid">
+    <h1 class="hero-title">
+      <span class="row"><span>One <em>upload,</em></span></span>
+      <span class="row"><span>six stores,</span></span>
+      <span class="row"><span><em>zero</em> handoff.</span></span>
+    </h1>
+    <aside class="hero-side">
+      <p class="lede">
+        <b>now Studio</b> is the developer platform behind <em>now.gg</em> — a multi-store publishing system for mobile games.
+        From a single build, devs ship to <em>PC, Mac, cloud, LINE, Telegram, and mobile</em>, plug in payments, and watch real-time analytics — all from one dashboard.
+      </p>
+      <p class="lede" style="color:var(--ink-2); font-size:14px;">
+        I led design end-to-end across three major overhauls — from a scrappy internal tool to a publishing system powering what now.gg calls
+        <b style="color:var(--accent);">"the third largest distribution after Apple &amp; Google."</b>
+      </p>
+    </aside>
+  </div>
+
+  <div class="meta-strip">
+    <div>
+      <h6>Role</h6>
+      <p>Lead / Sole<br>Product Designer</p>
+    </div>
+    <div>
+      <h6>Timeline</h6>
+      <p>2022 → present<br><b>4+ years</b></p>
+    </div>
+    <div>
+      <h6>Team</h6>
+      <p>w/ PMs, Eng leads<br>Front, Back, SDK</p>
+    </div>
+    <div>
+      <h6>Scope</h6>
+      <p>Publishing, Payments,<br>Analytics, RBAC</p>
+    </div>
+    <div>
+      <h6>Type</h6>
+      <p>B2B platform<br>SaaS · Dev tools</p>
+    </div>
+  </div>
+
+  <div class="hero-slab">
+    <div class="slab-grid"></div>
+    <div class="slab-corner tl">FIG. 01 / OVERVIEW</div>
+    <div class="slab-corner tr">studio.now.gg</div>
+    <div class="slab-corner bl">DASHBOARD · v3</div>
+    <div class="slab-corner br">● LIVE</div>
+    <div class="slab-label">
+      <span class="big">now <em>Studio</em></span>
+      <span class="tag">— upload screenshot of the dashboard here —</span>
+    </div>
+  </div>
+</section>
+
+<!-- CONTEXT / PROBLEM -->
+<section class="cs" id="context" data-reveal>
+  <div class="sec-head">
+    <span class="num">§01</span>
+    <span class="ttl">The <em>problem.</em> &nbsp; What devs were dealing with before now Studio.</span>
+    <span>2022 / Pre-launch</span>
+  </div>
+
+  <div class="ctx-grid">
+    <p class="ctx-lede">
+      Mobile game devs ship one build, then spend <em>weeks</em> stitching together <em>five storefronts</em>, <em>three payment SDKs</em>, and a graveyard of analytics dashboards — losing <em>30%+ of IAP revenue</em> to platform cuts along the way.
+    </p>
+    <div class="ctx-side">
+      <dl>
+        <dt>Pain · 01</dt>
+        <dd>Each store has its own listing format, asset specs, regulations and review cycle. Localization multiplies this.</dd>
+      </dl>
+      <dl>
+        <dt>Pain · 02</dt>
+        <dd>Pre-launch testing is manual: zip the build, share over Drive, beg testers, lose feedback in Discord.</dd>
+      </dl>
+      <dl>
+        <dt>Pain · 03</dt>
+        <dd>Apple &amp; Google take a <b>30% cut</b> on IAPs. Indie studios bleed margin on day one.</dd>
+      </dl>
+      <dl>
+        <dt>Pain · 04</dt>
+        <dd>Multi-staff studios have no role boundaries — finance sees QA tools, marketing can ship live builds.</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="pillars">
+    <div class="pillar">
+      <div class="num">01 — REACH</div>
+      <h4>Six storefronts, <em>one</em> upload</h4>
+      <p>Publish across BlueStacks (PC), now.gg (cloud), LINE, Telegram (TON), Mac and mobile from a single build pipeline.</p>
+    </div>
+    <div class="pillar">
+      <div class="num">02 — REVENUE</div>
+      <h4>Keep <em>more</em> of every IAP</h4>
+      <p>Drop in nowSDK Payments and bypass the standard 30% storefront cut on supported channels — with localized pricing baked in.</p>
+    </div>
+    <div class="pillar">
+      <div class="num">03 — TEST</div>
+      <h4>Ship it <em>before</em> shipping it</h4>
+      <p>Generate test links, gate them by region or tester, and pull qualitative feedback into the same dashboard you publish from.</p>
+    </div>
+    <div class="pillar">
+      <div class="num">04 — CONTROL</div>
+      <h4>Roles that <em>actually</em> roll</h4>
+      <p>Granular RBAC across multiple titles. QA never sees billing; marketing never ships a build. Per-app, per-flow.</p>
+    </div>
+  </div>
+</section>
+
+<!-- EVOLUTION / 3 OVERHAULS -->
+<section class="cs inv" id="evolution" data-reveal>
+  <div class="sec-head">
+    <span class="num">§02</span>
+    <span class="ttl">Three overhauls. <em>Four years.</em> &nbsp; How the product evolved.</span>
+    <span>2022 → 2026</span>
+  </div>
+
+  <p class="ctx-lede" style="max-width: 60ch; margin-bottom: 60px;">
+    Studio didn't arrive fully-formed. It started as <em>an internal admin panel</em> — and grew, version by version, into a publishing system devs trust with their launch day.
+  </p>
+
+  <div class="timeline">
+    <div class="tl-step">
+      <div class="vno">v1 · <b>2022 — INTERNAL</b></div>
+      <div class="vyear">01<em>.</em></div>
+      <h4>From admin tool, to a platform devs touch.</h4>
+      <p>The legacy version was a Google-Form-shaped data collector; our internal team pasted devs' assets in by hand. v1 turned it into a real self-serve tool — devs could submit, test and publish to now.gg cloud themselves.</p>
+      <ul>
+        <li>Self-serve onboarding</li>
+        <li>Cloud (now.gg) publishing</li>
+        <li>Build &amp; asset uploader</li>
+        <li>Basic test-link generation</li>
+      </ul>
+    </div>
+    <div class="tl-step">
+      <div class="vno">v2 · <b>2023 — SDK ERA</b></div>
+      <div class="vyear">02<em>.</em></div>
+      <h4>SDKs, payments &amp; the analytics layer.</h4>
+      <p>The big one. We launched on BlueStacks app player (PC), wired up the Payments SDK with localized pricing &amp; IAP inventory management, shipped an analytics dashboard, and built a Discord bot to drive traffic to dev pages.</p>
+      <ul>
+        <li>BlueStacks PC publishing</li>
+        <li>nowSDK Payments + IAPs</li>
+        <li>Localized pricing matrix</li>
+        <li>Analytics dashboard</li>
+        <li>Discord traffic bot</li>
+      </ul>
+    </div>
+    <div class="tl-step">
+      <div class="vno">v3 · <b>2024+ — MULTI-STORE</b></div>
+      <div class="vyear">03<em>.</em></div>
+      <h4>Six storefronts. RBAC. One dashboard.</h4>
+      <p>The current era: multi-store publishing across LINE, Telegram (NowStore, TON-powered), Mac, mobile, plus the existing PC + cloud channels. Roles &amp; permissions ship alongside, so multi-staff studios can finally divide work safely.</p>
+      <ul>
+        <li>LINE + Telegram + Mac + Mobile</li>
+        <li>Per-store regulations handled</li>
+        <li>Roles &amp; permissions (RBAC)</li>
+        <li>Pricing &amp; IAP templates</li>
+        <li>Real-time session tracking</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="stores" style="margin-top: 0; border-top: 0;">
+    <div class="store"><div class="stno">CH 01</div><div class="stname">BlueStacks</div><div class="stsub">PC · Win</div></div>
+    <div class="store"><div class="stno">CH 02</div><div class="stname">now.gg</div><div class="stsub">Cloud · Browser</div></div>
+    <div class="store"><div class="stno">CH 03</div><div class="stname">Mac</div><div class="stsub">macOS · Native</div></div>
+    <div class="store"><div class="stno">CH 04</div><div class="stname">LINE</div><div class="stsub">JP · Super-app</div></div>
+    <div class="store"><div class="stno">CH 05</div><div class="stname">Telegram</div><div class="stsub">NowStore · TON</div></div>
+    <div class="store"><div class="stno">CH 06</div><div class="stname">Mobile</div><div class="stsub">BS Mobile</div></div>
+  </div>
+
+  <!-- artifact: hero dashboard -->
+  <div class="art-block">
+    <div class="art-block-head">
+      <span><b>FIG. 02</b> · The publishing dashboard, v3</span>
+      <span class="accent">— upload: studio dashboard hero shot —</span>
+    </div>
+    <div class="art">
+      <div class="ph-grid"></div>
+      <div class="art-corner tl">DASHBOARD · ALL APPS VIEW</div>
+      <div class="art-corner br">PNG · 1920×1080</div>
+      <div class="ph-label">FIG. 02 — <b>HOMEPAGE / DASHBOARD</b></div>
+    </div>
+    <div class="caption">
+      <span><b>What to upload here:</b> the main dashboard screen — list of apps with their channel-status pills, primary CTA (New publish), the side nav.</span>
+      <span class="accent">studio.now.gg / home</span>
+    </div>
+  </div>
+</section>
+
+<!-- KEY DECISIONS -->
+<section class="cs" id="decisions" data-reveal>
+  <div class="sec-head">
+    <span class="num">§03</span>
+    <span class="ttl">Three decisions <em>I'd make again.</em></span>
+    <span>Craft + Tradeoffs</span>
+  </div>
+
+  <div class="decisions">
+    <div class="decision">
+      <div class="dno">DEC · 01</div>
+      <h3>Strip the <em>publishing flow</em> down to the asks that actually matter.</h3>
+      <div class="dbody">
+        <p>The first instinct on a dev portal is to ask for <b>everything upfront</b>. We didn't. Each step asks for the minimum needed to advance — and pulls defaults wherever it can: fetch a Play Store listing, auto-fill region pricing, remember the last build's metadata.</p>
+        <p>The result is a flow that breaks a 40-field form into <b>4 short, recoverable steps</b> — without losing any of the data the publishing pipeline needs.</p>
+        <div class="quote">"Stop asking devs for things you can fetch. Stop fetching things you don't need yet."</div>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="dno">DEC · 02</div>
+      <h3>Treat IAPs &amp; pricing as a <em>spreadsheet</em>, not a form.</h3>
+      <div class="dbody">
+        <p>Devs don't have 4 IAPs — they have 40, across 30 markets. So I designed pricing as a <b>matrix-first interface</b>: bulk edit by region, copy across tiers, save price &amp; inventory templates for new launches.</p>
+        <p>The IAP template is the move I'm proudest of — it shaved <b>most of the boilerplate work</b> off every subsequent app a studio published.</p>
+      </div>
+    </div>
+
+    <div class="decision">
+      <div class="dno">DEC · 03</div>
+      <h3>Roles that map to <em>real teams,</em> not abstract policies.</h3>
+      <div class="dbody">
+        <p>Generic RBAC libraries treat permissions as a flat checklist. Game studios think in roles: <b>QA, Finance, Marketing, Producer</b>. I designed permission scopes around those archetypes — per-app, per-flow — and made the unsafe defaults <b>impossible to choose accidentally.</b></p>
+        <p>Net effect: a 12-person studio can onboard a new QA in 2 minutes without giving them keys to the billing console.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- artifact: publishing flow -->
+  <div class="art-block">
+    <div class="art-block-head">
+      <span><b>FIG. 03</b> · Publishing flow — 4 steps</span>
+      <span class="accent">— upload: 4 step screenshots, side-by-side —</span>
+    </div>
+    <div class="art-trip" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="art tall">
+        <div class="ph-grid"></div>
+        <div class="art-corner tl">STEP 01</div>
+        <div class="art-corner br">BUILD</div>
+        <div class="ph-label">UPLOAD<br>BUILD</div>
+      </div>
+      <div class="art tall">
+        <div class="ph-grid"></div>
+        <div class="art-corner tl">STEP 02</div>
+        <div class="art-corner br">LISTING</div>
+        <div class="ph-label">STORE<br>LISTING</div>
+      </div>
+      <div class="art tall">
+        <div class="ph-grid"></div>
+        <div class="art-corner tl">STEP 03</div>
+        <div class="art-corner br">CHANNELS</div>
+        <div class="ph-label">PICK<br>CHANNELS</div>
+      </div>
+      <div class="art tall">
+        <div class="ph-grid"></div>
+        <div class="art-corner tl">STEP 04</div>
+        <div class="art-corner br">REVIEW</div>
+        <div class="ph-label">REVIEW &amp;<br>PUBLISH</div>
+      </div>
+    </div>
+    <div class="caption">
+      <span><b>What to upload here:</b> the 4 step screens — Build upload, Listing (store-asset import + localization), Channel selector with regulations, Final review.</span>
+      <span class="accent">→ short looping video would land hardest here</span>
+    </div>
+  </div>
+
+  <!-- artifact: IAP matrix -->
+  <div class="art-block">
+    <div class="art-block-head">
+      <span><b>FIG. 04</b> · IAP &amp; localized pricing matrix</span>
+      <span class="accent">— upload: pricing table screen —</span>
+    </div>
+    <div class="art-pair">
+      <div class="art">
+        <div class="ph-grid"></div>
+        <div class="art-corner tl">PRICING TABLE</div>
+        <div class="art-corner br">BULK EDIT</div>
+        <div class="ph-label">IAP × REGION × <b>PRICE</b></div>
+      </div>
+      <div class="art">
+        <div class="ph-grid"></div>
+        <div class="art-corner tl">TEMPLATE</div>
+        <div class="art-corner br">REUSE</div>
+        <div class="ph-label">SAVE AS<br><b>TEMPLATE</b></div>
+      </div>
+    </div>
+    <div class="caption">
+      <span><b>What to upload here:</b> the IAP list, the bulk pricing-by-region table, and the "save as template" modal.</span>
+      <span class="accent">studio.now.gg / iaps</span>
+    </div>
+  </div>
+
+  <!-- artifact: RBAC -->
+  <div class="art-block">
+    <div class="art-block-head">
+      <span><b>FIG. 05</b> · Roles &amp; permissions, per-app</span>
+      <span class="accent">— upload: RBAC settings screen —</span>
+    </div>
+    <div class="art wide">
+      <div class="ph-grid"></div>
+      <div class="art-corner tl">TEAM · MULTI-APP</div>
+      <div class="art-corner br">RBAC</div>
+      <div class="ph-label">ROLES × APPS × <b>PERMISSIONS</b></div>
+    </div>
+    <div class="caption">
+      <span><b>What to upload here:</b> the team management screen showing role chips per app, and the role-edit drawer with permission scopes.</span>
+      <span class="accent">studio.now.gg / team</span>
+    </div>
+  </div>
+</section>
+
+<!-- METRICS / RESULTS -->
+<section class="cs inv" id="impact" data-reveal>
+  <div class="sec-head">
+    <span class="num">§04</span>
+    <span class="ttl"><em>Outcomes,</em> not outputs.</span>
+    <span>Last 12 months</span>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="mlbl">— TIME-TO-FIRST-PUBLISH</div>
+      <div class="mnum">−35<span class="sym">%</span></div>
+      <div class="mcap">From a dev's first sign-in to their first live build, after the v3 publishing flow shipped.</div>
+    </div>
+    <div class="metric">
+      <div class="mlbl">— DEVS ONBOARDED</div>
+      <div class="mnum">60<span class="sym">+</span></div>
+      <div class="mcap">Net-new studios onboarded in the last 12 months — across PC, cloud, LINE and Telegram.</div>
+    </div>
+    <div class="metric">
+      <div class="mlbl">— REVENUE VIA nowSDK</div>
+      <div class="mnum">+23<span class="sym">%</span></div>
+      <div class="mcap">Lift in IAP revenue captured through nowSDK Payments — money that would have gone to platform cuts.</div>
+    </div>
+    <div class="metric">
+      <div class="mlbl">— STOREFRONTS</div>
+      <div class="mnum">6<span class="sym">×</span></div>
+      <div class="mcap">A single now Studio build now reaches PC, Mac, cloud, LINE, Telegram and mobile — from one dashboard.</div>
+    </div>
+  </div>
+
+  <div style="margin-top: 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px;">
+    <div>
+      <h6 style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:rgba(10,10,10,0.55); margin-bottom:16px;">BUSINESS IMPACT</h6>
+      <p style="font-family:'Space Grotesk',sans-serif; font-size:24px; line-height:1.3; letter-spacing:-.02em; color:#0a0a0a; max-width:36ch;">
+        now Studio is the on-ramp behind what now.gg publicly calls
+        <em style="font-style:italic; color:var(--accent); font-weight:300;">"the third largest distribution after Apple &amp; Google."</em>
+      </p>
+    </div>
+    <div>
+      <h6 style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:rgba(10,10,10,0.55); margin-bottom:16px;">FOR THE DEV</h6>
+      <p style="font-size:16px; line-height:1.6; color:rgba(10,10,10,0.8); max-width:48ch;">
+        A studio launching across BlueStacks PC, now.gg cloud and Telegram NowStore now does it in <b style="color:var(--accent);">a single afternoon</b> instead of three coordinated launch weeks — with one analytics view, one payment integration, one team console.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- QUOTE -->
+<div class="quote-block">
+  <p class="q">A platform should make the <em>complicated</em> thing feel like the <em>obvious</em> one.</p>
+  <p class="q-attr">— Studio's design north-star, taped above the Figma file</p>
+</div>
+
+<!-- ANALYTICS / DISCORD ARTIFACTS -->
+<section class="cs" id="more" data-reveal>
+  <div class="sec-head">
+    <span class="num">§05</span>
+    <span class="ttl">More <em>surface area.</em></span>
+    <span>Analytics · Test links · Discord bot</span>
+  </div>
+
+  <div class="art-block" style="margin-top: 0;">
+    <div class="art-block-head">
+      <span><b>FIG. 06</b> · Analytics dashboard</span>
+      <span class="accent">— upload: charts + session table —</span>
+    </div>
+    <div class="art wide">
+      <div class="ph-grid"></div>
+      <div class="art-corner tl">REAL-TIME</div>
+      <div class="art-corner br">CHARTS · TABLE</div>
+      <div class="ph-label">DAU · SESSIONS · IAPs · <b>RETENTION</b></div>
+    </div>
+    <div class="caption">
+      <span><b>What to upload here:</b> the analytics overview with the time-range filter, headline cards, retention chart, and the per-channel breakdown table.</span>
+      <span class="accent">studio.now.gg / analytics</span>
+    </div>
+  </div>
+
+  <div class="art-block">
+    <div class="art-block-head">
+      <span><b>FIG. 07</b> · Test-link generator + pre-launch feedback</span>
+      <span class="accent">— upload: 2 screens, side-by-side —</span>
+    </div>
+    <div class="art-pair">
+      <div class="art">
+        <div class="ph-grid"></div>
+        <div class="art-corner tl">TEST LINK</div>
+        <div class="art-corner br">SHARE</div>
+        <div class="ph-label">GENERATE<br>TEST LINK</div>
+      </div>
+      <div class="art">
+        <div class="ph-grid"></div>
+        <div class="art-corner tl">FEEDBACK</div>
+        <div class="art-corner br">PRE-LAUNCH</div>
+        <div class="ph-label">TESTER<br>FEEDBACK</div>
+      </div>
+    </div>
+    <div class="caption">
+      <span><b>What to upload here:</b> the test-link generator (with regional gating), and the feedback inbox screen. A 6-second screen-recording of the link-share flow would be even better.</span>
+      <span class="accent">→ video preferred</span>
+    </div>
+  </div>
+
+  <div class="art-block">
+    <div class="art-block-head">
+      <span><b>FIG. 08</b> · Discord bot configuration</span>
+      <span class="accent">— upload: bot setup screen —</span>
+    </div>
+    <div class="art">
+      <div class="ph-grid"></div>
+      <div class="art-corner tl">DISCORD INTEGRATION</div>
+      <div class="art-corner br">TRAFFIC</div>
+      <div class="ph-label">BOT · GUILD CONFIG · <b>EVENTS</b></div>
+    </div>
+    <div class="caption">
+      <span><b>What to upload here:</b> the Discord bot setup wizard — connect server, pick channel, configure auto-posts.</span>
+      <span class="accent">studio.now.gg / integrations</span>
+    </div>
+  </div>
+</section>
+
+<!-- REFLECTION -->
+<section class="cs inv" id="reflect" data-reveal>
+  <div class="sec-head">
+    <span class="num">§06</span>
+    <span class="ttl">What I'd <em>do again,</em> what I wouldn't.</span>
+    <span>Honest self-review</span>
+  </div>
+
+  <div class="reflect-grid">
+    <div class="reflect-block">
+      <h4><b>+</b> &nbsp; What I'd do again</h4>
+      <ul>
+        <li><b>Sit in dev calls.</b> The biggest design wins came from watching real studios fumble through builds, not from synthesized personas.</li>
+        <li><b>Defaults > forms.</b> Pulling listing assets from existing storefronts cut friction more than any flow optimization I tried.</li>
+        <li><b>Templates as a first-class object.</b> IAP templates, role templates, listing templates — they compounded onto every new app.</li>
+        <li><b>Design with eng leads in the room.</b> The publishing pipeline has dragons. Co-designing with eng kept the UI honest.</li>
+      </ul>
+    </div>
+    <div class="reflect-block">
+      <h4><b>−</b> &nbsp; What I'd change</h4>
+      <ul>
+        <li><b>Ship the analytics view earlier.</b> Devs asked for it from v1. We shipped it in v2. They were right.</li>
+        <li><b>Roles before scale.</b> RBAC arrived in v3 — it should have been in v2 once multi-staff studios started joining.</li>
+        <li><b>Build the design system in parallel.</b> I patched components per-flow for too long; consolidating later cost weeks.</li>
+        <li><b>Document the publishing logic.</b> A flow this branchy needs a living state diagram. We finally have one. We should have started with one.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT CASE STUDY -->
+<a class="next-cs" href="Portfolio Brutalist.html#work">
+  <div class="sub">— NEXT &nbsp; <b>03 / 07</b> &nbsp; — &nbsp; BlueStacks Design System</div>
+  <div class="next-title">A <em>design system</em> for two brands<span class="arrow">→</span></div>
+</a>
+
+<footer class="cs-foot">
+  <span>© ZIAUL ISLAM — 2026</span>
+  <span>now Studio · 2022 → present</span>
+  <span><a href="https://studio.now.gg/" target="_blank" rel="noopener">studio.now.gg ↗</a></span>
+  <span><a href="Portfolio Brutalist.html">← Index</a></span>
+</footer>
+
+<script>
+  // Scroll progress bar
+  const prog = document.getElementById('scrollProg');
+  function updateProg() {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    const p = h > 0 ? (window.scrollY / h) * 100 : 0;
+    prog.style.width = p + '%';
+  }
+  window.addEventListener('scroll', updateProg, { passive: true });
+  updateProg();
+
+  // Reveal observer
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>

@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Hero BG · Options</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0a0a0a; --bg-2:#111; --ink:#f5f1e8; --ink-2:#9a958a; --ink-3:#4a453d;
+    --line:#1f1d1a; --line-2:#2a2822; --accent:#ff3b1f;
+    --ease:cubic-bezier(.7,0,.2,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  /* OPTION SWITCHER (top bar) */
+  .switcher{
+    position:fixed;top:14px;left:50%;transform:translateX(-50%);
+    z-index:80;
+    display:inline-flex;gap:6px;
+    padding:6px;
+    background:rgba(10,10,10,.65);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--line-2);
+    border-radius:200px;
+  }
+  .switcher button{
+    font:inherit;color:var(--ink-2);background:transparent;border:0;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+    padding:8px 14px;border-radius:200px;cursor:pointer;
+    transition:color .25s,background .25s;
+    white-space:nowrap;
+  }
+  .switcher button:hover{color:var(--ink)}
+  .switcher button.active{
+    background:var(--accent);color:#0a0a0a;
+  }
+  .switcher .name{
+    margin-left:4px;color:var(--ink-3);font-style:italic;
+    text-transform:none;letter-spacing:0;
+  }
+  .switcher button.active .name{color:#0a0a0a}
+
+  /* HERO LAYOUT */
+  .hero{
+    position:relative;min-height:100vh;
+    padding:140px 60px 80px;
+    overflow:hidden;
+    isolation:isolate;
+  }
+  .hero-bg{
+    position:absolute;inset:0;z-index:0;pointer-events:none;
+  }
+  /* allow ptr events on the bg layer for interactive options */
+  .hero-bg.interactive{pointer-events:none}
+  .hero > .content{position:relative;z-index:2}
+  .hero-bg canvas, .hero-bg svg{display:block;width:100%;height:100%}
+
+  /* foreground type — same as the real site */
+  .lead{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    margin-bottom:40px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2);
+  }
+  .lead .tag{max-width:280px;line-height:1.7}
+  .lead .tag b{color:var(--ink)}
+  .huge{
+    font-family:'Space Grotesk',sans-serif;font-weight:500;
+    font-size:clamp(64px,15vw,260px);
+    line-height:.86;letter-spacing:-.055em;text-wrap:balance;
+  }
+  .huge em{font-style:italic;font-weight:300;color:var(--accent)}
+  .huge .row{display:block}
+  .label{
+    margin-top:48px;padding-top:24px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;
+    font-family:'JetBrains Mono',monospace;font-size:10px;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2);
+  }
+  .label b{color:var(--ink)}
+  .label .accent{color:var(--accent)}
+
+  /* GRAIN */
+  .grain{
+    position:fixed;inset:0;pointer-events:none;z-index:90;
+    opacity:.09;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.9'/></svg>");
+  }
+
+  /* hide all bgs by default; .active reveals one */
+  .bg{display:none}
+  .bg.active{display:block;position:absolute;inset:0}
+
+  /* OPTION 1 — ASCII RIPPLE FIELD =====================================*/
+  /* canvas-driven, monospace glyphs on a grid, ripple from cursor */
+
+  /* OPTION 2 — SPOTLIGHT REVEAL =====================================*/
+  /* Dark overlay with a soft circular cutout following the cursor.
+     Underneath: a dense field of mono coordinates + asterisks. */
+  .bg-spot .field{
+    position:absolute;inset:0;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(255,59,31,.06), transparent 60%),
+      var(--bg);
+    overflow:hidden;
+  }
+  .bg-spot .marks{
+    position:absolute;inset:0;
+    color:var(--ink-3);
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+    line-height:1.7;
+    padding:60px 30px;
+    white-space:pre-wrap;word-break:break-all;
+    opacity:.55;
+  }
+  .bg-spot .veil{
+    position:absolute;inset:-2px;
+    background:var(--bg);
+    -webkit-mask: radial-gradient(circle 240px at var(--mx,50%) var(--my,50%),
+                  transparent 40%, #000 80%);
+            mask: radial-gradient(circle 240px at var(--mx,50%) var(--my,50%),
+                  transparent 40%, #000 80%);
+    transition:-webkit-mask-position .12s linear, mask-position .12s linear;
+  }
+  .bg-spot .ring{
+    position:absolute;width:480px;height:480px;border-radius:50%;
+    border:1px solid var(--accent);opacity:.35;
+    left:var(--mx,50%);top:var(--my,50%);
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+    transition:transform .15s var(--ease);
+  }
+  .bg-spot .crosshair{
+    position:absolute;
+    left:var(--mx,50%);top:var(--my,50%);
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+    width:1px;height:1px;
+  }
+  .bg-spot .crosshair::before,
+  .bg-spot .crosshair::after{
+    content:'';position:absolute;
+    background:var(--accent);
+    opacity:.6;
+  }
+  .bg-spot .crosshair::before{left:-12px;top:0;width:24px;height:1px}
+  .bg-spot .crosshair::after{top:-12px;left:0;height:24px;width:1px}
+
+  /* OPTION 3 — MAGNETIC TICK FIELD =====================================*/
+  /* SVG grid of small tick lines; each tick rotates toward cursor.
+     Distance-falloff so far ticks point at default direction. */
+  .bg-ticks{background:var(--bg)}
+  .bg-ticks svg{position:absolute;inset:0;width:100%;height:100%}
+  .bg-ticks .tick{
+    stroke:var(--ink-3);stroke-width:1;
+    transform-box:fill-box;transform-origin:center;
+  }
+  .bg-ticks .tick.hot{stroke:var(--accent)}
+
+  /* OPTION 4 — TYPE WARP (chromatic NOW) ==============================*/
+  /* huge "NOW——" background with three RGB-split layers that pull
+     based on cursor position. */
+  .bg-warp{background:var(--bg);overflow:hidden}
+  .bg-warp .layer{
+    position:absolute;top:50%;left:50%;
+    font-family:'Space Grotesk',sans-serif;font-weight:500;
+    font-size:clamp(260px,36vw,700px);
+    letter-spacing:-.06em;
+    white-space:nowrap;user-select:none;
+    transform:translate(-50%,-50%);
+    transition:transform .35s cubic-bezier(.16,1,.3,1), color .3s;
+    will-change:transform;
+  }
+  .bg-warp .l1{color:rgba(245,241,232,.06)}
+  .bg-warp .l2{color:rgba(255,59,31,.05); mix-blend-mode:screen}
+  .bg-warp .l3{color:rgba(154,149,138,.045)}
+  .bg-warp .grid{
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(to right, rgba(245,241,232,.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(245,241,232,.035) 1px, transparent 1px);
+    background-size:80px 80px;
+    mask-image: radial-gradient(ellipse at 50% 50%, black 40%, transparent 85%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 40%, transparent 85%);
+  }
+  .bg-warp .scan{
+    position:absolute;left:0;right:0;height:1px;
+    background:linear-gradient(90deg, transparent, rgba(255,59,31,.5), transparent);
+    animation:scanSweep 7s ease-in-out infinite;
+  }
+  .bg-warp .scan.s1{top:32%;animation-delay:0s}
+  .bg-warp .scan.s2{top:64%;animation-delay:3s}
+  @keyframes scanSweep{
+    0%,100%{transform:translateX(-30%);opacity:0}
+    50%{transform:translateX(20%);opacity:1}
+  }
+
+  /* OPTION 5 — DOT REPULSION =========================================*/
+  /* Canvas: grid of dots that flee from cursor with spring return. */
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<nav class="switcher" id="switcher" role="tablist" aria-label="hero bg options">
+  <button class="active" data-opt="ascii">O1<span class="name">&nbsp;ASCII RIPPLE</span></button>
+  <button data-opt="spot">O2<span class="name">&nbsp;SPOTLIGHT</span></button>
+  <button data-opt="ticks">O3<span class="name">&nbsp;MAGNETIC TICKS</span></button>
+  <button data-opt="warp">O4<span class="name">&nbsp;TYPE WARP</span></button>
+  <button data-opt="dots">O5<span class="name">&nbsp;DOT REPULSION</span></button>
+</nav>
+
+<section class="hero" id="hero">
+  <!-- ===== BG LAYERS ===== -->
+  <div class="hero-bg">
+    <div class="bg bg-ascii active" id="bgAscii"><canvas id="asciiCanvas"></canvas></div>
+
+    <div class="bg bg-spot" id="bgSpot">
+      <div class="field">
+        <div class="marks" id="spotMarks"></div>
+        <div class="veil"></div>
+        <div class="ring"></div>
+        <div class="crosshair"></div>
+      </div>
+    </div>
+
+    <div class="bg bg-ticks" id="bgTicks"><svg id="ticksSvg" preserveAspectRatio="xMidYMid slice"></svg></div>
+
+    <div class="bg bg-warp" id="bgWarp">
+      <div class="grid"></div>
+      <div class="layer l1" id="warpL1">NOW——</div>
+      <div class="layer l2" id="warpL2">NOW——</div>
+      <div class="layer l3" id="warpL3">NOW——</div>
+      <div class="scan s1"></div>
+      <div class="scan s2"></div>
+    </div>
+
+    <div class="bg bg-dots" id="bgDots"><canvas id="dotsCanvas"></canvas></div>
+  </div>
+
+  <!-- ===== FOREGROUND HERO TEXT (faithful to the real one) ===== -->
+  <div class="content">
+    <div class="lead">
+      <div>§01 / THE GREETING</div>
+      <div class="tag">
+        <b>Senior Product Designer</b> — shipping B2B &amp; B2C at the awkward seam where payments, gameplay, and AI agree to coexist.
+      </div>
+      <div>Portfolio — Vol. 26<br />Hand-set on the web, 2026</div>
+    </div>
+
+    <h1 class="huge">
+      <span class="row">Designing</span>
+      <span class="row"><em>payments</em></span>
+      <span class="row">that <em>ship</em>.</span>
+    </h1>
+
+    <div class="label">
+      <span><b>HERO BG</b> · Pick one — currently <span class="accent" id="curName">O1 · ASCII RIPPLE</span></span>
+      <span>Move your mouse over the hero to interact</span>
+    </div>
+  </div>
+</section>
+
+<script>
+(() => {
+  /* ============================================================ */
+  /* OPTION 1 — ASCII RIPPLE FIELD                                 */
+  /* ============================================================ */
+  function initAscii(){
+    const canvas = document.getElementById('asciiCanvas');
+    const ctx = canvas.getContext('2d');
+    const CHARS = ['·','.',':','+','/','—','◌','✦','-','*'];
+    let w=0,h=0,dpr=1, cols=0, rows=0;
+    const cell = 18; // px per ASCII cell
+    const mouse = {x:-9999,y:-9999, tx:-9999, ty:-9999};
+    let raf=0, t0 = performance.now();
+
+    function size(){
+      dpr = Math.min(window.devicePixelRatio||1, 2);
+      const r = canvas.parentElement.getBoundingClientRect();
+      w = r.width; h = r.height;
+      canvas.width = w*dpr; canvas.height = h*dpr;
+      canvas.style.width = w+'px'; canvas.style.height = h+'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      cols = Math.ceil(w/cell);
+      rows = Math.ceil(h/cell);
+    }
+    function loop(){
+      mouse.x += (mouse.tx - mouse.x)*0.18;
+      mouse.y += (mouse.ty - mouse.y)*0.18;
+      const t = (performance.now() - t0)/1000;
+      ctx.clearRect(0,0,w,h);
+      ctx.font = '11px "JetBrains Mono", monospace';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'center';
+      for(let r=0; r<rows; r++){
+        for(let c=0; c<cols; c++){
+          const x = c*cell + cell/2;
+          const y = r*cell + cell/2;
+          const dx = x - mouse.x, dy = y - mouse.y;
+          const d = Math.sqrt(dx*dx + dy*dy);
+          // ripple wave from cursor
+          const phase = d*0.04 - t*4;
+          const wave = (Math.sin(phase) + 1) * 0.5; // 0..1
+          // far falloff
+          const reach = 380;
+          const local = Math.max(0, 1 - d/reach);
+          const intensity = wave*local;
+          const idx = Math.min(CHARS.length-1, Math.floor((wave*0.7 + (Math.sin(c*0.3+r*0.2+t*0.5)+1)*0.15) * CHARS.length));
+          // base subtle color
+          const base = 0.16 + 0.06 * Math.sin(c*0.2 + r*0.18 + t*0.6);
+          ctx.fillStyle = `rgba(74,69,61,${base.toFixed(3)})`;
+          // accent near cursor
+          if (intensity > 0.25){
+            const a = Math.min(1, intensity*1.4);
+            ctx.fillStyle = `rgba(255,59,31,${a.toFixed(3)})`;
+          } else if (local > 0.05){
+            const a = 0.35 + local*0.4;
+            ctx.fillStyle = `rgba(245,241,232,${a.toFixed(3)})`;
+          }
+          ctx.fillText(CHARS[idx], x, y);
+        }
+      }
+      raf = requestAnimationFrame(loop);
+    }
+    function onMove(e){
+      const r = canvas.getBoundingClientRect();
+      mouse.tx = e.clientX - r.left;
+      mouse.ty = e.clientY - r.top;
+    }
+    function onLeave(){ mouse.tx = -9999; mouse.ty = -9999; }
+    function start(){
+      size(); raf = requestAnimationFrame(loop);
+      window.addEventListener('resize', size);
+      const hero = document.getElementById('hero');
+      hero.addEventListener('mousemove', onMove);
+      hero.addEventListener('mouseleave', onLeave);
+    }
+    function stop(){
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', size);
+      const hero = document.getElementById('hero');
+      hero.removeEventListener('mousemove', onMove);
+      hero.removeEventListener('mouseleave', onLeave);
+    }
+    return {start, stop};
+  }
+
+  /* ============================================================ */
+  /* OPTION 2 — SPOTLIGHT REVEAL                                   */
+  /* ============================================================ */
+  function initSpot(){
+    const root = document.getElementById('bgSpot');
+    const marks = document.getElementById('spotMarks');
+    let raf = 0;
+    const m = {x:innerWidth/2, y:innerHeight/2, tx:innerWidth/2, ty:innerHeight/2};
+
+    function buildMarks(){
+      // dense field of pseudo-coordinates / hex / words
+      const W = ['NOW','LAT','LON','REV','SHIP','VOL.26','§01','§02','§03','§04','§05','PD','BS','6L','—','+','✦','◌','/','REV.','GG'];
+      let s = '';
+      const cols = Math.ceil(innerWidth/110);
+      const rows = Math.ceil(innerHeight/22);
+      for(let r=0;r<rows;r++){
+        for(let c=0;c<cols;c++){
+          if (Math.random() < 0.25) {
+            s += W[Math.floor(Math.random()*W.length)] + '  ';
+          } else if (Math.random() < 0.3) {
+            // hex-y
+            s += Math.floor(Math.random()*256).toString(16).padStart(2,'0').toUpperCase() + ' ';
+          } else {
+            s += (Math.floor(Math.random()*99).toString().padStart(2,'0')) + '·' +
+                 (Math.floor(Math.random()*99).toString().padStart(2,'0')) + '  ';
+          }
+        }
+        s += '\n';
+      }
+      marks.textContent = s;
+    }
+    function loop(){
+      m.x += (m.tx - m.x) * 0.18;
+      m.y += (m.ty - m.y) * 0.18;
+      root.style.setProperty('--mx', m.x + 'px');
+      root.style.setProperty('--my', m.y + 'px');
+      raf = requestAnimationFrame(loop);
+    }
+    function onMove(e){
+      const r = root.getBoundingClientRect();
+      m.tx = e.clientX - r.left;
+      m.ty = e.clientY - r.top;
+    }
+    function start(){
+      buildMarks();
+      raf = requestAnimationFrame(loop);
+      const hero = document.getElementById('hero');
+      hero.addEventListener('mousemove', onMove);
+      window.addEventListener('resize', buildMarks);
+    }
+    function stop(){
+      cancelAnimationFrame(raf);
+      const hero = document.getElementById('hero');
+      hero.removeEventListener('mousemove', onMove);
+      window.removeEventListener('resize', buildMarks);
+    }
+    return {start, stop};
+  }
+
+  /* ============================================================ */
+  /* OPTION 3 — MAGNETIC TICK FIELD                                */
+  /* ============================================================ */
+  function initTicks(){
+    const svg = document.getElementById('ticksSvg');
+    let ticks = [];
+    let w=0,h=0, raf=0;
+    const m = {x:-9999,y:-9999, tx:-9999, ty:-9999};
+    const STEP = 56;
+    const TICK_LEN = 12;
+
+    function build(){
+      svg.innerHTML = '';
+      const r = svg.parentElement.getBoundingClientRect();
+      w = r.width; h = r.height;
+      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      svg.setAttribute('width', w);
+      svg.setAttribute('height', h);
+      ticks = [];
+      const cols = Math.ceil(w/STEP)+1;
+      const rows = Math.ceil(h/STEP)+1;
+      for(let r=0;r<rows;r++){
+        for(let c=0;c<cols;c++){
+          const x = c*STEP, y = r*STEP;
+          const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+          line.setAttribute('x1', x - TICK_LEN/2);
+          line.setAttribute('y1', y);
+          line.setAttribute('x2', x + TICK_LEN/2);
+          line.setAttribute('y2', y);
+          line.setAttribute('class','tick');
+          svg.appendChild(line);
+          ticks.push({el:line, x, y, baseAngle: 0});
+        }
+      }
+    }
+    function loop(){
+      m.x += (m.tx - m.x)*0.16;
+      m.y += (m.ty - m.y)*0.16;
+      for(const t of ticks){
+        const dx = m.x - t.x, dy = m.y - t.y;
+        const d = Math.sqrt(dx*dx+dy*dy);
+        const reach = 320;
+        const k = Math.max(0, 1 - d/reach);
+        const angTo = Math.atan2(dy,dx);
+        // blend toward angle-to-mouse based on closeness
+        const ang = angTo * k;
+        t.el.setAttribute('transform', `rotate(${(ang*180/Math.PI).toFixed(2)} ${t.x} ${t.y})`);
+        if (k > 0.18) t.el.classList.add('hot');
+        else t.el.classList.remove('hot');
+        // intensity via opacity
+        t.el.setAttribute('stroke-opacity', (0.18 + k*0.82).toFixed(3));
+      }
+      raf = requestAnimationFrame(loop);
+    }
+    function onMove(e){
+      const r = svg.getBoundingClientRect();
+      m.tx = e.clientX - r.left; m.ty = e.clientY - r.top;
+    }
+    function onLeave(){ m.tx = -9999; m.ty = -9999; }
+    function start(){
+      build();
+      raf = requestAnimationFrame(loop);
+      window.addEventListener('resize', build);
+      const hero = document.getElementById('hero');
+      hero.addEventListener('mousemove', onMove);
+      hero.addEventListener('mouseleave', onLeave);
+    }
+    function stop(){
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', build);
+      const hero = document.getElementById('hero');
+      hero.removeEventListener('mousemove', onMove);
+      hero.removeEventListener('mouseleave', onLeave);
+    }
+    return {start, stop};
+  }
+
+  /* ============================================================ */
+  /* OPTION 4 — TYPE WARP (CHROMATIC NOW)                           */
+  /* ============================================================ */
+  function initWarp(){
+    const l1 = document.getElementById('warpL1');
+    const l2 = document.getElementById('warpL2');
+    const l3 = document.getElementById('warpL3');
+    let raf=0;
+    const m = {x:0,y:0, tx:0, ty:0};
+    function loop(){
+      m.x += (m.tx - m.x)*0.08;
+      m.y += (m.ty - m.y)*0.08;
+      // l1 moves slightly opposite, l2 with cursor, l3 perpendicular
+      l1.style.transform = `translate(calc(-50% + ${(-m.x*40).toFixed(2)}px), calc(-50% + ${(-m.y*30).toFixed(2)}px))`;
+      l2.style.transform = `translate(calc(-50% + ${(m.x*60).toFixed(2)}px), calc(-50% + ${(m.y*40).toFixed(2)}px))`;
+      l3.style.transform = `translate(calc(-50% + ${(m.y*50).toFixed(2)}px), calc(-50% + ${(-m.x*40).toFixed(2)}px))`;
+      raf = requestAnimationFrame(loop);
+    }
+    function onMove(e){
+      const r = document.getElementById('hero').getBoundingClientRect();
+      // normalize -1..1 from center
+      m.tx = (e.clientX - r.left)/r.width - 0.5;
+      m.ty = (e.clientY - r.top)/r.height - 0.5;
+    }
+    function start(){
+      raf = requestAnimationFrame(loop);
+      document.getElementById('hero').addEventListener('mousemove', onMove);
+    }
+    function stop(){
+      cancelAnimationFrame(raf);
+      document.getElementById('hero').removeEventListener('mousemove', onMove);
+    }
+    return {start, stop};
+  }
+
+  /* ============================================================ */
+  /* OPTION 5 — DOT REPULSION                                      */
+  /* ============================================================ */
+  function initDots(){
+    const canvas = document.getElementById('dotsCanvas');
+    const ctx = canvas.getContext('2d');
+    let dpr = 1, w=0, h=0, raf=0;
+    let dots = [];
+    const STEP = 28;
+    const m = {x:-9999,y:-9999, tx:-9999, ty:-9999};
+
+    function size(){
+      dpr = Math.min(window.devicePixelRatio||1, 2);
+      const r = canvas.parentElement.getBoundingClientRect();
+      w = r.width; h = r.height;
+      canvas.width = w*dpr; canvas.height = h*dpr;
+      canvas.style.width = w+'px'; canvas.style.height = h+'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      build();
+    }
+    function build(){
+      dots = [];
+      const cols = Math.ceil(w/STEP);
+      const rows = Math.ceil(h/STEP);
+      for(let r=0;r<rows;r++){
+        for(let c=0;c<cols;c++){
+          dots.push({
+            ox: c*STEP + STEP/2,
+            oy: r*STEP + STEP/2,
+            x: c*STEP + STEP/2,
+            y: r*STEP + STEP/2,
+            vx: 0, vy: 0,
+          });
+        }
+      }
+    }
+    function loop(){
+      m.x += (m.tx - m.x)*0.2;
+      m.y += (m.ty - m.y)*0.2;
+      ctx.clearRect(0,0,w,h);
+      const reach = 180;
+      const reach2 = reach*reach;
+      for(const d of dots){
+        // force away from cursor (1/r²-ish, capped)
+        const dx = d.x - m.x, dy = d.y - m.y;
+        const dist2 = dx*dx + dy*dy;
+        if (dist2 < reach2 && dist2 > 1) {
+          const f = (reach2/dist2 - 1) * 0.04;
+          d.vx += dx * f / Math.sqrt(dist2);
+          d.vy += dy * f / Math.sqrt(dist2);
+        }
+        // spring back toward origin
+        d.vx += (d.ox - d.x) * 0.04;
+        d.vy += (d.oy - d.y) * 0.04;
+        d.vx *= 0.78; d.vy *= 0.78;
+        d.x += d.vx; d.y += d.vy;
+
+        // distance to mouse for color/size
+        const dxn = d.x - m.x, dyn = d.y - m.y;
+        const dn = Math.sqrt(dxn*dxn + dyn*dyn);
+        const k = Math.max(0, 1 - dn/280);
+        const size = 1 + k*1.6;
+        ctx.beginPath();
+        if (k > 0.55){
+          ctx.fillStyle = `rgba(255,59,31,${(0.6+k*0.4).toFixed(3)})`;
+        } else if (k > 0.1){
+          ctx.fillStyle = `rgba(245,241,232,${(0.25+k*0.5).toFixed(3)})`;
+        } else {
+          ctx.fillStyle = 'rgba(74,69,61,.55)';
+        }
+        ctx.arc(d.x, d.y, size, 0, Math.PI*2);
+        ctx.fill();
+      }
+      raf = requestAnimationFrame(loop);
+    }
+    function onMove(e){
+      const r = canvas.getBoundingClientRect();
+      m.tx = e.clientX - r.left;
+      m.ty = e.clientY - r.top;
+    }
+    function onLeave(){ m.tx = -9999; m.ty = -9999; }
+    function start(){
+      size();
+      raf = requestAnimationFrame(loop);
+      window.addEventListener('resize', size);
+      const hero = document.getElementById('hero');
+      hero.addEventListener('mousemove', onMove);
+      hero.addEventListener('mouseleave', onLeave);
+    }
+    function stop(){
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', size);
+      const hero = document.getElementById('hero');
+      hero.removeEventListener('mousemove', onMove);
+      hero.removeEventListener('mouseleave', onLeave);
+    }
+    return {start, stop};
+  }
+
+  /* ============================================================ */
+  /* SWITCHER                                                      */
+  /* ============================================================ */
+  const OPTS = {
+    ascii: {label:'O1 · ASCII RIPPLE', el:'bgAscii', mod:initAscii()},
+    spot:  {label:'O2 · SPOTLIGHT',    el:'bgSpot',  mod:initSpot()},
+    ticks: {label:'O3 · MAGNETIC TICKS', el:'bgTicks', mod:initTicks()},
+    warp:  {label:'O4 · TYPE WARP',    el:'bgWarp',  mod:initWarp()},
+    dots:  {label:'O5 · DOT REPULSION', el:'bgDots', mod:initDots()},
+  };
+  let active = 'ascii';
+  OPTS[active].mod.start();
+
+  function setOpt(key){
+    if (key === active) return;
+    OPTS[active].mod.stop();
+    document.getElementById(OPTS[active].el).classList.remove('active');
+    active = key;
+    document.getElementById(OPTS[active].el).classList.add('active');
+    OPTS[active].mod.start();
+    document.getElementById('curName').textContent = OPTS[active].label;
+    document.querySelectorAll('#switcher button').forEach(b => {
+      b.classList.toggle('active', b.dataset.opt === key);
+    });
+  }
+  document.querySelectorAll('#switcher button').forEach(b => {
+    b.addEventListener('click', () => setOpt(b.dataset.opt));
+  });
+  // keyboard 1..5
+  window.addEventListener('keydown', e => {
+    const map = {'1':'ascii','2':'spot','3':'ticks','4':'warp','5':'dots'};
+    if (map[e.key]) setOpt(map[e.key]);
+  });
+})();
+</script>
+</body>
+</html>

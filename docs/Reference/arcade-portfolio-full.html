@@ -1,0 +1,1753 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Ziaul Islam — AI native Product Designer · Arcade Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+
+<style>
+/* ════════════════════════════════════════════════
+   TOKENS
+   ════════════════════════════════════════════════ */
+:root {
+  --bg: #0a0612;
+  --bg-2: #15102a;
+  --bg-3: #1f1840;
+  --ink: #f5f0ff;
+  --muted: rgba(245,240,255,.6);
+  --dim: rgba(245,240,255,.35);
+  --orange: #ff5a1f;
+  --orange-soft: rgba(255,90,31,.18);
+  --cyan: #00d6ff;
+  --magenta: #ff2e6c;
+  --lime: #4ade80;
+  --lavender: #b9a7ff;
+  --paper: rgba(157,128,255,.06);
+  --line: rgba(245,240,255,.12);
+  --line-strong: rgba(245,240,255,.25);
+  --ease: cubic-bezier(.22,1,.36,1);
+  --mono: 'Geist Mono', ui-monospace, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'Geist', system-ui, sans-serif; -webkit-font-smoothing: antialiased; cursor: none; }
+body { overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+
+/* Global scanlines + vignette overlay */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,.5) 100%);
+  pointer-events: none;
+  z-index: 200;
+}
+
+/* ════════════════════════════════════════════════
+   PERSISTENT HUD (top bar + cursor + mascot + global canvas)
+   ════════════════════════════════════════════════ */
+.hud-top {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  background: rgba(10,6,18,.85);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border-bottom: 1px solid var(--line-strong);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.hud-top .group { display: flex; align-items: center; gap: 22px; padding: 12px 22px; }
+.hud-top .group + .group { border-left: 1px solid var(--line); }
+.hud-top .item { display: flex; flex-direction: column; gap: 3px; min-width: 70px; }
+.hud-top .item .lbl { color: var(--lavender); font-size: 9px; }
+.hud-top .item .val { color: var(--ink); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hud-top .live { display: inline-flex; align-items: center; gap: 6px; color: var(--lime); }
+.hud-top .live::before { content: ""; width: 6px; height: 6px; background: var(--lime); box-shadow: 0 0 10px var(--lime); }
+.hud-top .stage-rail { display: flex; align-items: center; gap: 4px; }
+.hud-top .stage-rail .pip { width: 8px; height: 8px; border: 1px solid var(--lavender); }
+.hud-top .stage-rail .pip.done { background: var(--lavender); }
+.hud-top .stage-rail .pip.active { background: var(--orange); border-color: var(--orange); box-shadow: 0 0 12px var(--orange); animation: pip-pulse 1.2s infinite; }
+@keyframes pip-pulse { 0%, 100% { opacity: 1 } 50% { opacity: .4 } }
+
+.cursor-px {
+  position: fixed;
+  width: 14px; height: 14px;
+  background: var(--orange);
+  pointer-events: none;
+  z-index: 220;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 2px rgba(255,255,255,.4), 0 0 18px var(--orange);
+  display: none;
+}
+.cursor-px.show { display: block; }
+
+.mascot {
+  position: fixed;
+  width: 36px; height: 36px;
+  pointer-events: none;
+  z-index: 150;
+  transform: translate(-50%, -50%);
+  color: var(--orange);
+  filter: drop-shadow(0 0 14px rgba(255,90,31,.7));
+  display: none;
+}
+.mascot.show { display: block; }
+
+.global-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 140;
+  width: 100%;
+  height: 100%;
+}
+
+.flicker {
+  position: fixed; inset: 0;
+  background: rgba(255,255,255,.04);
+  pointer-events: none;
+  z-index: 199;
+  opacity: 0;
+  animation: g-flicker 11s steps(1) infinite;
+}
+@keyframes g-flicker {
+  0%, 49%, 53%, 76%, 78%, 100% { opacity: 0; }
+  50% { opacity: .2; }
+  51% { opacity: .03; }
+  52% { opacity: .12; }
+  77% { opacity: .1; }
+}
+
+/* Stage-clear toast */
+.toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  z-index: 130;
+  background: var(--bg);
+  border: 2px solid var(--lime);
+  padding: 12px 24px;
+  color: var(--lime);
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  box-shadow: 4px 4px 0 var(--lavender), 0 0 24px rgba(74,222,128,.4);
+  opacity: 0;
+  transition: opacity .3s, transform .3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ════════════════════════════════════════════════
+   PRIMITIVES — bracket, chase, pixel button, tag, etc.
+   ════════════════════════════════════════════════ */
+.bracket { position: absolute; width: 24px; height: 24px; border: 2px solid var(--lavender); pointer-events: none; opacity: .65; z-index: 5; }
+.bracket.tl { top: 8px; left: 8px; border-right: 0; border-bottom: 0; }
+.bracket.tr { top: 8px; right: 8px; border-left: 0; border-bottom: 0; }
+.bracket.bl { bottom: 8px; left: 8px; border-right: 0; border-top: 0; }
+.bracket.br { bottom: 8px; right: 8px; border-left: 0; border-top: 0; }
+
+.tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--line-strong);
+  background: rgba(157,128,255,.06);
+  color: var(--lavender);
+  font: 700 10px/1 var(--mono);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.tag.cyan { color: var(--cyan); border-color: rgba(0,214,255,.4); background: rgba(0,214,255,.08); }
+.tag.orange { color: var(--orange); border-color: rgba(255,90,31,.4); background: rgba(255,90,31,.08); }
+.tag.magenta { color: var(--magenta); border-color: rgba(255,46,108,.4); background: rgba(255,46,108,.08); }
+.tag.lime { color: var(--lime); border-color: rgba(74,222,128,.4); background: rgba(74,222,128,.08); }
+.tag .live::before { content: ""; display: inline-block; width: 6px; height: 6px; background: var(--lime); margin-right: 6px; vertical-align: 1px; }
+
+.pxbtn {
+  appearance: none;
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 12px 20px;
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  font: 700 12px/1 'Geist', sans-serif;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--lavender);
+  transition: transform .12s var(--ease), box-shadow .12s var(--ease), background .25s var(--ease), color .25s var(--ease);
+}
+.pxbtn:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 var(--lavender); }
+.pxbtn:active { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--lavender); }
+.pxbtn.primary { background: var(--orange); border-color: #fff; color: #fff; box-shadow: 4px 4px 0 var(--lavender), 0 0 24px rgba(255,90,31,.45); }
+.pxbtn.primary:hover { box-shadow: 6px 6px 0 var(--lavender), 0 0 32px rgba(255,90,31,.65); }
+.pxbtn.cyan { color: var(--cyan); border-color: var(--cyan); box-shadow: 4px 4px 0 var(--cyan); }
+.pxbtn.cyan:hover { box-shadow: 6px 6px 0 var(--cyan); }
+.pxbtn.lime { color: var(--lime); border-color: var(--lime); box-shadow: 4px 4px 0 var(--lime); }
+.pxbtn.lime:hover { box-shadow: 6px 6px 0 var(--lime); }
+
+.crt-frame {
+  position: relative;
+  background: var(--bg-2);
+  border: 1.5px solid var(--lavender);
+  overflow: hidden;
+  box-shadow: 0 0 24px rgba(157,128,255,.18), inset 0 0 60px rgba(0,0,0,.4);
+}
+.crt-frame::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.glitch {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  user-select: none;
+  text-shadow:
+    2px 0 var(--magenta),
+    -2px 0 var(--cyan),
+    0 0 20px rgba(255,255,255,.1);
+  transition: text-shadow .25s var(--ease);
+}
+.glitch:hover {
+  text-shadow:
+    5px 0 var(--magenta),
+    -5px 0 var(--cyan),
+    0 0 32px rgba(255,255,255,.22);
+}
+.glitch::before, .glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.glitch::before {
+  color: var(--magenta);
+  transform: translate(2px, 0);
+  mix-blend-mode: screen;
+  clip-path: inset(0 0 60% 0);
+  animation: glitch-a 4s infinite steps(1);
+}
+.glitch::after {
+  color: var(--cyan);
+  transform: translate(-2px, 0);
+  mix-blend-mode: screen;
+  clip-path: inset(60% 0 0 0);
+  animation: glitch-b 4s infinite steps(1);
+}
+@keyframes glitch-a {
+  0%, 90%, 100% { clip-path: inset(0 0 60% 0); transform: translate(2px, 0); }
+  92% { clip-path: inset(20% 0 40% 0); transform: translate(6px, -2px); }
+  94% { clip-path: inset(70% 0 10% 0); transform: translate(-4px, 2px); }
+  96% { clip-path: inset(40% 0 30% 0); transform: translate(8px, 0); }
+}
+@keyframes glitch-b {
+  0%, 90%, 100% { clip-path: inset(60% 0 0 0); transform: translate(-2px, 0); }
+  92% { clip-path: inset(40% 0 20% 0); transform: translate(-6px, 2px); }
+  94% { clip-path: inset(10% 0 70% 0); transform: translate(4px, -2px); }
+  96% { clip-path: inset(30% 0 40% 0); transform: translate(-8px, 0); }
+}
+
+.scene {
+  position: relative;
+  padding: 96px 48px;
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
+.scene-wrap { max-width: 1280px; margin: 0 auto; position: relative; }
+.scene-head { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; margin-bottom: 48px; flex-wrap: wrap; }
+.scene-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .2em;
+  color: var(--lavender);
+  text-transform: uppercase;
+}
+.scene-title { font-family: 'Geist', sans-serif; font-size: clamp(40px, 6vw, 88px); font-weight: 800; letter-spacing: -0.04em; line-height: .95; margin: 0; color: var(--ink); }
+.scene-title em { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--lavender); }
+.scene-sub { font-family: var(--mono); font-size: 12px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; max-width: 480px; }
+
+/* ════════════════════════════════════════════════
+   HERO — TITLE SCREEN
+   ════════════════════════════════════════════════ */
+.hero {
+  padding: 110px 48px 96px;
+  position: relative;
+  overflow: hidden;
+  min-height: 100svh;
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(157,128,255,.08), transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+}
+.hero-wrap { max-width: 1280px; margin: 0 auto; position: relative; z-index: 4; padding-top: 16px; padding-bottom: 110px; }
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  color: var(--lavender);
+  font: 500 11px/1 var(--mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+  background: rgba(157,128,255,.08);
+}
+.hero-tag .live { width: 6px; height: 6px; background: var(--lime); box-shadow: 0 0 12px var(--lime); }
+.hero-line { margin: 0; font-weight: 800; line-height: .9; letter-spacing: -0.045em; font-size: clamp(72px, 13vw, 200px); }
+.hero-line.serif { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--lavender); font-size: clamp(56px, 10vw, 160px); letter-spacing: -0.02em; }
+.hero-tail { margin-top: 40px; display: flex; gap: 28px; flex-wrap: wrap; color: var(--muted); font: 500 13px/1.4 var(--mono); letter-spacing: .04em; max-width: 760px; }
+.hero-tail b { color: var(--ink); font-weight: 500; }
+.hero-tail .pixel { display: inline-block; width: 8px; height: 8px; background: var(--orange); margin-right: 8px; vertical-align: 1px; }
+
+.hero-chase { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
+.hero-chase::before, .hero-chase::after {
+  content: "";
+  position: absolute;
+  height: 8px;
+  background-image: radial-gradient(circle, var(--orange) 35%, transparent 40%);
+  background-size: 14px 8px;
+  background-repeat: repeat-x;
+  opacity: .55;
+}
+.hero-chase::before { top: 80px; left: 56px; right: 56px; animation: hero-chase 1.4s linear infinite; }
+.hero-chase::after { bottom: 26px; left: 56px; right: 56px; animation: hero-chase 1.4s linear infinite reverse; }
+@keyframes hero-chase {
+  from { background-position: 0 0; }
+  to { background-position: 28px 0; }
+}
+
+.hero-coin {
+  position: absolute;
+  bottom: 32px;
+  right: 56px;
+  z-index: 6;
+  appearance: none;
+  background: var(--orange);
+  color: #fff;
+  border: 2px solid #fff;
+  font: 700 13px/1 'Geist', sans-serif;
+  padding: 14px 22px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--lavender), 0 0 24px rgba(255,90,31,.45);
+  transition: transform .12s var(--ease), box-shadow .12s var(--ease), background .25s var(--ease), color .25s var(--ease);
+}
+.hero-coin:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--lavender), 0 0 32px rgba(255,90,31,.65); }
+.hero-coin.playing { background: #1a1430; color: var(--lime); border-color: var(--lime); box-shadow: 4px 4px 0 var(--lime); }
+
+/* ════════════════════════════════════════════════
+   MARQUEE STRIP — connective tissue
+   ════════════════════════════════════════════════ */
+.strip {
+  position: relative;
+  height: 56px;
+  background: linear-gradient(180deg, var(--bg-2), var(--bg));
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.strip::before, .strip::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  height: 4px;
+  background-image: radial-gradient(circle, var(--orange) 40%, transparent 45%);
+  background-size: 12px 4px;
+  background-repeat: repeat-x;
+  opacity: .6;
+}
+.strip::before { top: 6px; animation: strip-chase 1.2s linear infinite; }
+.strip::after { bottom: 6px; animation: strip-chase 1.2s linear infinite reverse; }
+@keyframes strip-chase {
+  from { background-position: 0 0; }
+  to { background-position: 24px 0; }
+}
+.strip-track {
+  display: flex;
+  gap: 36px;
+  white-space: nowrap;
+  animation: strip-scroll 50s linear infinite;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--lavender);
+  flex-shrink: 0;
+  padding-right: 36px;
+}
+.strip-track .star { color: var(--orange); }
+.strip-track .ghost { color: var(--cyan); }
+@keyframes strip-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ════════════════════════════════════════════════
+   FEATURED WORK — STAGE SELECT
+   ════════════════════════════════════════════════ */
+.featured-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+@media (max-width: 980px) { .featured-grid { grid-template-columns: 1fr; } }
+
+.stage-card {
+  position: relative;
+  background: var(--bg-2);
+  border: 1.5px solid var(--line-strong);
+  overflow: hidden;
+  transition: transform .35s var(--ease), border-color .35s var(--ease), box-shadow .35s var(--ease);
+  cursor: pointer;
+}
+.stage-card:hover { transform: translateY(-6px); border-color: var(--orange); box-shadow: 0 0 0 1px var(--orange), 0 0 32px rgba(255,90,31,.25), 8px 8px 0 var(--lavender); }
+.stage-card:hover .stage-screen img-pixel { filter: brightness(1.15); }
+.stage-card .stage-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 3;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  color: var(--orange);
+  background: rgba(10,6,18,.85);
+  padding: 4px 10px;
+  border: 1px solid var(--orange);
+}
+.stage-card .stage-stars {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  color: var(--lime);
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 2px;
+  background: rgba(10,6,18,.85);
+  padding: 4px 8px;
+  border: 1px solid var(--lime);
+}
+.stage-screen {
+  position: relative;
+  aspect-ratio: 4/3;
+  background: linear-gradient(135deg, var(--bg-3), #0c0820);
+  overflow: hidden;
+}
+.stage-screen::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+  z-index: 2;
+}
+.stage-screen .img-pixel {
+  position: absolute;
+  inset: 18% 18%;
+  background-size: 14px 14px;
+  background-position: 0 0;
+  transition: filter .35s var(--ease);
+}
+.stage-screen.s1 .img-pixel { background:
+  conic-gradient(from 45deg at 30% 30%, var(--orange), var(--magenta), var(--cyan), var(--orange));
+  border: 2px solid var(--orange);
+}
+.stage-screen.s2 .img-pixel { background:
+  linear-gradient(135deg, var(--cyan), transparent 40%),
+  linear-gradient(225deg, var(--magenta), transparent 50%),
+  var(--bg-2);
+  border: 2px solid var(--cyan);
+}
+.stage-screen.s3 .img-pixel { background:
+  repeating-linear-gradient(45deg, var(--lavender) 0 8px, transparent 8px 16px),
+  var(--bg-3);
+  border: 2px solid var(--lavender);
+}
+
+.stage-body { padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 12px; }
+.stage-title { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; color: var(--ink); margin: 0; }
+.stage-meta { display: flex; gap: 8px; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
+.stage-meta .sep { color: var(--dim); }
+.stage-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.stage-stat {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--lime);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  border-top: 1px dashed var(--line);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+.stage-stat b { color: var(--ink); font-weight: 700; }
+.stage-cta { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
+.stage-cta .play { color: var(--orange); font: 700 12px/1 var(--mono); letter-spacing: .15em; text-transform: uppercase; }
+.stage-cta .arrow { color: var(--orange); font-size: 18px; }
+
+/* ════════════════════════════════════════════════
+   CRAFT — ABILITIES UNLOCKED
+   ════════════════════════════════════════════════ */
+.abilities-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+@media (max-width: 1100px) { .abilities-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 760px) { .abilities-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.ability {
+  position: relative;
+  background: var(--bg-2);
+  border: 1px solid var(--line-strong);
+  padding: 18px 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color .25s var(--ease), transform .25s var(--ease);
+}
+.ability:hover { transform: translateY(-2px); border-color: var(--lavender); }
+.ability-head { display: flex; align-items: center; gap: 10px; }
+.ability-ico {
+  width: 32px; height: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--bg-3);
+  border: 1px solid var(--line-strong);
+  color: var(--lavender);
+  flex-shrink: 0;
+}
+.ability-ico svg { width: 16px; height: 16px; }
+.ability-class {
+  font: 700 9px/1 var(--mono);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--lavender);
+  margin-left: auto;
+}
+.ability-name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); margin: 0; }
+.ability-bar { height: 6px; background: var(--bg-3); position: relative; overflow: hidden; }
+.ability-bar::before { content: ""; position: absolute; inset: 0 var(--gap, 30%) 0 0; background: var(--lavender); }
+.ability-lvl { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; display: flex; justify-content: space-between; }
+.ability-lvl b { color: var(--ink); font-weight: 700; }
+
+.ability.research { border-color: rgba(0,214,255,.25); }
+.ability.research .ability-ico, .ability.research .ability-class { color: var(--cyan); border-color: rgba(0,214,255,.4); }
+.ability.research .ability-bar::before { background: var(--cyan); }
+.ability.craft { border-color: rgba(255,90,31,.25); }
+.ability.craft .ability-ico, .ability.craft .ability-class { color: var(--orange); border-color: rgba(255,90,31,.4); }
+.ability.craft .ability-bar::before { background: var(--orange); }
+.ability.systems { border-color: rgba(157,128,255,.25); }
+.ability.systems .ability-ico, .ability.systems .ability-class { color: var(--lavender); border-color: rgba(157,128,255,.4); }
+.ability.systems .ability-bar::before { background: var(--lavender); }
+.ability.ai { border-color: rgba(255,46,108,.25); }
+.ability.ai .ability-ico, .ability.ai .ability-class { color: var(--magenta); border-color: rgba(255,46,108,.4); }
+.ability.ai .ability-bar::before { background: var(--magenta); }
+
+/* ════════════════════════════════════════════════
+   WORK GRID — BONUS ROUNDS
+   ════════════════════════════════════════════════ */
+.bonus-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+@media (max-width: 900px) { .bonus-grid { grid-template-columns: 1fr; } }
+
+.bonus {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color .25s var(--ease), transform .25s var(--ease);
+  cursor: pointer;
+}
+.bonus:hover { transform: translateY(-2px); border-color: var(--cyan); }
+.bonus-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.bonus-num { font-family: var(--mono); font-size: 11px; color: var(--cyan); letter-spacing: .15em; text-transform: uppercase; font-weight: 700; }
+.bonus-yr { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .12em; }
+.bonus-title { font-size: 18px; font-weight: 600; line-height: 1.25; letter-spacing: -0.015em; color: var(--ink); margin: 0; }
+.bonus-desc { font-size: 13px; line-height: 1.5; color: var(--muted); margin: 0; }
+.bonus-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px dashed var(--line); margin-top: auto; }
+.bonus-foot .play { color: var(--cyan); font: 700 11px/1 var(--mono); letter-spacing: .15em; text-transform: uppercase; }
+
+/* ════════════════════════════════════════════════
+   ABOUT — PLAYER PROFILE
+   ════════════════════════════════════════════════ */
+.profile {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 32px;
+  align-items: stretch;
+}
+@media (max-width: 900px) { .profile { grid-template-columns: 1fr; } }
+
+.profile-card {
+  background: var(--bg-2);
+  border: 1.5px solid var(--lavender);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  position: relative;
+}
+.profile-avatar {
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--bg-3);
+  border: 1px solid var(--line-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.profile-avatar::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0 1px, transparent 1px 3px);
+  pointer-events: none;
+  z-index: 2;
+}
+.profile-avatar svg { width: 75%; height: 75%; image-rendering: pixelated; }
+.profile-name { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); margin: 0; }
+.profile-class { font-family: var(--mono); font-size: 11px; color: var(--orange); letter-spacing: .15em; text-transform: uppercase; }
+.profile-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.profile-stat { padding: 10px 12px; background: var(--bg-3); border: 1px solid var(--line); }
+.profile-stat .lbl { font-family: var(--mono); font-size: 9px; color: var(--lavender); letter-spacing: .15em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+.profile-stat .val { font-family: var(--mono); font-size: 14px; color: var(--ink); font-weight: 700; }
+
+.profile-right { display: flex; flex-direction: column; gap: 22px; }
+.bio-log {
+  background: var(--bg-2);
+  border: 1.5px solid var(--line-strong);
+  padding: 32px 32px 36px;
+  position: relative;
+}
+.bio-log .panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.bio-log .panel-head .l { color: var(--lavender); }
+.bio-log .panel-head .r { color: var(--lime); }
+
+.bio-sentence {
+  font-family: 'Geist', sans-serif;
+  font-weight: 600;
+  font-size: clamp(20px, 2.4vw, 32px);
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.bio-sentence .swirl { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--lavender); margin: 0 .08em; }
+
+.chipx {
+  display: inline-flex;
+  align-items: center;
+  gap: .35em;
+  padding: .12em .55em .12em .12em;
+  border-radius: 999px;
+  background: var(--bg-3);
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.015em;
+  vertical-align: 4%;
+  box-shadow: 0 3px 0 var(--lavender);
+  margin: 0 .06em;
+}
+.chipx .ico {
+  width: 1.4em; height: 1.4em;
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  background: var(--orange-soft);
+  color: var(--orange);
+}
+.chipx .ico svg { width: 70%; height: 70%; }
+.chipx.name .ico { background: var(--orange); color: #fff; }
+.chipx.year { background: var(--ink); color: var(--bg); border-color: var(--ink); box-shadow: 0 3px 0 var(--lavender); }
+.chipx.year .ico { background: rgba(10,6,18,.15); color: var(--bg); }
+.chipx.ai .ico { background: rgba(255,46,108,.18); color: var(--magenta); }
+.chipx.systems .ico { background: rgba(157,128,255,.2); color: var(--lavender); }
+.chipx.scale .ico { background: rgba(74,222,128,.18); color: var(--lime); }
+.chipx.company .ico { background: var(--cyan); color: var(--bg); }
+.chipx:nth-of-type(odd) { transform: rotate(-1deg); }
+.chipx:nth-of-type(even) { transform: rotate(.8deg); }
+
+.equipment {
+  background: var(--bg-2);
+  border: 1.5px solid var(--line-strong);
+  padding: 24px 28px;
+}
+.equipment .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; font-family: var(--mono); font-size: 11px; letter-spacing: .15em; text-transform: uppercase; }
+.equipment .panel-head .l { color: var(--lavender); }
+.equipment .panel-head .r { color: var(--muted); }
+.equip-cluster { display: flex; flex-wrap: wrap; gap: 8px; }
+.skill-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg-3);
+  border: 1px solid var(--line-strong);
+  font: 500 13px/1 'Geist', sans-serif;
+  color: var(--ink);
+  transition: transform .2s var(--ease), background .2s var(--ease);
+}
+.skill-pill:hover { transform: translateY(-2px); background: var(--bg); }
+.skill-pill.solid { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.skill-pill.outline { background: transparent; }
+.skill-pill.tag { color: var(--orange); border-color: var(--orange); background: rgba(255,90,31,.08); }
+.skill-pill.cyan { color: var(--cyan); border-color: var(--cyan); background: rgba(0,214,255,.08); }
+.skill-pill.amp { width: 36px; height: 36px; justify-content: center; padding: 0; font-family: 'Instrument Serif', serif; font-style: italic; font-size: 22px; background: var(--ink); color: var(--bg); }
+.skill-pill.dashed { border-style: dashed; transform: rotate(-2deg); }
+
+/* ════════════════════════════════════════════════
+   TIMELINE — WORLD MAP
+   ════════════════════════════════════════════════ */
+.worldmap { position: relative; padding: 32px 0 64px; }
+.worldmap-track { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+.worldmap-path {
+  position: absolute;
+  top: 56px;
+  left: 12.5%;
+  right: 12.5%;
+  height: 4px;
+  background-image: radial-gradient(circle, var(--lavender) 35%, transparent 40%);
+  background-size: 12px 4px;
+  background-repeat: repeat-x;
+  animation: strip-chase 1.6s linear infinite;
+  opacity: .55;
+  z-index: 1;
+}
+.world-node { display: flex; flex-direction: column; align-items: center; gap: 14px; position: relative; z-index: 2; padding-top: 28px; }
+.world-pin {
+  width: 56px; height: 56px;
+  background: var(--bg-2);
+  border: 2px solid var(--lavender);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--lavender);
+  position: relative;
+}
+.world-node .stamp {
+  position: absolute;
+  top: -16px;
+  right: -22px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--lime);
+  border: 1px solid var(--lime);
+  padding: 3px 6px;
+  background: var(--bg);
+  transform: rotate(-8deg);
+}
+.world-node.active .world-pin {
+  background: var(--orange);
+  border-color: #fff;
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(255,90,31,.2), 0 0 24px rgba(255,90,31,.5);
+  animation: pin-pulse 1.6s infinite;
+}
+.world-node.active .stamp { color: var(--orange); border-color: var(--orange); }
+@keyframes pin-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(255,90,31,.2), 0 0 24px rgba(255,90,31,.5); }
+  50% { box-shadow: 0 0 0 12px rgba(255,90,31,0), 0 0 32px rgba(255,90,31,.65); }
+}
+
+.world-card { width: 100%; max-width: 240px; background: var(--bg-2); border: 1px solid var(--line-strong); padding: 16px 18px; }
+.world-card .yr { font-family: var(--mono); font-size: 11px; color: var(--lavender); letter-spacing: .12em; }
+.world-card .co { font-size: 16px; font-weight: 700; color: var(--ink); margin-top: 4px; }
+.world-card .role { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 4px; letter-spacing: .08em; text-transform: uppercase; }
+.world-node.active .world-card { border-color: var(--orange); }
+
+/* ════════════════════════════════════════════════
+   WORKSHOP — SECRET STAGE (second-loudest)
+   ════════════════════════════════════════════════ */
+.secret {
+  background:
+    radial-gradient(800px 400px at 50% 30%, rgba(255,46,108,.12), transparent 70%),
+    radial-gradient(800px 400px at 30% 80%, rgba(0,214,255,.1), transparent 70%);
+  text-align: center;
+}
+.secret-tag {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 8px 16px;
+  border: 1.5px solid var(--magenta);
+  color: var(--magenta);
+  font: 700 11px/1 var(--mono);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  background: rgba(255,46,108,.08);
+  margin-bottom: 28px;
+  animation: secret-pulse 2s infinite;
+}
+@keyframes secret-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,46,108,.5); }
+  50% { box-shadow: 0 0 0 12px rgba(255,46,108,0); }
+}
+.secret-title { font-size: clamp(48px, 7vw, 96px); font-weight: 800; letter-spacing: -0.04em; line-height: .95; margin: 0; color: var(--ink); }
+.secret-title em { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--magenta); }
+.secret-desc { max-width: 620px; margin: 24px auto 0; color: var(--muted); font-size: 16px; line-height: 1.6; }
+.secret-actions { margin-top: 36px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.secret-hint { margin-top: 28px; font-family: var(--mono); font-size: 11px; color: var(--lavender); letter-spacing: .2em; text-transform: uppercase; opacity: .7; }
+.secret-hint .key { display: inline-block; padding: 2px 8px; border: 1px solid var(--lavender); margin: 0 2px; }
+
+/* ════════════════════════════════════════════════
+   FOOTER — GAME OVER / HIGH SCORE
+   ════════════════════════════════════════════════ */
+.gameover { padding: 96px 48px 64px; }
+.gameover-wrap { max-width: 1280px; margin: 0 auto; }
+.gameover-headline {
+  text-align: center;
+  font-size: clamp(56px, 9vw, 128px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: .95;
+  margin: 0 0 16px;
+  color: var(--ink);
+}
+.gameover-sub { text-align: center; font-family: var(--mono); font-size: 13px; color: var(--lavender); letter-spacing: .3em; text-transform: uppercase; margin-bottom: 56px; }
+
+.highscore {
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--bg-2);
+  border: 1.5px solid var(--lavender);
+  padding: 28px 32px;
+}
+.highscore-head { display: flex; justify-content: space-between; padding-bottom: 14px; border-bottom: 1px solid var(--line-strong); margin-bottom: 14px; font-family: var(--mono); font-size: 10px; color: var(--lavender); letter-spacing: .2em; text-transform: uppercase; }
+.highscore-row { display: grid; grid-template-columns: 60px 1.4fr 1fr 100px; gap: 12px; padding: 14px 0; border-bottom: 1px dashed var(--line); align-items: center; font-family: var(--mono); transition: background .2s var(--ease); }
+.highscore-row:hover { background: rgba(157,128,255,.05); }
+.highscore-row:last-child { border-bottom: 0; }
+.highscore-row .rank { color: var(--orange); font-weight: 700; font-size: 14px; }
+.highscore-row .name { font-size: 14px; color: var(--ink); font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+.highscore-row .link { font-size: 11px; color: var(--muted); letter-spacing: .08em; }
+.highscore-row .score { font-size: 14px; color: var(--lime); font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+
+.continue { text-align: center; margin: 56px auto 0; }
+.continue-prompt { font-family: var(--mono); font-size: 14px; color: var(--lavender); letter-spacing: .2em; text-transform: uppercase; margin-bottom: 20px; }
+.continue-prompt .blink { animation: blink 1s steps(1) infinite; }
+@keyframes blink { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
+
+.credits {
+  margin-top: 64px;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
+.credits-track {
+  display: flex;
+  gap: 48px;
+  white-space: nowrap;
+  animation: strip-scroll 60s linear infinite;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  padding-right: 48px;
+}
+.credits-track b { color: var(--ink); font-weight: 700; }
+.credits-track .star { color: var(--orange); }
+
+.cabinet {
+  display: flex;
+  justify-content: center;
+  margin-top: 64px;
+}
+.cabinet svg { width: 120px; height: auto; opacity: .4; }
+
+.signoff {
+  margin-top: 24px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+
+/* Reduced motion — kill animations, keep visuals */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0s !important; animation-iteration-count: 1 !important; transition-duration: 0s !important; }
+  .glitch::before, .glitch::after { display: none; }
+  .mascot, .cursor-px { display: none !important; }
+  body { cursor: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     PERSISTENT HUD
+     ════════════════════════════════════════════════ -->
+<div class="hud-top" id="hud">
+  <div class="group">
+    <div class="item"><span class="lbl">Player</span><span class="val">P1 ZIAUL</span></div>
+    <div class="item"><span class="lbl">Class</span><span class="val">AI-NATIVE PD</span></div>
+    <div class="item"><span class="lbl">Level</span><span class="val" id="hud-level">07</span></div>
+    <div class="item"><span class="lbl">Score</span><span class="val" id="hud-score">000000</span></div>
+  </div>
+  <div class="group">
+    <div class="stage-rail" id="stage-rail">
+      <span class="pip done" data-stage="hero" title="Title"></span>
+      <span class="pip" data-stage="featured" title="Featured"></span>
+      <span class="pip" data-stage="craft" title="Craft"></span>
+      <span class="pip" data-stage="bonus" title="Bonus"></span>
+      <span class="pip" data-stage="profile" title="Profile"></span>
+      <span class="pip" data-stage="map" title="Map"></span>
+      <span class="pip" data-stage="secret" title="Secret"></span>
+      <span class="pip" data-stage="end" title="End"></span>
+    </div>
+    <span class="live">SYSTEM ONLINE</span>
+  </div>
+</div>
+
+<div class="cursor-px" id="cursor"></div>
+<svg class="mascot" id="mascot" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+  <rect x="4" y="0" width="8" height="2" fill="currentColor"/>
+  <rect x="2" y="2" width="12" height="2" fill="currentColor"/>
+  <rect x="0" y="4" width="16" height="10" fill="currentColor"/>
+  <rect x="0" y="14" width="2" height="2" fill="currentColor"/>
+  <rect x="4" y="14" width="2" height="2" fill="currentColor"/>
+  <rect x="8" y="14" width="2" height="2" fill="currentColor"/>
+  <rect x="12" y="14" width="2" height="2" fill="currentColor"/>
+  <rect x="3" y="6" width="3" height="4" fill="white"/>
+  <rect x="10" y="6" width="3" height="4" fill="white"/>
+  <rect class="eye-l" x="4" y="7" width="1" height="2" fill="#1a1430"/>
+  <rect class="eye-r" x="11" y="7" width="1" height="2" fill="#1a1430"/>
+</svg>
+<canvas class="global-canvas" id="gc"></canvas>
+<div class="flicker"></div>
+<div class="toast" id="toast">★ STAGE CLEAR ★</div>
+
+<!-- ════════════════════════════════════════════════
+     HERO — TITLE SCREEN
+     ════════════════════════════════════════════════ -->
+<section class="hero" id="sec-hero" data-stage="hero">
+  <div class="hero-grid"></div>
+  <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+  <div class="hero-chase"></div>
+
+  <div class="hero-wrap">
+    <span class="hero-tag"><span class="live"></span> SYSTEM ONLINE · APRIL 2026</span>
+    <h1 class="hero-line"><span class="glitch" data-text="AI">AI</span></h1>
+    <h1 class="hero-line serif"><span class="glitch" data-text="native">native</span></h1>
+    <h1 class="hero-line"><span class="glitch" data-text="PRODUCT">PRODUCT</span></h1>
+    <h1 class="hero-line"><span class="glitch" data-text="DESIGNER">DESIGNER</span></h1>
+
+    <div class="hero-tail">
+      <span><span class="pixel"></span><b>PLAYER 1</b> · ZIAUL ISLAM</span>
+      <span><span class="pixel"></span><b>LEVEL</b> · 07 YEARS</span>
+      <span><span class="pixel"></span><b>STAGE</b> · BLUESTACKS // NOW.GG</span>
+      <span><span class="pixel"></span><b>SKILL TREE</b> · AI · DS · PLATFORMS</span>
+    </div>
+  </div>
+
+  <button class="hero-coin" id="hero-coin" type="button">▶ INSERT COIN</button>
+</section>
+
+<!-- ─── strip ─── -->
+<div class="strip">
+  <div class="strip-track" id="strip-1">
+    <span class="star">★</span><span>PRESS START</span><span class="ghost">◆</span><span>1UP READY</span><span class="star">★</span><span>BLUESTACKS</span><span class="ghost">◆</span><span>NOW.GG</span><span class="star">★</span><span>6LABS.AI</span><span class="ghost">◆</span><span>AMWAY</span><span class="star">★</span><span>IKOKAS</span><span class="ghost">◆</span><span>ALPHA AGENCY</span><span class="star">★</span>
+    <span class="star">★</span><span>PRESS START</span><span class="ghost">◆</span><span>1UP READY</span><span class="star">★</span><span>BLUESTACKS</span><span class="ghost">◆</span><span>NOW.GG</span><span class="star">★</span><span>6LABS.AI</span><span class="ghost">◆</span><span>AMWAY</span><span class="star">★</span><span>IKOKAS</span><span class="ghost">◆</span><span>ALPHA AGENCY</span><span class="star">★</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     FEATURED — STAGE SELECT
+     ════════════════════════════════════════════════ -->
+<section class="scene" id="sec-featured" data-stage="featured">
+  <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+  <div class="scene-wrap">
+    <div class="scene-head">
+      <div>
+        <div class="scene-num">// SECTION 02 — STAGE SELECT</div>
+        <h2 class="scene-title">Featured <em>stages</em></h2>
+      </div>
+      <div class="scene-sub">Three campaigns shipped at scale. Pick one to enter the level.</div>
+    </div>
+
+    <div class="featured-grid">
+      <article class="stage-card">
+        <div class="stage-tag">STAGE 01</div>
+        <div class="stage-stars">★★★</div>
+        <div class="stage-screen s1 crt-frame"><div class="img-pixel"></div></div>
+        <div class="stage-body">
+          <h3 class="stage-title">App Player Discovery</h3>
+          <div class="stage-meta">BLUESTACKS<span class="sep">·</span>2023–24<span class="sep">·</span>BOSS LEVEL</div>
+          <div class="stage-tags">
+            <span class="tag orange">AI / ML</span>
+            <span class="tag">B2B + B2C</span>
+          </div>
+          <p class="stage-stat"><b>+28%</b> session length · <b>+14%</b> rev / DAU</p>
+          <div class="stage-cta"><span class="play">▶ PLAY</span><span class="arrow">→</span></div>
+        </div>
+      </article>
+
+      <article class="stage-card">
+        <div class="stage-tag">STAGE 02</div>
+        <div class="stage-stars">★★★</div>
+        <div class="stage-screen s2 crt-frame"><div class="img-pixel"></div></div>
+        <div class="stage-body">
+          <h3 class="stage-title">Cloud Streaming Onboarding</h3>
+          <div class="stage-meta">NOW.GG<span class="sep">·</span>2022–23<span class="sep">·</span>SPEEDRUN</div>
+          <div class="stage-tags">
+            <span class="tag cyan">CLOUD</span>
+            <span class="tag">B2C</span>
+          </div>
+          <p class="stage-stat"><b>−60%</b> first-session friction · <b>12s</b> link → game</p>
+          <div class="stage-cta"><span class="play">▶ PLAY</span><span class="arrow">→</span></div>
+        </div>
+      </article>
+
+      <article class="stage-card">
+        <div class="stage-tag">STAGE 03</div>
+        <div class="stage-stars">★★★</div>
+        <div class="stage-screen s3 crt-frame"><div class="img-pixel"></div></div>
+        <div class="stage-body">
+          <h3 class="stage-title">Apparatus Design System</h3>
+          <div class="stage-meta">6LABS<span class="sep">·</span>2025<span class="sep">·</span>NEW GAME+</div>
+          <div class="stage-tags">
+            <span class="tag magenta">DS / TOKENS</span>
+            <span class="tag">MULTI-THEME</span>
+          </div>
+          <p class="stage-stat"><b>8 themes</b> from <b>1</b> token system · <b>4</b> product surfaces</p>
+          <div class="stage-cta"><span class="play">▶ PLAY</span><span class="arrow">→</span></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ─── strip ─── -->
+<div class="strip">
+  <div class="strip-track">
+    <span class="ghost">◆</span><span>UX RESEARCH</span><span class="star">★</span><span>DESIGN SYSTEMS</span><span class="ghost">◆</span><span>AI EXPERIMENTATION</span><span class="star">★</span><span>WIREFRAMING</span><span class="ghost">◆</span><span>A/B TESTING</span><span class="star">★</span><span>PROTOTYPING</span><span class="ghost">◆</span><span>INTERACTION DESIGN</span><span class="star">★</span>
+    <span class="ghost">◆</span><span>UX RESEARCH</span><span class="star">★</span><span>DESIGN SYSTEMS</span><span class="ghost">◆</span><span>AI EXPERIMENTATION</span><span class="star">★</span><span>WIREFRAMING</span><span class="ghost">◆</span><span>A/B TESTING</span><span class="star">★</span><span>PROTOTYPING</span><span class="ghost">◆</span><span>INTERACTION DESIGN</span><span class="star">★</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     CRAFT — ABILITIES UNLOCKED
+     ════════════════════════════════════════════════ -->
+<section class="scene" id="sec-craft" data-stage="craft">
+  <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+  <div class="scene-wrap">
+    <div class="scene-head">
+      <div>
+        <div class="scene-num">// SECTION 03 — ABILITIES UNLOCKED</div>
+        <h2 class="scene-title">Skill <em>tree</em></h2>
+      </div>
+      <div class="scene-sub">Twelve abilities, four classes. Levels reflect years actively shipping.</div>
+    </div>
+
+    <div class="abilities-grid">
+      <!-- Research class (cyan) -->
+      <div class="ability research">
+        <div class="ability-head">
+          <div class="ability-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></div>
+          <span class="ability-class">RES</span>
+        </div>
+        <h3 class="ability-name">UX Research</h3>
+        <div class="ability-bar" style="--gap:30%"></div>
+        <div class="ability-lvl">LV.<b>07</b><span>EXPERT</span></div>
+      </div>
+      <div class="ability research">
+        <div class="ability-head">
+          <div class="ability-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg></div>
+          <span class="ability-class">RES</span>
+        </div>
+        <h3 class="ability-name">User Testing</h3>
+        <div class="ability-bar" style="--gap:35%"></div>
+        <div class="ability-lvl">LV.<b>06</b><span>ADEPT</span></div>
+      </div>
+      <div class="ability research">
+        <div class="ability-head">
+          <div class="ability-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><polyline points="14 7 21 7 21 14"/></svg></div>
+          <span class="ability-class">RES</span>
+        </div>
+        <h3 class="ability-name">Customer Journey</h3>
+        <div class="ability-bar" style="--gap:30%"></div>
+        <div class="ability-lvl">LV.<b>07</b><span>EXPERT</span></div>
+      </div>
+      <div class="ability research">
+        <div class="ability-head">
+          <div class="ability-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg></div>
+          <span class="ability-class">RES</span>
+        </div>
+        <h3 class="ability-name">A/B Testing</h3>
+        <div class="ability-bar" style="--gap:35%"></div>
+        <div class="ability-lvl">LV.<b>06</b><span>ADEPT</span></div>
+      </div>
+
+      <!-- Craft class (orange) -->
+      <div class="ability craft">
+        <div class="ability-head">
+          <div class="ability-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></div>
+          <span class="ability-class">CRF</span>
+        </div>
+        <h3 class="ability-name">Wireframing</h3>
+        <div class="ability-bar" style="--gap:20%"></div>
+        <div class="ability-lvl">LV.<b>08</b><span>MASTER</span></div>
+      </div>
+      <div class="ability craft">
+        <div class="ability-head">
+          <div class="ability-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><polyline points="2 8.5 12 14 22 8.5"/><line x1="12" y1="22" x2="12" y2="14"/></svg></div>
+          <span class="ability-class">CRF</span>
+        </div>
+        <h3 class="ability-name">Prototyping</h3>
+        <div class="ability-bar" style="--gap:20%"></div>
+        <div class="ability-lvl">LV.<b>08</b><span>MASTER</span></div>
+      </div>
+      <div class="ability craft">
+        <div class="ability-head">
+          <div class="ability-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg></div>
+          <span class="ability-class">CRF</span>
+        </div>
+        <h3 class="ability-name">Interaction Design</h3>
+        <div class="ability-bar" style="--gap:30%"></div>
+        <div class="ability-lvl">LV.<b>07</b><span>EXPERT</span></div>
+      </div>
+      <div class="ability craft">
+        <div class="ability-head">
+          <div class="ability-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="6" r="3"/><circle cx="6" cy="17" r="3"/><circle cx="17" cy="17" r="3"/></svg></div>
+          <span class="ability-class">CRF</span>
+        </div>
+        <h3 class="ability-name">Visual Design</h3>
+        <div class="ability-bar" style="--gap:30%"></div>
+        <div class="ability-lvl">LV.<b>07</b><span>EXPERT</span></div>
+      </div>
+
+      <!-- Systems class (lavender) -->
+      <div class="ability systems">
+        <div class="ability-head">
+          <div class="ability-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+          <span class="ability-class">SYS</span>
+        </div>
+        <h3 class="ability-name">Design Systems</h3>
+        <div class="ability-bar" style="--gap:10%"></div>
+        <div class="ability-lvl">LV.<b>09</b><span>LEGEND</span></div>
+      </div>
+      <div class="ability systems">
+        <div class="ability-head">
+          <div class="ability-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 7 9 7 11 4 13 4 15 7 21 7"/><path d="M3 7v13h18V7"/><circle cx="12" cy="14" r="3"/></svg></div>
+          <span class="ability-class">SYS</span>
+        </div>
+        <h3 class="ability-name">Information Architecture</h3>
+        <div class="ability-bar" style="--gap:30%"></div>
+        <div class="ability-lvl">LV.<b>07</b><span>EXPERT</span></div>
+      </div>
+      <div class="ability systems">
+        <div class="ability-head">
+          <div class="ability-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+          <span class="ability-class">SYS</span>
+        </div>
+        <h3 class="ability-name">Cross-platform</h3>
+        <div class="ability-bar" style="--gap:30%"></div>
+        <div class="ability-lvl">LV.<b>07</b><span>EXPERT</span></div>
+      </div>
+
+      <!-- AI class (magenta) -->
+      <div class="ability ai">
+        <div class="ability-head">
+          <div class="ability-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 5a2 2 0 0 0 1.4 1.4L20 11l-5 1.6a2 2 0 0 0-1.4 1.4L12 19l-1.6-5a2 2 0 0 0-1.4-1.4L4 11l5-1.6A2 2 0 0 0 10.4 8L12 3z"/></svg></div>
+          <span class="ability-class">AI</span>
+        </div>
+        <h3 class="ability-name">AI Experimentation</h3>
+        <div class="ability-bar" style="--gap:35%"></div>
+        <div class="ability-lvl">LV.<b>06</b><span>RISING</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     WORK GRID — BONUS ROUNDS
+     ════════════════════════════════════════════════ -->
+<section class="scene" id="sec-bonus" data-stage="bonus">
+  <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+  <div class="scene-wrap">
+    <div class="scene-head">
+      <div>
+        <div class="scene-num">// SECTION 04 — BONUS ROUNDS</div>
+        <h2 class="scene-title">Side <em>quests</em></h2>
+      </div>
+      <div class="scene-sub">Smaller stages — redesigns, experiments, contract gigs.</div>
+    </div>
+
+    <div class="bonus-grid">
+      <article class="bonus">
+        <div class="bonus-head"><span class="bonus-num">ROUND 04</span><span class="bonus-yr">2020–21</span></div>
+        <h3 class="bonus-title">Amway India · Mobile App Redesign</h3>
+        <p class="bonus-desc">UX overhaul + design system pass adhering to Amway global guidelines.</p>
+        <div class="bonus-foot"><span class="bonus-yr">CONTRACT</span><span class="play">▶ PLAY</span></div>
+      </article>
+      <article class="bonus">
+        <div class="bonus-head"><span class="bonus-num">ROUND 05</span><span class="bonus-yr">2020–21</span></div>
+        <h3 class="bonus-title">Amway · Global DS Adoption</h3>
+        <p class="bonus-desc">Built shared component library to bring India in line with global product surfaces.</p>
+        <div class="bonus-foot"><span class="bonus-yr">CONTRACT</span><span class="play">▶ PLAY</span></div>
+      </article>
+      <article class="bonus">
+        <div class="bonus-head"><span class="bonus-num">ROUND 06</span><span class="bonus-yr">2020</span></div>
+        <h3 class="bonus-title">Ikokas · SaaS Portals</h3>
+        <p class="bonus-desc">Client-tailored UX across multiple B2B SaaS portals — research, IA, hi-fi screens.</p>
+        <div class="bonus-foot"><span class="bonus-yr">FULL-TIME</span><span class="play">▶ PLAY</span></div>
+      </article>
+      <article class="bonus">
+        <div class="bonus-head"><span class="bonus-num">ROUND 07</span><span class="bonus-yr">2022</span></div>
+        <h3 class="bonus-title">BlueStacks · Multi-platform Auth</h3>
+        <p class="bonus-desc">Unified sign-in across App Player, Cloud Player, and web — single account, four surfaces.</p>
+        <div class="bonus-foot"><span class="bonus-yr">PRODUCT DESIGNER</span><span class="play">▶ PLAY</span></div>
+      </article>
+      <article class="bonus">
+        <div class="bonus-head"><span class="bonus-num">ROUND 08</span><span class="bonus-yr">2023</span></div>
+        <h3 class="bonus-title">now.gg · Pricing Experiments</h3>
+        <p class="bonus-desc">A/B tested pricing pages with cohort-aware dynamic copy. Conversion lift, no dark patterns.</p>
+        <div class="bonus-foot"><span class="bonus-yr">PRODUCT DESIGNER</span><span class="play">▶ PLAY</span></div>
+      </article>
+      <article class="bonus">
+        <div class="bonus-head"><span class="bonus-num">ROUND 09</span><span class="bonus-yr">2025</span></div>
+        <h3 class="bonus-title">Internal AI Workflow Tooling</h3>
+        <p class="bonus-desc">Designer-facing tools threading LLMs into research synthesis and component drafts.</p>
+        <div class="bonus-foot"><span class="bonus-yr">EXPLORATION</span><span class="play">▶ PLAY</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ─── strip ─── -->
+<div class="strip">
+  <div class="strip-track">
+    <span class="star">★</span><span>PLAYER PROFILE</span><span class="ghost">◆</span><span>BIO LOG</span><span class="star">★</span><span>EQUIPMENT</span><span class="ghost">◆</span><span>JOIN DATE 2019</span><span class="star">★</span><span>ACTIVE STAGE NOW.GG</span><span class="ghost">◆</span><span>CLASS AI-NATIVE</span><span class="star">★</span>
+    <span class="star">★</span><span>PLAYER PROFILE</span><span class="ghost">◆</span><span>BIO LOG</span><span class="star">★</span><span>EQUIPMENT</span><span class="ghost">◆</span><span>JOIN DATE 2019</span><span class="star">★</span><span>ACTIVE STAGE NOW.GG</span><span class="ghost">◆</span><span>CLASS AI-NATIVE</span><span class="star">★</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     ABOUT — PLAYER PROFILE
+     ════════════════════════════════════════════════ -->
+<section class="scene" id="sec-profile" data-stage="profile">
+  <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+  <div class="scene-wrap">
+    <div class="scene-head">
+      <div>
+        <div class="scene-num">// SECTION 05 — PLAYER PROFILE</div>
+        <h2 class="scene-title">About <em>P1</em></h2>
+      </div>
+      <div class="scene-sub">Stats, bio, and equipment loaded from save file <b style="color:var(--ink)">/ZIAUL.SAV</b>.</div>
+    </div>
+
+    <div class="profile">
+      <!-- Left card: avatar + stats -->
+      <div class="profile-card">
+        <div class="profile-avatar">
+          <svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+            <rect width="16" height="16" fill="#15102a"/>
+            <rect x="4" y="3" width="8" height="9" fill="#d4a373"/>
+            <rect x="3" y="2" width="10" height="3" fill="#1a1430"/>
+            <rect x="4" y="1" width="8" height="2" fill="#1a1430"/>
+            <rect x="5" y="6" width="2" height="1" fill="#1a1430"/>
+            <rect x="9" y="6" width="2" height="1" fill="#1a1430"/>
+            <rect x="6" y="9" width="4" height="1" fill="#1a1430"/>
+            <rect x="3" y="5" width="1" height="3" fill="#ff5a1f"/>
+            <rect x="12" y="5" width="1" height="3" fill="#ff5a1f"/>
+            <rect x="3" y="4" width="10" height="1" fill="#ff5a1f"/>
+            <rect x="3" y="12" width="10" height="4" fill="#00d6ff"/>
+            <rect x="6" y="12" width="4" height="2" fill="#1a1430"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="profile-name">ZIAUL ISLAM</h3>
+          <div class="profile-class">AI-NATIVE PRODUCT DESIGNER</div>
+        </div>
+        <div class="profile-stats">
+          <div class="profile-stat"><span class="lbl">Lvl</span><span class="val">07</span></div>
+          <div class="profile-stat"><span class="lbl">Class</span><span class="val">PD</span></div>
+          <div class="profile-stat"><span class="lbl">Joined</span><span class="val">2019</span></div>
+          <div class="profile-stat"><span class="lbl">Stage</span><span class="val">NOW.GG</span></div>
+          <div class="profile-stat"><span class="lbl">HP</span><span class="val">∞</span></div>
+          <div class="profile-stat"><span class="lbl">MP</span><span class="val">100%</span></div>
+        </div>
+      </div>
+
+      <div class="profile-right">
+        <!-- Bio log panel — sticker sentence kept verbatim -->
+        <div class="bio-log">
+          <div class="panel-head"><span class="l">▼ BIO LOG</span><span class="r">● REC</span></div>
+          <p class="bio-sentence">
+            Hi, I'm
+            <span class="chipx name">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 1 0-4 0"/><path d="M14 10V4a2 2 0 1 0-4 0v2"/><path d="M10 10.5V6a2 2 0 1 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></span>Ziaul
+            </span> —
+            <span class="swirl">a Product Designer</span>
+            crafting end-to-end flows since
+            <span class="chipx year">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg></span>2019
+            </span>.
+            Focused on
+            <span class="chipx ai">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.6 5a2 2 0 0 0 1.4 1.4L20 11l-5 1.6a2 2 0 0 0-1.4 1.4L12 19l-1.6-5a2 2 0 0 0-1.4-1.4L4 11l5-1.6A2 2 0 0 0 10.4 8L12 3z"/></svg></span>AI-native
+            </span> products,
+            <span class="chipx systems">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>design&nbsp;systems
+            </span>
+            and platforms that
+            <span class="chipx scale">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></span>scale
+            </span>
+            — currently shaping AI at
+            <span class="chipx company">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span>BlueStacks&nbsp;&amp;&nbsp;now.gg
+            </span>.
+          </p>
+        </div>
+
+        <!-- Equipment / skill cluster -->
+        <div class="equipment">
+          <div class="panel-head"><span class="l">▼ EQUIPMENT</span><span class="r">17 EQUIPPED</span></div>
+          <div class="equip-cluster">
+            <span class="skill-pill">Empathy</span>
+            <span class="skill-pill solid">User Research</span>
+            <span class="skill-pill">Wireframing</span>
+            <span class="skill-pill outline">Prototyping</span>
+            <span class="skill-pill tag">User Flow</span>
+            <span class="skill-pill cyan">Information Architecture</span>
+            <span class="skill-pill solid">Critical Thinking</span>
+            <span class="skill-pill">Communication</span>
+            <span class="skill-pill dashed">Collaboration</span>
+            <span class="skill-pill amp">&amp;</span>
+            <span class="skill-pill outline">Design Sprints</span>
+            <span class="skill-pill tag">A/B Testing</span>
+            <span class="skill-pill">Interaction Design</span>
+            <span class="skill-pill cyan">Visual Design</span>
+            <span class="skill-pill solid">Design Systems</span>
+            <span class="skill-pill">Design Tokens</span>
+            <span class="skill-pill tag">AI Experimentation</span>
+            <span class="skill-pill">Cross-platform</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════
+     TIMELINE — WORLD MAP
+     ════════════════════════════════════════════════ -->
+<section class="scene" id="sec-map" data-stage="map">
+  <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+  <div class="scene-wrap">
+    <div class="scene-head">
+      <div>
+        <div class="scene-num">// SECTION 06 — WORLD MAP</div>
+        <h2 class="scene-title">Career <em>map</em></h2>
+      </div>
+      <div class="scene-sub">Four worlds cleared. Currently grinding the boss stage.</div>
+    </div>
+
+    <div class="worldmap">
+      <div class="worldmap-track">
+        <div class="worldmap-path"></div>
+        <div class="world-node">
+          <div class="world-pin">01<span class="stamp">CLEARED</span></div>
+          <div class="world-card">
+            <div class="yr">2019</div>
+            <div class="co">Alpha Agency</div>
+            <div class="role">UI/UX Designer</div>
+          </div>
+        </div>
+        <div class="world-node">
+          <div class="world-pin">02<span class="stamp">CLEARED</span></div>
+          <div class="world-card">
+            <div class="yr">2020</div>
+            <div class="co">Ikokas Digital</div>
+            <div class="role">UI/UX Designer</div>
+          </div>
+        </div>
+        <div class="world-node">
+          <div class="world-pin">03<span class="stamp">CLEARED</span></div>
+          <div class="world-card">
+            <div class="yr">2020 – 21</div>
+            <div class="co">Amway India</div>
+            <div class="role">Contract UI/UX</div>
+          </div>
+        </div>
+        <div class="world-node active">
+          <div class="world-pin">04<span class="stamp">ACTIVE</span></div>
+          <div class="world-card">
+            <div class="yr">2021 — present</div>
+            <div class="co">BlueStacks // now.gg</div>
+            <div class="role">Product Designer</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── strip ─── -->
+<div class="strip">
+  <div class="strip-track">
+    <span class="ghost">◆</span><span>SECRET STAGE INCOMING</span><span class="star">★</span><span>BONUS UNLOCKED</span><span class="ghost">◆</span><span>AI-NATIVE WORKFLOWS</span><span class="star">★</span><span>WARNING — GLITCH ZONE</span><span class="ghost">◆</span>
+    <span class="ghost">◆</span><span>SECRET STAGE INCOMING</span><span class="star">★</span><span>BONUS UNLOCKED</span><span class="ghost">◆</span><span>AI-NATIVE WORKFLOWS</span><span class="star">★</span><span>WARNING — GLITCH ZONE</span><span class="ghost">◆</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     WORKSHOP — SECRET STAGE
+     ════════════════════════════════════════════════ -->
+<section class="scene secret" id="sec-secret" data-stage="secret">
+  <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+  <div class="scene-wrap">
+    <div style="text-align:center;">
+      <span class="secret-tag">★ SECRET STAGE UNLOCKED ★</span>
+      <h2 class="secret-title"><span class="glitch" data-text="AI-NATIVE">AI-NATIVE</span> <em>workshops</em></h2>
+      <p class="secret-desc">
+        Running internal sessions on weaving LLMs into design workflows — prompts as design systems,
+        synthesis-by-agent, and design-to-code pipelines that don't suck. Open to running this for
+        your team.
+      </p>
+      <div class="secret-actions">
+        <button class="pxbtn primary" type="button">▶ ENTER STAGE</button>
+        <button class="pxbtn cyan" type="button">▶ BOOK A SESSION</button>
+      </div>
+      <div class="secret-hint">CHEAT CODE — <span class="key">↑</span><span class="key">↑</span><span class="key">↓</span><span class="key">↓</span><span class="key">←</span><span class="key">→</span><span class="key">←</span><span class="key">→</span><span class="key">B</span><span class="key">A</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── strip ─── -->
+<div class="strip">
+  <div class="strip-track">
+    <span class="star">★</span><span>HIGH SCORE TABLE</span><span class="ghost">◆</span><span>CONTINUE? Y/N</span><span class="star">★</span><span>THANKS FOR PLAYING</span><span class="ghost">◆</span><span>CREDITS ROLLING</span><span class="star">★</span>
+    <span class="star">★</span><span>HIGH SCORE TABLE</span><span class="ghost">◆</span><span>CONTINUE? Y/N</span><span class="star">★</span><span>THANKS FOR PLAYING</span><span class="ghost">◆</span><span>CREDITS ROLLING</span><span class="star">★</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     FOOTER — GAME OVER / HIGH SCORE
+     ════════════════════════════════════════════════ -->
+<footer class="scene gameover" id="sec-end" data-stage="end">
+  <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+  <div class="gameover-wrap">
+    <h2 class="gameover-headline"><span class="glitch" data-text="THANKS">THANKS</span> for playing.</h2>
+    <div class="gameover-sub">▼ HIGH SCORE TABLE — INSERT NAME ▼</div>
+
+    <div class="highscore">
+      <div class="highscore-head"><span>RANK</span><span>NAME</span><span>HANDLE</span><span>SCORE</span></div>
+      <a class="highscore-row" href="https://linkedin.com/in/ziaulislam14" target="_blank" rel="noreferrer"><span class="rank">1ST</span><span class="name">LINKEDIN</span><span class="link">/in/ziaulislam14</span><span class="score">999,999</span></a>
+      <a class="highscore-row" href="mailto:ziaul.islam14@gmail.com"><span class="rank">2ND</span><span class="name">EMAIL</span><span class="link">ziaul.islam14@gmail.com</span><span class="score">888,888</span></a>
+      <a class="highscore-row" href="#"><span class="rank">3RD</span><span class="name">CALENDAR</span><span class="link">book a slot</span><span class="score">777,777</span></a>
+      <a class="highscore-row" href="#"><span class="rank">4TH</span><span class="name">DRIBBBLE</span><span class="link">/ziaulislam</span><span class="score">666,666</span></a>
+      <a class="highscore-row" href="#"><span class="rank">5TH</span><span class="name">GITHUB</span><span class="link">/ziaulislam14</span><span class="score">555,555</span></a>
+    </div>
+
+    <div class="continue">
+      <div class="continue-prompt">CONTINUE? <span class="blink">Y</span>/N</div>
+      <a href="mailto:ziaul.islam14@gmail.com" class="pxbtn primary">▶ Y · CONTINUE TO INBOX</a>
+    </div>
+
+    <div class="credits">
+      <div class="credits-track">
+        <span class="star">★</span><span><b>DESIGN</b> · ZIAUL ISLAM</span><span class="star">★</span><span><b>BUILD</b> · NEXT.JS · TAILWIND · FRAMER MOTION</span><span class="star">★</span><span><b>INSPIRATION</b> · EVERY ARCADE I LOVED</span><span class="star">★</span><span><b>YEAR</b> · 2026</span><span class="star">★</span><span><b>VERSION</b> · v1.0 ARCADE EDITION</span><span class="star">★</span>
+        <span class="star">★</span><span><b>DESIGN</b> · ZIAUL ISLAM</span><span class="star">★</span><span><b>BUILD</b> · NEXT.JS · TAILWIND · FRAMER MOTION</span><span class="star">★</span><span><b>INSPIRATION</b> · EVERY ARCADE I LOVED</span><span class="star">★</span><span><b>YEAR</b> · 2026</span><span class="star">★</span><span><b>VERSION</b> · v1.0 ARCADE EDITION</span><span class="star">★</span>
+      </div>
+    </div>
+
+    <div class="cabinet">
+      <svg viewBox="0 0 100 140" shape-rendering="crispEdges">
+        <rect x="10" y="0" width="80" height="20" fill="var(--lavender)"/>
+        <rect x="14" y="22" width="72" height="44" fill="var(--bg-3)" stroke="var(--lavender)" stroke-width="1"/>
+        <rect x="20" y="68" width="60" height="8" fill="var(--orange)"/>
+        <rect x="14" y="80" width="72" height="30" fill="var(--bg-2)" stroke="var(--lavender)" stroke-width="1"/>
+        <circle cx="35" cy="95" r="4" fill="var(--orange)"/>
+        <circle cx="55" cy="95" r="3" fill="var(--magenta)"/>
+        <circle cx="65" cy="95" r="3" fill="var(--cyan)"/>
+        <rect x="10" y="112" width="80" height="28" fill="var(--lavender)"/>
+        <rect x="40" y="118" width="20" height="18" fill="var(--bg)"/>
+      </svg>
+    </div>
+    <div class="signoff">v1.0 — arcade edition · ziaul.islam14@gmail.com · 2026</div>
+  </div>
+</footer>
+
+<script>
+/* ════════════════════════════════════════════════
+   GLOBAL — cursor, mascot, scoreboard, particles
+   ════════════════════════════════════════════════ */
+const cursor = document.getElementById('cursor');
+const mascot = document.getElementById('mascot');
+const eyeL = mascot.querySelector('.eye-l');
+const eyeR = mascot.querySelector('.eye-r');
+const gc = document.getElementById('gc');
+const gctx = gc.getContext('2d');
+const dpr = Math.min(window.devicePixelRatio || 1, 2);
+const palette = ['#ff2e6c', '#00d6ff', '#b9a7ff', '#4ade80', '#ff5a1f'];
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function resizeGc() {
+  gc.width = innerWidth * dpr;
+  gc.height = innerHeight * dpr;
+  gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+resizeGc();
+addEventListener('resize', resizeGc);
+
+let mx = innerWidth / 2, my = innerHeight / 2;
+let cxF = mx, cyF = my;
+const particles = [];
+
+addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px';
+  cursor.style.top = my + 'px';
+  cursor.classList.add('show');
+  if (!reduce) mascot.classList.add('show');
+});
+addEventListener('mouseleave', () => {
+  cursor.classList.remove('show');
+  mascot.classList.remove('show');
+});
+
+/* ════════════════════════════════════════════════
+   SCRAMBLE — letter cycle on hover
+   ════════════════════════════════════════════════ */
+const SC = '!<>-_\\/[]{}=+*^?#01░▒▓■';
+function scramble(el, final, dur) {
+  const myId = (parseInt(el.dataset.scrambleId, 10) || 0) + 1;
+  el.dataset.scrambleId = String(myId);
+  const start = performance.now();
+  function step(now) {
+    if (parseInt(el.dataset.scrambleId, 10) !== myId) return;
+    const t = Math.min(1, (now - start) / dur);
+    let s = '';
+    for (let i = 0; i < final.length; i++) {
+      if (i / final.length < t * 1.3) s += final[i];
+      else s += SC[(Math.random() * SC.length) | 0];
+    }
+    el.textContent = s;
+    el.setAttribute('data-text', s);
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+document.querySelectorAll('.glitch').forEach(el => {
+  el.dataset.original = el.textContent;
+  el.addEventListener('mouseenter', () => scramble(el, el.dataset.original, 600));
+  el.addEventListener('mousemove', e => {
+    for (let i = 0; i < 2; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const sp = 1 + Math.random() * 4;
+      particles.push({
+        x: e.clientX + (Math.random() - .5) * 30,
+        y: e.clientY + (Math.random() - .5) * 30,
+        vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+        life: 1, col: palette[(Math.random() * palette.length) | 0],
+        size: 2 + ((Math.random() * 3) | 0)
+      });
+    }
+  });
+  el.addEventListener('click', () => {
+    const r = el.getBoundingClientRect();
+    explodeAt(r.left + r.width / 2, r.top + r.height / 2, 110);
+    scramble(el, el.dataset.original, 800);
+  });
+});
+
+document.querySelectorAll('.bonus-title, .stage-title').forEach(el => {
+  el.dataset.original = el.textContent;
+  el.addEventListener('mouseenter', () => scramble(el, el.dataset.original, 480));
+});
+
+function explodeAt(x, y, n) {
+  for (let i = 0; i < n; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const sp = 2 + Math.random() * 9;
+    particles.push({
+      x: x + (Math.random() - .5) * 30,
+      y: y + (Math.random() - .5) * 30,
+      vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+      life: 1, col: palette[(Math.random() * palette.length) | 0],
+      size: 2 + ((Math.random() * 4) | 0)
+    });
+  }
+}
+
+/* ════════════════════════════════════════════════
+   COIN — pixel rain + button toggle
+   ════════════════════════════════════════════════ */
+const coin = document.getElementById('hero-coin');
+const rain = [];
+let coinTimer = null;
+coin.addEventListener('click', () => {
+  coin.classList.add('playing');
+  coin.textContent = '● ● ● PLAYING ● ● ●';
+  for (let i = 0; i < 280; i++) {
+    rain.push({
+      x: Math.random() * innerWidth,
+      y: -10 - Math.random() * 240,
+      vy: 2 + Math.random() * 7,
+      size: 2 + ((Math.random() * 4) | 0),
+      col: palette[(Math.random() * palette.length) | 0],
+    });
+  }
+  clearTimeout(coinTimer);
+  coinTimer = setTimeout(() => {
+    coin.classList.remove('playing');
+    coin.textContent = '▶ INSERT COIN';
+  }, 4400);
+});
+
+/* ════════════════════════════════════════════════
+   SCOREBOARD — score grows on scroll, level on stages
+   ════════════════════════════════════════════════ */
+const hudScore = document.getElementById('hud-score');
+const hudLevel = document.getElementById('hud-level');
+const stageRail = document.getElementById('stage-rail');
+const sections = document.querySelectorAll('[data-stage]');
+const stagesSeen = new Set(['hero']);
+
+function updateScore() {
+  const max = document.body.scrollHeight - innerHeight;
+  const pct = Math.min(1, scrollY / Math.max(1, max));
+  const v = Math.floor(pct * 999999);
+  hudScore.textContent = String(v).padStart(6, '0');
+}
+addEventListener('scroll', updateScore, { passive: true });
+updateScore();
+
+/* IntersectionObserver — section enter → toast + level + pip */
+const toast = document.getElementById('toast');
+let toastTimer = null;
+function showToast(text) {
+  toast.textContent = text;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1600);
+}
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting && e.intersectionRatio > 0.4) {
+      const id = e.target.dataset.stage;
+      if (!id) return;
+      if (!stagesSeen.has(id)) {
+        stagesSeen.add(id);
+        showToast('★ STAGE CLEAR · ' + id.toUpperCase() + ' ★');
+      }
+      // Update active pip
+      stageRail.querySelectorAll('.pip').forEach(p => {
+        if (stagesSeen.has(p.dataset.stage)) p.classList.add('done');
+        p.classList.toggle('active', p.dataset.stage === id);
+      });
+      // Level = stages seen
+      hudLevel.textContent = String(6 + stagesSeen.size).padStart(2, '0');
+    }
+  });
+}, { threshold: [0.4] });
+sections.forEach(s => io.observe(s));
+
+/* ════════════════════════════════════════════════
+   KONAMI — ↑↑↓↓←→←→BA → rainbow rain
+   ════════════════════════════════════════════════ */
+const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let kIdx = 0;
+addEventListener('keydown', e => {
+  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  if (k === KONAMI[kIdx]) {
+    kIdx++;
+    if (kIdx === KONAMI.length) {
+      kIdx = 0;
+      showToast('★ CHEAT ACTIVATED ★');
+      for (let i = 0; i < 800; i++) {
+        rain.push({
+          x: Math.random() * innerWidth,
+          y: -20 - Math.random() * 400,
+          vy: 1 + Math.random() * 8,
+          size: 2 + ((Math.random() * 5) | 0),
+          col: palette[(Math.random() * palette.length) | 0],
+        });
+      }
+    }
+  } else {
+    kIdx = (k === KONAMI[0]) ? 1 : 0;
+  }
+});
+
+/* ════════════════════════════════════════════════
+   MAIN TICK — mascot, particles, rain
+   ════════════════════════════════════════════════ */
+function tick() {
+  // Mascot follow + eye tracking
+  cxF += (mx - cxF) * 0.08;
+  cyF += (my - cyF) * 0.08;
+  mascot.style.left = (cxF + 36) + 'px';
+  mascot.style.top = (cyF + 36) + 'px';
+  const dx = mx - cxF, dy = my - cyF;
+  const len = Math.max(1, Math.sqrt(dx*dx + dy*dy));
+  const ex = (dx / len) * 0.7, ey = (dy / len) * 0.7;
+  eyeL.setAttribute('x', (4 + ex).toFixed(2));
+  eyeL.setAttribute('y', (7 + ey).toFixed(2));
+  eyeR.setAttribute('x', (11 + ex).toFixed(2));
+  eyeR.setAttribute('y', (7 + ey).toFixed(2));
+
+  // Clear + draw particles
+  gctx.clearRect(0, 0, innerWidth, innerHeight);
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx; p.y += p.vy;
+    p.vx *= 0.96; p.vy *= 0.96;
+    p.life -= 0.025;
+    if (p.life <= 0) { particles.splice(i, 1); continue; }
+    gctx.fillStyle = p.col;
+    gctx.globalAlpha = Math.max(0, p.life);
+    gctx.fillRect(p.x | 0, p.y | 0, p.size, p.size);
+  }
+  // Rain
+  for (let i = rain.length - 1; i >= 0; i--) {
+    const p = rain[i];
+    p.y += p.vy;
+    if (p.y > innerHeight + 10) { rain.splice(i, 1); continue; }
+    gctx.globalAlpha = 1;
+    gctx.fillStyle = p.col;
+    gctx.fillRect(p.x | 0, p.y | 0, p.size, p.size);
+  }
+  gctx.globalAlpha = 1;
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
+
+</body>
+</html>

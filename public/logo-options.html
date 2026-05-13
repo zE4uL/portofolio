@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Logo Explorations · Ziaul Islam</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg-2: #111;
+    --ink: #f5f1e8;
+    --ink-2: #b8b3a8;
+    --ink-3: #6b6660;
+    --line: rgba(245,241,232,0.08);
+    --accent: #ff3b1f;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --serif: 'Instrument Serif', serif;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); }
+  body { min-height: 100vh; padding: 60px 40px 120px; }
+
+  .page-head {
+    max-width: 1200px; margin: 0 auto 56px;
+    display: flex; align-items: flex-end; justify-content: space-between;
+    border-bottom: 1px solid var(--line); padding-bottom: 24px;
+  }
+  .page-head h1 {
+    font-family: var(--serif); font-weight: 400; font-size: 56px; line-height: 1; margin: 0 0 4px;
+  }
+  .page-head h1 em { font-style: italic; color: var(--accent); }
+  .page-head .meta {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .legend {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-2); display: flex; gap: 18px;
+  }
+  .legend span::before { content: '·'; margin-right: 6px; color: var(--accent); }
+
+  .grid {
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px;
+  }
+  .card {
+    background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px;
+    padding: 32px; display: flex; flex-direction: column; gap: 20px; min-height: 280px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+  .card:hover { border-color: rgba(245,241,232,0.18); transform: translateY(-2px); }
+  .card-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--ink-3); padding-bottom: 12px; border-bottom: 1px dashed var(--line);
+  }
+  .card-head .num { color: var(--accent); }
+  .card-head .name { color: var(--ink); }
+  .card-stage {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    padding: 24px 12px;
+  }
+  .card-foot {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--ink-3); display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .card-foot span { padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; }
+  .card-foot span.tag-accent { color: var(--accent); border-color: rgba(255,59,31,0.4); }
+
+  /* Variants on light background swatch */
+  .swatch-light {
+    background: #f5f1e8; color: #0a0a0a;
+    padding: 16px 18px; border-radius: 8px; display: inline-flex; gap: 12px; align-items: center;
+  }
+
+  /* ===== Logo 01: Monogram Pill ===== */
+  .lg-pill {
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 10px 16px 10px 12px;
+    background: rgba(245,241,232,0.04); border: 1px solid var(--line); border-radius: 999px;
+  }
+  .lg-pill-mark {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--accent); color: #0a0a0a;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-weight: 700; font-size: 13px; letter-spacing: 0.02em;
+  }
+  .lg-pill-mark .slash { font-weight: 400; opacity: 0.6; margin: 0 1px; }
+  .lg-pill-meta { display: flex; flex-direction: column; line-height: 1; }
+  .lg-pill-name {
+    font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .lg-pill-role {
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--ink-3); margin-top: 5px;
+  }
+
+  /* ===== Logo 02: Wordmark Stack ===== */
+  .lg-stack {
+    display: inline-flex; flex-direction: column; align-items: flex-start;
+    line-height: 0.92;
+  }
+  .lg-stack-name {
+    font-family: var(--serif); font-style: italic; font-size: 56px; font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  .lg-stack-name b { font-style: normal; color: var(--accent); }
+  .lg-stack-bar {
+    display: flex; align-items: center; gap: 8px; margin-top: 14px;
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .lg-stack-bar::before {
+    content: ''; display: inline-block; width: 28px; height: 1px; background: var(--accent);
+  }
+
+  /* ===== Logo 03: Grid Mark ===== */
+  .lg-grid {
+    display: inline-flex; align-items: center; gap: 14px;
+  }
+  .lg-grid-mark {
+    width: 56px; height: 56px;
+    display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+    gap: 3px; padding: 4px;
+    border: 1px solid var(--ink-2);
+  }
+  .lg-grid-mark span {
+    background: transparent;
+  }
+  /* Form a "Z" using the 3x3 grid */
+  .lg-grid-mark span:nth-child(1),
+  .lg-grid-mark span:nth-child(2),
+  .lg-grid-mark span:nth-child(3),
+  .lg-grid-mark span:nth-child(5),
+  .lg-grid-mark span:nth-child(7),
+  .lg-grid-mark span:nth-child(8),
+  .lg-grid-mark span:nth-child(9) { background: var(--ink); }
+  .lg-grid-mark span:nth-child(3),
+  .lg-grid-mark span:nth-child(7) { background: var(--accent); }
+  .lg-grid-meta {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink); line-height: 1.4;
+  }
+  .lg-grid-meta small { color: var(--ink-3); font-size: 9px; letter-spacing: 0.24em; }
+
+  /* ===== Logo 04: Slash System ===== */
+  .lg-slash {
+    display: inline-flex; align-items: baseline; gap: 0;
+    font-family: var(--mono); font-weight: 700; font-size: 28px; letter-spacing: -0.01em;
+  }
+  .lg-slash .z { color: var(--ink); }
+  .lg-slash .sep {
+    color: var(--accent); font-size: 32px; margin: 0 4px; transform: translateY(2px);
+    display: inline-block;
+  }
+  .lg-slash .i { color: var(--ink); }
+  .lg-slash-tail {
+    margin-left: 14px; padding-left: 14px; border-left: 1px solid var(--line);
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.26em; text-transform: uppercase;
+    color: var(--ink-3); align-self: center;
+  }
+
+  /* ===== Logo 05: Brutalist Stamp ===== */
+  .lg-stamp {
+    display: inline-flex; align-items: stretch;
+    border: 2px solid var(--ink); position: relative;
+  }
+  .lg-stamp-block {
+    background: var(--ink); color: #0a0a0a;
+    padding: 14px 16px;
+    font-family: var(--mono); font-weight: 700; font-size: 22px; line-height: 1;
+    display: inline-flex; align-items: center;
+  }
+  .lg-stamp-block .accent { color: var(--accent); margin-right: 4px; }
+  .lg-stamp-text {
+    padding: 14px 18px;
+    display: flex; flex-direction: column; justify-content: center; gap: 4px;
+  }
+  .lg-stamp-text .top {
+    font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--ink);
+  }
+  .lg-stamp-text .bot {
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .lg-stamp::after {
+    content: ''; position: absolute; right: -6px; bottom: -6px;
+    width: 100%; height: 100%; border: 2px solid var(--accent); z-index: -1;
+  }
+
+  /* ===== Logo 06: Circle Caret (animated) ===== */
+  .lg-caret {
+    display: inline-flex; align-items: center; gap: 14px;
+  }
+  .lg-caret-orb {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #1a1a1a, #050505);
+    border: 1px solid var(--ink-3);
+    position: relative;
+    display: inline-flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .lg-caret-orb::before {
+    content: ''; position: absolute; inset: 6px; border-radius: 50%;
+    border: 1px dashed rgba(255,59,31,0.45);
+    animation: spin 8s linear infinite;
+  }
+  .lg-caret-orb svg { width: 22px; height: 22px; position: relative; z-index: 2; }
+  .lg-caret-meta {
+    display: flex; flex-direction: column; line-height: 1.05; gap: 6px;
+  }
+  .lg-caret-meta .name {
+    font-family: var(--serif); font-style: italic; font-size: 22px; line-height: 1;
+  }
+  .lg-caret-meta .role {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.26em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .footer {
+    max-width: 1200px; margin: 80px auto 0;
+    border-top: 1px solid var(--line); padding-top: 24px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--ink-3); display: flex; justify-content: space-between;
+  }
+
+  @media (max-width: 760px) {
+    .grid { grid-template-columns: 1fr; }
+    .page-head { flex-direction: column; gap: 16px; align-items: flex-start; }
+    body { padding: 32px 20px 80px; }
+  }
+</style>
+</head>
+<body>
+  <header class="page-head">
+    <div>
+      <h1>Logo <em>explorations</em></h1>
+      <div class="legend">
+        <span>Six concepts</span>
+        <span>Brutalist palette</span>
+        <span>2026 — 04 — 28</span>
+      </div>
+    </div>
+    <div class="meta">Ziaul Islam · v.0.1 · Static preview</div>
+  </header>
+
+  <main class="grid">
+
+    <!-- 01 — Monogram Pill -->
+    <article class="card">
+      <div class="card-head"><span class="num">01</span> <span class="name">Monogram Pill</span> <span>Identity · Compact</span></div>
+      <div class="card-stage">
+        <div class="lg-pill">
+          <span class="lg-pill-mark">Z<span class="slash">/</span>I</span>
+          <span class="lg-pill-meta">
+            <span class="lg-pill-name">Ziaul Islam</span>
+            <span class="lg-pill-role">Senior Product Designer</span>
+          </span>
+        </div>
+      </div>
+      <div class="card-foot"><span class="tag-accent">Recommended</span><span>Pairs with floating chrome</span><span>32px tall</span></div>
+    </article>
+
+    <!-- 02 — Wordmark Stack -->
+    <article class="card">
+      <div class="card-head"><span class="num">02</span> <span class="name">Serif Wordmark</span> <span>Editorial · Hero</span></div>
+      <div class="card-stage">
+        <div class="lg-stack">
+          <span class="lg-stack-name">Ziaul <b>Islam.</b></span>
+          <span class="lg-stack-bar">Senior Product Designer · Gurugram</span>
+        </div>
+      </div>
+      <div class="card-foot"><span>Hero / footer use</span><span>Instrument Serif</span></div>
+    </article>
+
+    <!-- 03 — Grid Mark -->
+    <article class="card">
+      <div class="card-head"><span class="num">03</span> <span class="name">Grid Z-Mark</span> <span>Iconic · Geometric</span></div>
+      <div class="card-stage">
+        <div class="lg-grid">
+          <div class="lg-grid-mark" aria-hidden="true">
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+          </div>
+          <div class="lg-grid-meta">ZIAUL ISLAM<br /><small>FAVICON · 32×32 · 16×16</small></div>
+        </div>
+      </div>
+      <div class="card-foot"><span>Favicon-friendly</span><span>App-icon ready</span></div>
+    </article>
+
+    <!-- 04 — Slash System -->
+    <article class="card">
+      <div class="card-head"><span class="num">04</span> <span class="name">Slash System</span> <span>Mono · Code</span></div>
+      <div class="card-stage">
+        <div class="lg-slash">
+          <span class="z">Z</span><span class="sep">/</span><span class="i">I</span>
+          <span class="lg-slash-tail">/ Senior Product Designer</span>
+        </div>
+      </div>
+      <div class="card-foot"><span>Inline / signature</span><span>JetBrains Mono</span></div>
+    </article>
+
+    <!-- 05 — Brutalist Stamp -->
+    <article class="card">
+      <div class="card-head"><span class="num">05</span> <span class="name">Brutalist Stamp</span> <span>Bold · Print</span></div>
+      <div class="card-stage">
+        <div class="lg-stamp">
+          <span class="lg-stamp-block">Z<span class="accent">/</span>I</span>
+          <span class="lg-stamp-text">
+            <span class="top">Ziaul Islam</span>
+            <span class="bot">EST · 2014 · IST+5:30</span>
+          </span>
+        </div>
+      </div>
+      <div class="card-foot"><span>About / contact pages</span><span>Print pieces</span></div>
+    </article>
+
+    <!-- 06 — Circle Caret -->
+    <article class="card">
+      <div class="card-head"><span class="num">06</span> <span class="name">Caret Orb</span> <span>Animated · Playful</span></div>
+      <div class="card-stage">
+        <div class="lg-caret">
+          <span class="lg-caret-orb">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#ff3b1f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 5h14L5 19h14" />
+            </svg>
+          </span>
+          <span class="lg-caret-meta">
+            <span class="name">Ziaul Islam</span>
+            <span class="role">Designs that move →</span>
+          </span>
+        </div>
+      </div>
+      <div class="card-foot"><span>Hero header</span><span>Animated dashed orbit</span></div>
+    </article>
+
+  </main>
+
+  <section class="explore">
+    <div class="explore-head">
+      <div>
+        <h2>Caret Orb · <em>deeper exploration</em></h2>
+        <p class="explore-sub">Eight variations on the option-06 concept — the orbital mark with an inner glyph. All animated. Hover the cards to see hover states.</p>
+      </div>
+      <div class="meta">06 · Expanded</div>
+    </div>
+
+    <div class="orbit-grid">
+
+      <!-- v1 — Original (refined) -->
+      <article class="orb-card">
+        <div class="orb-stage" style="background: radial-gradient(circle at 30% 25%, #1a1a1a, #050505);">
+          <div class="orb v1">
+            <span class="ring" aria-hidden="true"></span>
+            <span class="ring r2" aria-hidden="true"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 5h14L5 19h14" />
+            </svg>
+          </div>
+        </div>
+        <div class="orb-meta">
+          <span class="orb-name">06.1 — Z-Caret Twin Orbit</span>
+          <span class="orb-note">Two counter-spinning dashed rings · 22px Z-glyph</span>
+        </div>
+      </article>
+
+      <!-- v2 — Filled accent core -->
+      <article class="orb-card">
+        <div class="orb-stage" style="background: radial-gradient(circle at 30% 25%, #1a1a1a, #050505);">
+          <div class="orb v2">
+            <span class="ring" aria-hidden="true"></span>
+            <span class="core" aria-hidden="true"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 5h14L5 19h14" />
+            </svg>
+          </div>
+        </div>
+        <div class="orb-meta">
+          <span class="orb-name">06.2 — Solid Core</span>
+          <span class="orb-note">Accent disc, dark glyph · works on dark + light bg</span>
+        </div>
+      </article>
+
+      <!-- v3 — Arrow caret -->
+      <article class="orb-card">
+        <div class="orb-stage" style="background: radial-gradient(circle at 30% 25%, #1a1a1a, #050505);">
+          <div class="orb v3">
+            <span class="ring r-arc" aria-hidden="true"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 17 17 7" />
+              <path d="M9 7h8v8" />
+            </svg>
+          </div>
+        </div>
+        <div class="orb-meta">
+          <span class="orb-name">06.3 — Forward Arrow</span>
+          <span class="orb-note">Single-arc orbit · diagonal arrow glyph</span>
+        </div>
+      </article>
+
+      <!-- v4 — Pulse rings -->
+      <article class="orb-card">
+        <div class="orb-stage" style="background: radial-gradient(circle at 30% 25%, #1a1a1a, #050505);">
+          <div class="orb v4">
+            <span class="pulse p1" aria-hidden="true"></span>
+            <span class="pulse p2" aria-hidden="true"></span>
+            <span class="pulse p3" aria-hidden="true"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 5h14L5 19h14" />
+            </svg>
+          </div>
+        </div>
+        <div class="orb-meta">
+          <span class="orb-name">06.4 — Pulse Sonar</span>
+          <span class="orb-note">Three concentric pulses · "live / available" feel</span>
+        </div>
+      </article>
+
+      <!-- v5 — Brutalist square -->
+      <article class="orb-card">
+        <div class="orb-stage" style="background: radial-gradient(circle at 30% 25%, #1a1a1a, #050505);">
+          <div class="orb v5 square">
+            <span class="ring" aria-hidden="true"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 5h14L5 19h14" />
+            </svg>
+          </div>
+        </div>
+        <div class="orb-meta">
+          <span class="orb-name">06.5 — Square Frame</span>
+          <span class="orb-note">Brutalist · same orbit, hard 4px corners</span>
+        </div>
+      </article>
+
+      <!-- v6 — Light theme -->
+      <article class="orb-card">
+        <div class="orb-stage light">
+          <div class="orb v6">
+            <span class="ring" aria-hidden="true"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#0a0a0a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 5h14L5 19h14" />
+            </svg>
+          </div>
+        </div>
+        <div class="orb-meta">
+          <span class="orb-name">06.6 — Paper Variant</span>
+          <span class="orb-note">For light backgrounds · about / contact pages</span>
+        </div>
+      </article>
+
+      <!-- v7 — Inline lockup -->
+      <article class="orb-card wide">
+        <div class="orb-stage" style="background: radial-gradient(circle at 30% 25%, #1a1a1a, #050505); justify-content: flex-start; padding-left: 32px;">
+          <div class="orb v1" style="margin-right: 18px;">
+            <span class="ring" aria-hidden="true"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 5h14L5 19h14" />
+            </svg>
+          </div>
+          <div class="lockup">
+            <span class="lockup-name">Ziaul <em>Islam.</em></span>
+            <span class="lockup-tag">Senior Product Designer · Available for select work</span>
+          </div>
+        </div>
+        <div class="orb-meta">
+          <span class="orb-name">06.7 — Full Lockup</span>
+          <span class="orb-note">Header / signature · pairs with serif wordmark</span>
+        </div>
+      </article>
+
+      <!-- v8 — Tiny / favicon -->
+      <article class="orb-card">
+        <div class="orb-stage" style="background: radial-gradient(circle at 30% 25%, #1a1a1a, #050505); gap: 24px; flex-direction: row;">
+          <div class="orb v1 sz-32">
+            <span class="ring" aria-hidden="true"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 5h14L5 19h14" />
+            </svg>
+          </div>
+          <div class="orb v1 sz-22">
+            <span class="ring" aria-hidden="true"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 5h14L5 19h14" />
+            </svg>
+          </div>
+          <div class="orb v1 sz-16">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 5h14L5 19h14" />
+            </svg>
+          </div>
+        </div>
+        <div class="orb-meta">
+          <span class="orb-name">06.8 — Scale Test</span>
+          <span class="orb-note">Favicon / OG / app icon · readable at 16px</span>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <style>
+    .explore {
+      max-width: 1200px; margin: 80px auto 0;
+      border-top: 1px dashed var(--line); padding-top: 40px;
+    }
+    .explore-head {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .explore-head h2 {
+      font-family: var(--serif); font-weight: 400; font-size: 40px; line-height: 1; margin: 0;
+    }
+    .explore-head h2 em { font-style: italic; color: var(--accent); }
+    .explore-sub {
+      margin: 12px 0 0; max-width: 540px;
+      font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; color: var(--ink-2);
+      line-height: 1.55;
+    }
+    .explore-head .meta {
+      font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--ink-3);
+    }
+    .orbit-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px;
+    }
+    .orb-card {
+      background: var(--bg-2); border: 1px solid var(--line); border-radius: 12px;
+      overflow: hidden; transition: border-color 0.2s ease, transform 0.25s ease;
+    }
+    .orb-card:hover { border-color: rgba(245,241,232,0.18); transform: translateY(-2px); }
+    .orb-card.wide { grid-column: span 2; }
+    .orb-stage {
+      min-height: 200px; display: flex; align-items: center; justify-content: center;
+      padding: 28px;
+    }
+    .orb-stage.light { background: #f5f1e8; }
+
+    .orb {
+      width: 64px; height: 64px; border-radius: 50%;
+      position: relative;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: var(--accent);
+    }
+    .orb svg { width: 26px; height: 26px; position: relative; z-index: 3; }
+    .orb .ring {
+      position: absolute; inset: 4px; border-radius: 50%;
+      border: 1px dashed rgba(255, 59, 31, 0.55);
+      animation: spin 8s linear infinite;
+    }
+    .orb .ring.r2 {
+      inset: -4px; border: 1px dashed rgba(245, 241, 232, 0.18);
+      animation: spin-rev 14s linear infinite;
+    }
+    .orb-card:hover .orb .ring { animation-duration: 3.5s; }
+
+    /* v1 base — dark with dashed accent ring */
+    .orb.v1 { border: 1px solid var(--ink-3); background: radial-gradient(circle at 35% 30%, #161616, #060606); }
+
+    /* v2 — solid accent core */
+    .orb.v2 { border: 1px solid var(--accent); }
+    .orb.v2 .core {
+      position: absolute; inset: 8px; border-radius: 50%;
+      background: var(--accent);
+    }
+    .orb.v2 .ring {
+      inset: -2px;
+      border: 1px solid rgba(255, 59, 31, 0.7);
+      border-style: dashed;
+    }
+
+    /* v3 — single-arc orbit */
+    .orb.v3 { border: 1px solid var(--ink-3); background: radial-gradient(circle at 35% 30%, #161616, #060606); }
+    .orb.v3 .r-arc {
+      position: absolute; inset: -3px; border-radius: 50%;
+      border: 1.5px solid transparent;
+      border-top-color: var(--accent);
+      border-right-color: var(--accent);
+      animation: spin 4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+    }
+
+    /* v4 — pulse sonar */
+    .orb.v4 { border: 1px solid var(--accent); background: radial-gradient(circle at 35% 30%, #161616, #060606); }
+    .orb.v4 .pulse {
+      position: absolute; inset: 0; border-radius: 50%;
+      border: 1px solid var(--accent);
+      animation: pulse 2.4s ease-out infinite;
+    }
+    .orb.v4 .p2 { animation-delay: 0.8s; }
+    .orb.v4 .p3 { animation-delay: 1.6s; }
+
+    /* v5 — square frame */
+    .orb.v5.square {
+      border-radius: 6px; border: 1.5px solid var(--ink); background: #0a0a0a;
+    }
+    .orb.v5.square .ring {
+      border-radius: 6px; inset: 4px;
+      border: 1px dashed rgba(255, 59, 31, 0.6);
+      animation: spin 0s; /* no spin on square — instead, fade */
+      animation: fade 2.6s ease-in-out infinite;
+    }
+
+    /* v6 — light theme */
+    .orb.v6 {
+      border: 1px solid #0a0a0a;
+      background: #faf6ec;
+      color: #0a0a0a;
+    }
+    .orb.v6 .ring {
+      border-color: rgba(10, 10, 10, 0.45);
+    }
+
+    /* sizes */
+    .orb.sz-32 { width: 48px; height: 48px; }
+    .orb.sz-32 svg { width: 20px; height: 20px; }
+    .orb.sz-22 { width: 32px; height: 32px; }
+    .orb.sz-22 svg { width: 14px; height: 14px; }
+    .orb.sz-22 .ring { inset: 2px; }
+    .orb.sz-16 { width: 22px; height: 22px; }
+    .orb.sz-16 svg { width: 11px; height: 11px; }
+
+    .lockup { display: flex; flex-direction: column; gap: 6px; }
+    .lockup-name {
+      font-family: var(--serif); font-style: italic; font-size: 28px; line-height: 1;
+    }
+    .lockup-name em { font-style: normal; color: var(--accent); }
+    .lockup-tag {
+      font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.24em; text-transform: uppercase;
+      color: var(--ink-3);
+    }
+
+    .orb-meta {
+      padding: 14px 18px; border-top: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+      font-family: var(--mono);
+    }
+    .orb-name {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--ink);
+    }
+    .orb-note {
+      font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-3);
+      text-align: right;
+    }
+
+    @keyframes spin-rev { to { transform: rotate(-360deg); } }
+    @keyframes pulse {
+      0% { transform: scale(0.92); opacity: 0.85; }
+      80% { transform: scale(1.6); opacity: 0; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    @keyframes fade {
+      0%, 100% { opacity: 0.95; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.96); }
+    }
+
+    @media (max-width: 760px) {
+      .orbit-grid { grid-template-columns: 1fr; }
+      .orb-card.wide { grid-column: span 1; }
+      .explore-head { flex-direction: column; gap: 12px; align-items: flex-start; }
+    }
+  </style>
+
+  <footer class="footer">
+    <span>© Ziaul Islam — 2026</span>
+    <span>portfolio/public/logo-options.html</span>
+    <span>Open in browser to compare</span>
+  </footer>
+</body>
+</html>
