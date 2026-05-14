@@ -15,7 +15,11 @@ export default function BrutalistHome() {
   useSmoothScroll({ lockRef: scrollLockRef });
 
   useEffect(() => {
-    document.body.classList.add("has-custom-cursor");
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+    if (!reduceMotion) document.body.classList.add("has-custom-cursor");
 
     // ===== CUSTOM CURSOR =====
     const dot = document.getElementById("cursorDot") as HTMLDivElement | null;
@@ -41,7 +45,7 @@ export default function BrutalistHome() {
       if (label) label.style.transform = `translate(${rx}px, ${ry + 2}px) translate(-50%,-50%)`;
       cursorRafId = requestAnimationFrame(cursorRaf);
     };
-    cursorRafId = requestAnimationFrame(cursorRaf);
+    if (!reduceMotion) cursorRafId = requestAnimationFrame(cursorRaf);
 
     const cursorEls = document.querySelectorAll<HTMLElement>("[data-cursor]");
     const cursorListeners: Array<{ el: HTMLElement; enter: () => void; leave: () => void }> = [];
@@ -119,7 +123,7 @@ export default function BrutalistHome() {
       }
       magnetRafId = requestAnimationFrame(magnetRaf);
     };
-    magnetRafId = requestAnimationFrame(magnetRaf);
+    if (!reduceMotion) magnetRafId = requestAnimationFrame(magnetRaf);
 
     // ===== STICKY ELASTIC ON CONTACT LINKS =====
     type Sticky = { el: HTMLElement; tx: number; ty: number; x: number; y: number; vx: number; vy: number };
@@ -150,7 +154,7 @@ export default function BrutalistHome() {
       }
       stickyRafId = requestAnimationFrame(stickyRaf);
     };
-    stickyRafId = requestAnimationFrame(stickyRaf);
+    if (!reduceMotion) stickyRafId = requestAnimationFrame(stickyRaf);
 
     // ===== HERO REVEAL =====
     const heroTitle = document.getElementById("heroTitle");
@@ -438,7 +442,7 @@ export default function BrutalistHome() {
       }
       previewRafId = requestAnimationFrame(previewRaf);
     };
-    previewRafId = requestAnimationFrame(previewRaf);
+    if (!reduceMotion) previewRafId = requestAnimationFrame(previewRaf);
 
     // ===== ZOOM-LETTER TRANSITIONS =====
     const _hex = (c: string): [number, number, number] => {

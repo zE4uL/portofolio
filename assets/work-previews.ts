@@ -14,13 +14,22 @@ export type WorkPreview = {
 export const workPreviews: Record<string, WorkPreview> = {
   "6labs": {
     label: "6labs.ai",
-    frames: [],
-    intervalMs: 700,
+    frames: [
+      "/images/work/6labs-ai/agentSurface4up.jpg",
+      "/images/work/6labs-ai/oracleQueryFlow.jpg",
+      "/images/work/6labs-ai/baristaSuggestionCard.jpg",
+      "/images/work/6labs-ai/iter3Barista.jpg",
+      "/images/work/6labs-ai/aiHighlightsCorpus.jpg",
+      "/images/work/6labs-ai/aiNativeRoundTrip.jpg",
+    ],
+    intervalMs: 650,
   },
   "ai-native": {
     label: "AI-Native",
     href: "/ai-native-workflow",
-    frames: [],
+    frames: [
+      "/images/work/6labs-ai/aiNativeRoundTrip.jpg",
+    ],
     intervalMs: 700,
   },
   nowstudio: {
@@ -59,6 +68,19 @@ export const workPreviews: Record<string, WorkPreview> = {
       "/images/work/bluestacks/foundationsComposite.jpg",
       "/images/work/bluestacks/paymentsDualTheme.jpg",
       "/images/work/bluestacks/gameBrowser.png",
+    ],
+    intervalMs: 650,
+  },
+  gamification: {
+    label: "Gamification",
+    href: "/gamification",
+    frames: [
+      "/images/work/gamification/bsxQuests.jpg",
+      "/images/work/gamification/paymentsCashback.jpg",
+      "/images/work/gamification/paymentsMiniGames.jpg",
+      "/images/work/gamification/nowcafeBots.jpg",
+      "/images/work/gamification/nowggProfile.jpg",
+      "/images/work/gamification/gameRoom.jpg",
     ],
     intervalMs: 650,
   },

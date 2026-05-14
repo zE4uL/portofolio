@@ -1734,7 +1734,7 @@ body.has-custom-cursor .work-item { cursor: none; }
 .work-preview {
   position: fixed;
   top: 0; left: 0;
-  width: 420px; height: 236px;
+  width: 300px; height: 180px;
   pointer-events: none;
   opacity: 0;
   z-index: 50;
@@ -8311,7 +8311,7 @@ body.has-custom-cursor .more-tile { cursor: none; }
   .tl-row--now { padding-bottom: 24px; }
 }
 
-/* trigger hmr · playground-head-bigger-gap-2026-05-14 */
+/* trigger hmr · sneak-peek-frames-and-reduced-motion-2026-05-14 */
 
 /* ─── Figure caption (below image): accent meta on top, descriptive sentence below ─── */
 .fig-cap {
