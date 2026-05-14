@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hero — Rethink Options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --ink: #f3eedf;
+    --ink-2: rgba(243, 238, 223, 0.55);
+    --ink-3: rgba(243, 238, 223, 0.35);
+    --line: rgba(243, 238, 223, 0.12);
+    --accent: #7ba889;
+    --paper: #f3eedf;
+
+    --font-grotesk: 'Inter', system-ui, sans-serif;
+    --font-jetbrains: 'JetBrains Mono', ui-monospace, monospace;
+    --font-serif: 'Instrument Serif', Georgia, serif;
+    --ease: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink); font-family: var(--font-grotesk); }
+  body { padding: 80px 0; }
+
+  /* ─── Picker rail ─── */
+  .rail {
+    position: fixed;
+    top: 24px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex; gap: 8px;
+    padding: 8px;
+    background: rgba(10,10,10,.85);
+    border: 1px solid var(--line);
+    border-radius: 200px;
+    backdrop-filter: blur(20px);
+  }
+  .rail button {
+    appearance: none; border: 1px solid transparent;
+    background: transparent;
+    color: var(--ink-2);
+    font-family: var(--font-jetbrains);
+    font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+    padding: 10px 16px;
+    border-radius: 200px;
+    cursor: pointer;
+    transition: color .2s ease, background .2s ease, border-color .2s ease;
+  }
+  .rail button:hover { color: var(--ink); }
+  .rail button.is-on {
+    color: #0a0a0a; background: var(--accent); border-color: var(--accent);
+  }
+
+  /* ─── Variant base ─── */
+  .variant {
+    display: none;
+    min-height: 100vh;
+    padding: 120px 56px 80px;
+    position: relative;
+  }
+  .variant.is-on { display: flex; flex-direction: column; }
+
+  /* Top corner chrome (shared) */
+  .chrome-logo, .chrome-menu {
+    position: absolute;
+    top: 36px;
+    font-family: var(--font-jetbrains);
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--ink-2);
+    padding: 10px 18px;
+    border: 1px solid var(--line);
+    border-radius: 200px;
+  }
+  .chrome-logo { left: 40px; }
+  .chrome-menu { right: 40px; border: 2px solid var(--accent); color: var(--ink); }
+
+  /* Section label */
+  .section-label {
+    font-family: var(--font-jetbrains);
+    font-size: 11px; letter-spacing: .28em; text-transform: uppercase;
+    color: var(--accent);
+    display: inline-flex; align-items: center; gap: 14px;
+  }
+  .section-label .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .section-label .dim { color: var(--ink-2); }
+
+  /* Massive headline */
+  .huge {
+    font-family: var(--font-grotesk);
+    font-weight: 500;
+    font-size: clamp(64px, 11.5vw, 200px);
+    line-height: 1.0;
+    letter-spacing: -.055em;
+    color: var(--ink);
+  }
+  .huge em {
+    font-family: var(--font-serif);
+    font-style: italic; font-weight: 300;
+    color: var(--accent);
+  }
+  .huge .morph { color: var(--accent); font-style: italic; font-family: var(--font-serif); font-weight: 300; }
+
+  /* CTA buttons (shared) */
+  .cta-row {
+    display: flex; flex-wrap: wrap; gap: 16px;
+    align-items: center;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 18px 28px;
+    border-radius: 200px;
+    font-family: var(--font-jetbrains);
+    font-size: 13px; letter-spacing: .2em; text-transform: uppercase;
+    text-decoration: none;
+    transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease), transform .25s var(--ease);
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .btn-primary { background: var(--accent); color: #0a0a0a; border-color: var(--accent); }
+  .btn-primary:hover { background: transparent; color: var(--accent); transform: translateY(-2px); }
+  .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+  .btn .arrow { font-size: 18px; line-height: 1; }
+
+  /* ============================================================ */
+  /* OPTION A — EDITORIAL COVER                                   */
+  /* center-aligned, label above + headline + 1-line tagline + 2 CTAs */
+  /* ============================================================ */
+  #variant-a { align-items: center; justify-content: center; text-align: center; }
+  #variant-a .a-label { margin-bottom: 36px; }
+  #variant-a .huge { max-width: 14ch; margin: 0 auto 32px; }
+  #variant-a .tagline {
+    font-family: var(--font-jetbrains);
+    font-size: 14px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--ink-2);
+    margin-bottom: 56px;
+    max-width: 64ch;
+    line-height: 1.7;
+  }
+  #variant-a .tagline b { color: var(--ink); font-weight: 500; }
+  #variant-a .cta-row { justify-content: center; }
+  #variant-a .scroll-cue {
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+    font-family: var(--font-jetbrains);
+    font-size: 11px; letter-spacing: .26em; text-transform: uppercase;
+    color: var(--ink-3);
+    display: inline-flex; align-items: center; gap: 12px;
+  }
+  #variant-a .scroll-cue .line {
+    display: inline-block; width: 60px; height: 1px; background: var(--ink-3);
+  }
+
+  /* ============================================================ */
+  /* OPTION B — STAT SPREAD                                       */
+  /* center headline + 3 inline stats below + CTAs                */
+  /* ============================================================ */
+  #variant-b { align-items: center; justify-content: center; text-align: center; }
+  #variant-b .b-label { margin-bottom: 28px; }
+  #variant-b .huge { max-width: 14ch; margin: 0 auto 56px; }
+  #variant-b .stats {
+    display: flex; gap: 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 56px;
+    max-width: 1100px; width: 100%;
+  }
+  #variant-b .stat {
+    flex: 1;
+    padding: 28px 24px;
+    text-align: left;
+    border-right: 1px solid var(--line);
+  }
+  #variant-b .stat:last-child { border-right: 0; }
+  #variant-b .stat-num {
+    font-family: var(--font-grotesk);
+    font-size: 48px; font-weight: 500; letter-spacing: -.04em;
+    color: var(--ink);
+    line-height: 1;
+  }
+  #variant-b .stat-num em {
+    font-family: var(--font-serif);
+    font-style: italic; font-weight: 300;
+    color: var(--accent);
+  }
+  #variant-b .stat-lbl {
+    font-family: var(--font-jetbrains);
+    font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--ink-2);
+    margin-top: 14px;
+  }
+  #variant-b .cta-row { justify-content: center; }
+
+  /* ============================================================ */
+  /* OPTION C — EDITORIAL SPREAD (left-aligned + side rail)       */
+  /* ============================================================ */
+  #variant-c { padding-left: 80px; padding-right: 80px; justify-content: center; gap: 56px; }
+  #variant-c .c-grid {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 80px;
+    align-items: end;
+  }
+  #variant-c .c-main { display: flex; flex-direction: column; gap: 36px; }
+  #variant-c .c-label { color: var(--accent); }
+  #variant-c .huge { max-width: 18ch; }
+  #variant-c .cta-row { margin-top: 16px; }
+  #variant-c .c-side {
+    border-left: 1px solid var(--line);
+    padding-left: 28px;
+    display: flex; flex-direction: column; gap: 28px;
+  }
+  #variant-c .c-side .row h5 {
+    font-family: var(--font-jetbrains);
+    font-size: 10px; letter-spacing: .24em; text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+  #variant-c .c-side .row p {
+    font-family: var(--font-grotesk);
+    font-size: 14px; line-height: 1.5;
+    color: var(--ink);
+  }
+  #variant-c .c-side .row p b { color: var(--accent); font-weight: 500; }
+  #variant-c .c-rule {
+    height: 1px; background: var(--accent);
+    width: 80px;
+  }
+
+  /* footer marker */
+  .preview-marker {
+    position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+    font-family: var(--font-jetbrains);
+    font-size: 10px; letter-spacing: .3em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 900px) {
+    #variant-c .c-grid { grid-template-columns: 1fr; }
+    #variant-c .c-side { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 28px; }
+    #variant-b .stats { flex-direction: column; }
+    #variant-b .stat { border-right: 0; border-bottom: 1px solid var(--line); }
+    #variant-b .stat:last-child { border-bottom: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="rail" role="tablist">
+  <button class="is-on" data-target="a">A · Editorial</button>
+  <button data-target="b">B · Stat Spread</button>
+  <button data-target="c">C · Spread+Rail</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- OPTION A — EDITORIAL COVER                                  -->
+<!-- ============================================================ -->
+<section id="variant-a" class="variant is-on">
+  <div class="chrome-logo">Z · Ziaul Islam</div>
+  <div class="chrome-menu">Menu · 05</div>
+
+  <div class="a-label section-label">
+    <span class="dot"></span>
+    <span>§00 · 2026 · Delhi NCR</span>
+    <span class="dim">/ Open to Sr · Lead roles</span>
+  </div>
+
+  <h1 class="huge">
+    Designing <span class="morph">flows</span> that <em>ship.</em>
+  </h1>
+
+  <p class="tagline">
+    Senior Product Designer · <b>payments + gamification + AI</b> · seven years, <b>~30 shipped products</b> across B2B + B2C.
+  </p>
+
+  <div class="cta-row">
+    <a class="btn btn-primary" href="#work">Selected work <span class="arrow">↓</span></a>
+    <a class="btn btn-ghost" href="#cv">Resume · CV <span class="arrow">↗</span></a>
+  </div>
+
+  <div class="scroll-cue">
+    <span class="line"></span>
+    <span>Scroll · 2019 → 2026</span>
+    <span class="line"></span>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- OPTION B — STAT SPREAD                                      -->
+<!-- ============================================================ -->
+<section id="variant-b" class="variant">
+  <div class="chrome-logo">Z · Ziaul Islam</div>
+  <div class="chrome-menu">Menu · 05</div>
+
+  <div class="b-label section-label">
+    <span class="dot"></span>
+    <span>§00 · Ziaul Islam · Senior Product Designer</span>
+  </div>
+
+  <h1 class="huge">
+    Designing <span class="morph">payments</span> that <em>ship.</em>
+  </h1>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">500M<em>+</em></div>
+      <div class="stat-lbl">Users on BlueStacks · 200+ countries</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">7K<em>+</em></div>
+      <div class="stat-lbl">Devs on nowStudio · ~$300K/mo IAP</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">~30</div>
+      <div class="stat-lbl">Shipped products · 7 years · B2B + B2C</div>
+    </div>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn btn-primary" href="#work">Selected work <span class="arrow">↓</span></a>
+    <a class="btn btn-ghost" href="#cv">Resume · CV <span class="arrow">↗</span></a>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- OPTION C — SPREAD + SIDE RAIL                               -->
+<!-- ============================================================ -->
+<section id="variant-c" class="variant">
+  <div class="chrome-logo">Z · Ziaul Islam</div>
+  <div class="chrome-menu">Menu · 05</div>
+
+  <div class="c-grid">
+    <div class="c-main">
+      <div class="c-label section-label">
+        <span class="dot"></span>
+        <span>§00 · 2026 · Delhi NCR</span>
+      </div>
+
+      <h1 class="huge">
+        Designing <span class="morph">flows</span> that <em>ship.</em>
+      </h1>
+
+      <div class="c-rule"></div>
+
+      <p class="tagline" style="max-width:52ch; font-family:var(--font-grotesk); font-size:18px; letter-spacing:0; text-transform:none; color:var(--ink-2); line-height:1.55;">
+        Senior Product Designer at the awkward seam where <em style="color:var(--accent);font-style:italic;font-family:var(--font-serif);">payments, gameplay, and AI</em> coexist. Seven years, ~30 shipped products.
+      </p>
+
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#work">Selected work <span class="arrow">↓</span></a>
+        <a class="btn btn-ghost" href="#cv">Resume · CV <span class="arrow">↗</span></a>
+      </div>
+    </div>
+
+    <aside class="c-side">
+      <div class="row">
+        <h5>Currently</h5>
+        <p>Lead designer on <b>6labs.ai</b> — AI gameplay analytics, end-to-end.</p>
+      </div>
+      <div class="row">
+        <h5>Open to</h5>
+        <p><b>Sr / Lead</b> product design roles · Delhi NCR · 2026.</p>
+      </div>
+      <div class="row">
+        <h5>Last shipped</h5>
+        <p>now.gg Studio · payments SDK at <b>~$300K/mo</b> IAP volume.</p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<div class="preview-marker">Use the rail above to switch hero options</div>
+
+<script>
+  const rail = document.querySelector('.rail');
+  rail.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const target = btn.dataset.target;
+    rail.querySelectorAll('button').forEach(b => b.classList.toggle('is-on', b === btn));
+    document.querySelectorAll('.variant').forEach(v => v.classList.toggle('is-on', v.id === 'variant-' + target));
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  });
+
+  // morph rotation demo
+  const morphWords = ['flows', 'payments', 'systems', 'rituals', 'loops'];
+  let mi = 0;
+  setInterval(() => {
+    mi = (mi + 1) % morphWords.length;
+    document.querySelectorAll('.morph').forEach(el => { el.textContent = morphWords[mi]; });
+  }, 2200);
+</script>
+</body>
+</html>

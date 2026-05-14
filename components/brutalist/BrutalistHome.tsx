@@ -7,6 +7,7 @@ import { workPreviews } from "@/assets/work-previews";
 import PlaygroundStage from "@/components/playground/PlaygroundStage";
 import RotatingStamp from "@/components/brutalist/RotatingStamp";
 import HeroMagneticGrid from "@/components/brutalist/HeroMagneticGrid";
+import HeroCRT from "@/components/brutalist/HeroCRT";
 
 export default function BrutalistHome() {
   const router = useRouter();
@@ -157,6 +158,7 @@ export default function BrutalistHome() {
       heroTitle?.classList.add("in");
     }, 80);
 
+
     // ===== MORPHING WORD (per-character cross-fade) =====
     const morphTimers: Array<ReturnType<typeof setTimeout> | ReturnType<typeof setInterval>> = [];
     {
@@ -166,19 +168,18 @@ export default function BrutalistHome() {
       if (stage && sizer && wrap) {
         const WORDS = [
           "payments",
-          "platforms",
-          "dashboards",
-          "systems",
-          "agents",
+          "design systems",
+          "AI agents",
+          "gameplay loops",
+          "Figma plugins",
           "SDKs",
-          "flows",
-          "tools",
-          "interfaces",
+          "platforms",
           "analytics",
         ];
 
-        const STAGGER = 40;
-        const SWIPE_DURATION = 850;
+        const STAGGER = 22;
+        const SWIPE_DURATION = 520;
+        const HANDOFF = 320;
         const NBSP = " ";
 
         const makeWord = (text: string, role: "current" | "outgoing" | "incoming") => {
@@ -224,15 +225,23 @@ export default function BrutalistHome() {
 
           requestAnimationFrame(() => {
             outgoing.classList.add("out");
-            incoming.classList.add("in");
           });
 
-          const longestIdx = Math.max(next.length, currentWord.length) - 1;
-          const total = SWIPE_DURATION + STAGGER * Math.max(0, longestIdx) + 100;
-
+          // Sequential handoff: let outgoing clear first, THEN bring incoming in.
+          // Eliminates the mid-transition overlap where both words read as
+          // overlapping blurred glyphs.
           morphTimers.push(
             setTimeout(() => {
               if (outgoing.parentNode) outgoing.parentNode.removeChild(outgoing);
+              requestAnimationFrame(() => incoming.classList.add("in"));
+            }, HANDOFF),
+          );
+
+          const longestIdx = Math.max(next.length, currentWord.length) - 1;
+          const total = HANDOFF + SWIPE_DURATION + STAGGER * Math.max(0, longestIdx) + 80;
+
+          morphTimers.push(
+            setTimeout(() => {
               incoming.classList.remove("incoming", "in");
               incoming.classList.add("current");
               currentEl = incoming;
@@ -758,6 +767,28 @@ export default function BrutalistHome() {
     };
     window.addEventListener("keydown", onKeyDown);
 
+    // ===== METHOD STACKING CARDS — darken outgoing cards =====
+    const methodCards = Array.from(
+      document.querySelectorAll<HTMLElement>(".method-card")
+    );
+    const methodIo = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const idx = Number((entry.target as HTMLElement).dataset.methodIdx ?? "-1");
+          if (idx <= 0) return;
+          const prev = methodCards[idx - 1];
+          if (!prev) return;
+          if (entry.isIntersecting && entry.intersectionRatio > 0.25) {
+            prev.classList.add("is-covered");
+          } else if (entry.boundingClientRect.top > 0) {
+            prev.classList.remove("is-covered");
+          }
+        });
+      },
+      { threshold: [0, 0.25, 0.5, 0.75, 1] }
+    );
+    methodCards.forEach((c) => methodIo.observe(c));
+
     // ===== CLEANUP =====
     return () => {
       document.body.classList.remove("has-custom-cursor");
@@ -792,6 +823,7 @@ export default function BrutalistHome() {
       menuItemListeners.forEach(({ el, fn }) => el.removeEventListener("click", fn));
       io.disconnect();
       secIo.disconnect();
+      methodIo.disconnect();
       clearTimeout(heroTimeout);
       clearTimeout(stInitTimeout);
       clearInterval(clockInterval);
@@ -834,34 +866,54 @@ export default function BrutalistHome() {
             <HeroMagneticGrid />
           </div>
 
-          <h1 className="huge" id="heroTitle">
-            <span className="row"><span>Designing</span></span>
-            <span className="row morph-row">
-              <span className="morph" id="morphWord" aria-live="polite">
-                <span className="morph-sizer" id="morphSizer">payments</span>
-                <span className="morph-stage" id="morphStage" aria-hidden="true"></span>
-              </span>
-            </span>
-            <span className="row">
-              <span>
-                that <em>ship</em>.
-              </span>
-            </span>
-          </h1>
+          <div className="hero-split">
+            <div className="hero-left">
+              <div className="hero-eyebrow" id="heroEyebrow">
+                <span className="eb-name">Ziaul Islam</span>
+                <span className="eb-sep">/</span>
+                <span className="eb-role">Senior Product Designer</span>
+                <span className="eb-sep">·</span>
+                <span className="eb-loc">Delhi NCR</span>
+                <span className="eb-sep">·</span>
+                <span className="eb-status"><span className="eb-dot" aria-hidden="true"></span>Open to Sr / Lead roles</span>
+              </div>
 
-          <div className="hero-foot">
-            <div style={{ width: 680 }}>
-              <h5>The short pitch</h5>
-              <p>Senior Product Designer at the awkward seam where payments, gameplay, and AI coexist. Seven years, ~30 shipped products across B2B + B2C — design systems that don&apos;t crumble when the third PM joins.</p>
+              <h1 className="huge" id="heroTitle">
+                <span className="row"><span>Designing</span></span>
+                <span className="row morph-row">
+                  <span className="morph" id="morphWord" aria-live="polite">
+                    <span className="morph-sizer" id="morphSizer">payments</span>
+                    <span className="morph-stage" id="morphStage" aria-hidden="true"></span>
+                  </span>
+                </span>
+                <span className="row">
+                  <span>
+                    that <em>ship</em>.
+                  </span>
+                </span>
+              </h1>
+
+              <div className="hero-pitch">
+                <p>Seven years, ~30 shipped products across B2B + B2C at the awkward seam where payments, gameplay, and AI coexist. Design systems that don&apos;t crumble when the third PM joins.</p>
+              </div>
+
+              {/* PROOF BAR — wordmarks as receipts. Sits at the bottom of the
+                  left column under the pitch. */}
+              <div className="hero-proof" aria-label="Where I've shipped">
+                <span>BlueStacks</span>
+                <span className="hp-sep">·</span>
+                <span>now.gg</span>
+                <span className="hp-sep">·</span>
+                <span>Float</span>
+                <span className="hp-sep">·</span>
+                <span>6labs.ai</span>
+                <span className="hp-sep">·</span>
+                <span>~30 shipped products</span>
+              </div>
             </div>
-            <div style={{ width: 724 }}>
-              <h5>Currently</h5>
-              <p className="small" style={{ width: "100%", maxWidth: "none" }}>
-                → Lead designer on 6labs.ai (AI gameplay analytics).<br />
-                → Vibe-coding Figma plugins &amp; agents.<br />
-                → Scaling design systems across BlueStacks &amp; now.gg.<br />
-                → Destroying lobbies in Battlefield 6.
-              </p>
+
+            <div className="hero-right">
+              <HeroCRT />
             </div>
           </div>
           <RotatingStamp
@@ -874,13 +926,6 @@ export default function BrutalistHome() {
           />
         </section>
 
-        {/* MARQUEE */}
-        <div className="marquee">
-          <div className="marquee-track">
-            <span>SELECTED WORK — 2019→2026<span className="star">✦</span><em>product design</em><span className="star">✦</span>design systems<span className="star">✦</span><em>design engineering</em><span className="star">✦</span>payments &amp; gamification<span className="star">✦</span><em>art direction</em><span className="star">✦</span>vibe coding<span className="star">✦</span></span>
-            <span>SELECTED WORK — 2019→2026<span className="star">✦</span><em>product design</em><span className="star">✦</span>design systems<span className="star">✦</span><em>design engineering</em><span className="star">✦</span>payments &amp; gamification<span className="star">✦</span><em>art direction</em><span className="star">✦</span>vibe coding<span className="star">✦</span></span>
-          </div>
-        </div>
 
         {/* TRANSITION → WORK */}
         <div
@@ -993,7 +1038,7 @@ export default function BrutalistHome() {
 
         </section>
 
-        {/* TRANSITION → ABOUT */}
+        {/* TRANSITION → METHOD */}
         <div
           className="scroll-transition"
           data-st
@@ -1009,73 +1054,96 @@ export default function BrutalistHome() {
           <div className="st-rule t"></div>
           <div className="st-sticky">
             <div className="st-stack" data-st-word>
-              <span className="st-tag">THE <span className="accent">HUMAN</span></span>
-              <span className="focal st-glyph" data-focal style={{ "--fx": "0px", "--fy": "0px" } as any}>✱</span>
-              <span className="st-context" data-st-sub>on &amp; off duty</span>
+              <span className="st-tag">THE <span className="accent">METHOD</span></span>
+              <span className="focal st-glyph" data-focal style={{ "--fx": "0px", "--fy": "0px" } as any}>+</span>
+              <span className="st-context" data-st-sub>code is the spec</span>
             </div>
           </div>
           <div className="st-progress" data-st-progress></div>
           <div className="st-rule b"></div>
         </div>
 
-        {/* ABOUT */}
-        <section id="about" data-section="ABOUT">
-          <div className="section-tag">THE <span className="accent">HUMAN</span></div>
-          <p className="about-lead" id="aboutLead">
-            Senior Product Designer, <em>seven years in</em>. The other half of the day is just as <em>opinionated</em>.
-          </p>
-          <div className="about-duty">
-            <div className="duty-col">
-              <div className="duty-head">
-                <span className="duty-mark">●</span>
-                <h3>On duty</h3>
-                <span className="duty-meta">09:00 → late</span>
+        {/* METHOD — Stacking Cards */}
+        <section className="method" id="process" data-section="PROCESS">
+          <div className="method-head">
+            <div className="section-tag">THE <span className="accent">METHOD</span></div>
+            <p className="method-deck">
+              Half the job is translating B2B revenue into B2C delight. The other half is keeping the system honest. Here&apos;s how I move from brief to ship.
+            </p>
+          </div>
+
+          <div className="method-stack" id="methodStack">
+            <article className="method-card method-card--01" data-method-idx="0">
+              <div className="method-card-overlay" />
+              <div className="method-card-inner">
+                <div className="method-card-lead">
+                  <span className="method-pno">P.01 — INTAKE</span>
+                  <h3>Listen <em>— to the business and the user.</em></h3>
+                  <p>Half my job is translating B2B revenue goals into B2C delight. I don&apos;t sketch a screen until I can name the metric it moves and the person it serves — in one sentence.</p>
+                  <span className="method-card-rule" />
+                  <span className="method-card-tag">USED ON · BlueStacks Payments · now.gg Studio · 6labs.ai</span>
+                </div>
+                <div className="method-card-display">
+                  <span className="method-card-label">Listen<em>.</em></span>
+                  <span className="method-card-tag">( business × user )</span>
+                </div>
               </div>
-              <dl>
-                <dt>Currently</dt>
-                <dd>Product Designer, <b>BlueStacks / now.gg</b> — leading design on <b>6labs.ai</b>, an AI gameplay analytics platform.</dd>
-              </dl>
-              <dl>
-                <dt>Track record</dt>
-                <dd>Seven years shipping at scale — <b>payments</b>, <b>gamification</b>, <b>AI tooling</b>. B2B and B2C, no preference.</dd>
-              </dl>
-              <dl>
-                <dt>Built lately</dt>
-                <dd>Design systems that survive brand swaps · agents and Figma plugins that do my own job 10× faster.</dd>
-              </dl>
-            </div>
-            <div className="duty-col">
-              <div className="duty-head">
-                <span className="duty-mark">○</span>
-                <h3>Off duty</h3>
-                <span className="duty-meta">weekends, holidays, transit</span>
+            </article>
+
+            <article className="method-card method-card--02" data-method-idx="1">
+              <div className="method-card-overlay" />
+              <div className="method-card-inner">
+                <div className="method-card-lead">
+                  <span className="method-pno">P.02 — FOUNDATION</span>
+                  <h3>System <em>— before I make screens.</em></h3>
+                  <p>Tokens, themes, primitives. I&apos;d rather spend a week on the design system than three months patching inconsistencies. <em>Float</em> runs four products on one parent-child architecture; <em>BlueStacks</em> keeps holding up at 500M+ users across 200+ countries.</p>
+                  <span className="method-card-rule" />
+                  <span className="method-card-tag">PROOF · Float DS · BlueStacks tokens · Apparatus</span>
+                </div>
+                <div className="method-card-display">
+                  <span className="method-card-label">System<em>.</em></span>
+                  <span className="method-card-tag">( tokens before screens )</span>
+                </div>
               </div>
-              <dl>
-                <dt>Gaming</dt>
-                <dd><b>Battlefield 6</b> · CS2 · Rocket League · Elden Ring · Black Myth: Wukong — any platform, any medium; lately destroying lobbies in BF6 with my squad.</dd>
-              </dl>
-              <dl>
-                <dt>Anime</dt>
-                <dd>Slow stories, loud feelings — character over plot, atmosphere over arc.</dd>
-              </dl>
-              <dl>
-                <dt>Sports</dt>
-                <dd><b>Cricket</b> loud, <b>football</b> louder — every weekend that lines up.</dd>
-              </dl>
-              <dl>
-                <dt>Travel</dt>
-                <dd>Boarding-pass curiosity — carry-on only, plans loose, return tickets optional.</dd>
-              </dl>
-            </div>
+            </article>
+
+            <article className="method-card method-card--03" data-method-idx="2">
+              <div className="method-card-overlay" />
+              <div className="method-card-inner">
+                <div className="method-card-lead">
+                  <span className="method-pno">P.03 — VELOCITY</span>
+                  <h3>Prototype <em>— vibe-coded, not vibes-only.</em></h3>
+                  <p>I prototype in code with AI agents and plugins as my second pair of hands. Real interactions, real tokens. The prototype <em>is</em> the spec — 6labs.ai was designed this way, end to end.</p>
+                  <span className="method-card-rule" />
+                  <span className="method-card-tag">STACK · Next.js · Figma plugins · custom agents</span>
+                </div>
+                <div className="method-card-display">
+                  <span className="method-card-label">Prototype<em>.</em></span>
+                  <span className="method-card-tag">( spec is the build )</span>
+                </div>
+              </div>
+            </article>
+
+            <article className="method-card method-card--04" data-method-idx="3">
+              <div className="method-card-overlay" />
+              <div className="method-card-inner">
+                <div className="method-card-lead">
+                  <span className="method-pno">P.04 — LOOP</span>
+                  <h3>Ship, then sharpen <em>— with the data.</em></h3>
+                  <p>I sit close to engineering and analytics. We ship, we measure, we cut what didn&apos;t earn its keep. The first version isn&apos;t the last good one — it&apos;s the start of the conversation.</p>
+                  <span className="method-card-rule" />
+                  <span className="method-card-tag">LOOP · ship → measure → cut → re-ship</span>
+                </div>
+                <div className="method-card-display">
+                  <span className="method-card-label">Ship<em>.</em></span>
+                  <span className="method-card-tag">( v1 ≠ last good one )</span>
+                </div>
+              </div>
+            </article>
           </div>
         </section>
 
-        <div className="playground-head">
-          <div className="section-tag section-tag--sm">THE <span className="accent">PLAYGROUND</span></div>
-        </div>
-        <PlaygroundStage />
-
-        {/* TRANSITION → PROCESS */}
+        {/* TRANSITION → HUMAN */}
         <div
           className="scroll-transition"
           data-st
@@ -1091,43 +1159,161 @@ export default function BrutalistHome() {
           <div className="st-rule t"></div>
           <div className="st-sticky">
             <div className="st-stack" data-st-word>
-              <span className="st-tag">THE <span className="accent">METHOD</span></span>
-              <span className="focal st-glyph lg" data-focal style={{ "--fx": "0px", "--fy": "0px" } as any}>+</span>
-              <span className="st-context" data-st-sub>code is the spec</span>
+              <span className="st-tag">THE <span className="accent">HUMAN</span></span>
+              <span className="focal st-glyph" data-focal style={{ "--fx": "0px", "--fy": "0px" } as any}>✱</span>
+              <span className="st-context" data-st-sub>on &amp; off duty</span>
             </div>
           </div>
           <div className="st-progress" data-st-progress></div>
           <div className="st-rule b"></div>
         </div>
 
-        {/* PROCESS */}
-        <section className="process inv" id="process" data-section="PROCESS">
-          <div className="section-tag">THE <span className="accent">METHOD</span></div>
-          <div className="process-list">
-            <div className="process-item">
-              <span className="pno">P.01</span>
-              <h3>Listen <em>— to the business and the user.</em></h3>
-              <p>Half my job is translating B2B revenue goals into B2C delight. I don&apos;t sketch a screen until I can name the metric it moves and the person it serves — in one sentence.</p>
-              <span className="plus">+</span>
+        {/* ABOUT */}
+        <section id="about" className="inv" data-section="ABOUT">
+          <div className="section-tag">THE <span className="accent">HUMAN</span></div>
+          <p className="about-lead" id="aboutLead">
+            Senior Product Designer, <em>seven years in</em>. The other half of the day is just as <em>opinionated</em>.
+          </p>
+
+          <div className="about-duty">
+            <div className="duty-col">
+              <div className="duty-head">
+                <span className="duty-mark">●</span>
+                <h3>On duty</h3>
+              </div>
+              <blockquote className="duty-quote">
+                Engineering background, design fluency. I&apos;d rather <em>ship something honest</em> than describe something perfect — the prototype is the spec, the metric is the brief.
+              </blockquote>
+              <dl>
+                <dt>How I work</dt>
+                <dd>Prototype-first, agent-augmented. Vibe-code the rough edges in Figma plugins, harden the parts that stick.</dd>
+              </dl>
+              <dl>
+                <dt>Closest to</dt>
+                <dd>Engineering and analytics — the seam between <b>what gets built</b> and <b>what gets measured</b>.</dd>
+              </dl>
+              <dl>
+                <dt>Operating mode</dt>
+                <dd>Solo on 0→1, lead on 1→N. Comfortable presenting to founders, mentoring juniors, and arguing with PMs in the same afternoon.</dd>
+              </dl>
+              <dl>
+                <dt>Credentials</dt>
+                <dd><b>HFI Certified Usability Analyst</b> · B.Tech, Computer Science Engineering · self-taught the rest.</dd>
+              </dl>
+              <dl>
+                <dt>Tools</dt>
+                <dd>Figma + plugins, React/Next, Claude &amp; Cursor for vibe-coding, BigQuery + Looker for the analytics half.</dd>
+              </dl>
             </div>
-            <div className="process-item">
-              <span className="pno">P.02</span>
-              <h3>System <em>— before I make screens.</em></h3>
-              <p>Tokens, themes, primitives. I&apos;d rather spend a week on the design system than three months patching inconsistencies. <em>Float</em> runs four products on one parent-child architecture; <em>BlueStacks</em> keeps holding up at 500M+ users across 200+ countries.</p>
-              <span className="plus">+</span>
+
+            <div className="duty-col">
+              <div className="duty-head">
+                <span className="duty-mark">○</span>
+                <h3>Off duty</h3>
+              </div>
+              <blockquote className="duty-quote">
+                <em>Competitive gaming and anime fuel the creativity.</em> Best design ideas show up after a long session, not during.
+              </blockquote>
+              <dl>
+                <dt>Gaming</dt>
+                <dd><b>Battlefield 6</b> · CS2 · Rocket League · Elden Ring · Black Myth: Wukong — competitive when the squad&apos;s online, single-player when it isn&apos;t.</dd>
+              </dl>
+              <dl>
+                <dt>Anime</dt>
+                <dd>Slow stories, loud feelings — character over plot, atmosphere over arc. <em>Frieren</em>, <em>Mushishi</em>, <em>Vinland</em>.</dd>
+              </dl>
+              <dl>
+                <dt>Sports</dt>
+                <dd><b>Cricket</b> loud, <b>football</b> louder — every weekend that lines up.</dd>
+              </dl>
+              <dl>
+                <dt>Travel</dt>
+                <dd>Boarding-pass curiosity — carry-on only, plans loose, return tickets optional.</dd>
+              </dl>
+              <dl>
+                <dt>Reading</dt>
+                <dd>Long-form essays, design-engineering blogs, the occasional cricket biography. Print, mostly.</dd>
+              </dl>
             </div>
-            <div className="process-item">
-              <span className="pno">P.03</span>
-              <h3>Prototype <em>— vibe-coded, not vibes-only.</em></h3>
-              <p>I prototype in code with AI agents and plugins as my second pair of hands. Real interactions, real tokens. The prototype <em>is</em> the spec — 6labs.ai was designed this way, end to end.</p>
-              <span className="plus">+</span>
+          </div>
+
+          {/* WORK TIMELINE */}
+          <div className="about-timeline">
+            <div className="about-timeline-head">
+              <span className="about-timeline-tag">TIMELINE</span>
+              <span className="about-timeline-range">2019 → NOW · 7 YEARS · ~30 SHIPPED</span>
             </div>
-            <div className="process-item">
-              <span className="pno">P.04</span>
-              <h3>Ship, then sharpen <em>— with the data.</em></h3>
-              <p>I sit close to engineering and analytics. We ship, we measure, we cut what didn&apos;t earn its keep. The first version isn&apos;t the last good one — it&apos;s the start of the conversation.</p>
-              <span className="plus">+</span>
+            <ol className="about-timeline-list">
+              <li className="tl-row tl-row--now">
+                <div className="tl-year">
+                  <span className="tl-year-from">2024</span>
+                  <span className="tl-year-to">NOW</span>
+                </div>
+                <div className="tl-node" aria-hidden />
+                <div className="tl-content">
+                  <h4 className="tl-title"><span className="tl-role">Senior Product Designer · Lead, 6labs.ai</span> · <em>BlueStacks / now.gg</em></h4>
+                  <p className="tl-body">AI gameplay analytics platform — vibe-coded prototypes, Figma-plugin engineering, custom agents that do my own job 10× faster. Owning end-to-end design across data ingestion, dashboards, and the AI authoring surface.</p>
+                  <ul className="tl-tags"><li>AI tooling</li><li>analytics</li><li>solo lead</li></ul>
+                </div>
+              </li>
+              <li className="tl-row">
+                <div className="tl-year">
+                  <span className="tl-year-from">2022</span>
+                  <span className="tl-year-to">2024</span>
+                </div>
+                <div className="tl-node" aria-hidden />
+                <div className="tl-content">
+                  <h4 className="tl-title"><span className="tl-role">Product Designer</span> · <em>BlueStacks / now.gg</em></h4>
+                  <p className="tl-body">Joined a product-based company and took a more holistic approach — strategy, mentoring juniors, presenting to stakeholders, shaping roadmaps. Shipped Float DS (four products, one parent-child architecture), nowStudio (7K+ devs, 200+ SDK integrations), and BlueStacks payments + gamification at 500M+ users.</p>
+                  <ul className="tl-tags"><li>design systems</li><li>payments</li><li>gamification</li><li>scale</li></ul>
+                </div>
+              </li>
+              <li className="tl-row">
+                <div className="tl-year">
+                  <span className="tl-year-from">2021</span>
+                  <span className="tl-year-to">2022</span>
+                </div>
+                <div className="tl-node" aria-hidden />
+                <div className="tl-content">
+                  <h4 className="tl-title"><span className="tl-role">UI/UX Designer</span> · <em>Service industry</em></h4>
+                  <p className="tl-body">Diverse-sector work across <b>IT, fintech, and brand-from-scratch</b> builds. The exposure broadened my design perspective — every industry has its own constraint set, and learning to adapt fast became the unfair advantage. Earned the HFI Certified Usability Analyst credential here.</p>
+                  <ul className="tl-tags"><li>IT</li><li>fintech</li><li>brand build</li><li>HFI CUA</li></ul>
+                </div>
+              </li>
+              <li className="tl-row">
+                <div className="tl-year">
+                  <span className="tl-year-from">2020</span>
+                  <span className="tl-year-to">2021</span>
+                </div>
+                <div className="tl-node" aria-hidden />
+                <div className="tl-content">
+                  <h4 className="tl-title"><span className="tl-role">Visual Designer</span> · <em>Agency / freelance</em></h4>
+                  <p className="tl-body">Recognized as visual designer, then went deeper — explored UI patterns and self-taught UX through courses on the side. The first deliberate pivot from <em>making it pretty</em> to <em>making it work</em>.</p>
+                  <ul className="tl-tags"><li>UI patterns</li><li>UX self-study</li><li>pivot</li></ul>
+                </div>
+              </li>
+              <li className="tl-row">
+                <div className="tl-year">
+                  <span className="tl-year-from">2019</span>
+                  <span className="tl-year-to">2020</span>
+                </div>
+                <div className="tl-node" aria-hidden />
+                <div className="tl-content">
+                  <h4 className="tl-title"><span className="tl-role">Graphic Designer</span> · <em>Emerging agency</em></h4>
+                  <p className="tl-body">Started here, crafting brand identities. CS-Engineering background made the jump to UI/UX feel natural — the apprentice years that set the taste calibration that still shows up in the work.</p>
+                  <ul className="tl-tags"><li>brand identity</li><li>print</li><li>foundations</li></ul>
+                </div>
+              </li>
+            </ol>
+          </div>
+        </section>
+
+        <section className="playground-pin" aria-label="Playground">
+          <div className="playground-frame">
+            <div className="playground-head">
+              <div className="section-tag">THE <span className="accent">PLAYGROUND</span></div>
             </div>
+            <PlaygroundStage />
           </div>
         </section>
 
