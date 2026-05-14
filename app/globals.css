@@ -1064,6 +1064,9 @@ section.inv, .scroll-transition.inv {
   z-index: 4;
   backface-visibility: hidden;
   transform-origin: center center !important;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 .scroll-transition .st-stack .st-glyph.lg {
   font-size: clamp(120px, 16vw, 260px);
@@ -1734,7 +1737,7 @@ body.has-custom-cursor .work-item { cursor: none; }
 .work-preview {
   position: fixed;
   top: 0; left: 0;
-  width: 300px; height: 180px;
+  width: 420px; height: 236px;
   pointer-events: none;
   opacity: 0;
   z-index: 50;
@@ -8311,7 +8314,7 @@ body.has-custom-cursor .more-tile { cursor: none; }
   .tl-row--now { padding-bottom: 24px; }
 }
 
-/* trigger hmr · sneak-peek-frames-and-reduced-motion-2026-05-14 */
+/* trigger hmr · glyph-fontsize-zoom-image-compression-2026-05-14 */
 
 /* ─── Figure caption (below image): accent meta on top, descriptive sentence below ─── */
 .fig-cap {

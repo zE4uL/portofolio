@@ -476,6 +476,7 @@ export default function BrutalistHome() {
       ruleB: HTMLElement | null;
       fromBg: string; fromFg: string; toBg: string; toFg: string;
       _curBg?: string;
+      focalBaseSize?: number;
     };
     const STs: ST[] = [];
     document.querySelectorAll<HTMLElement>("[data-st]").forEach((st) => {
@@ -524,6 +525,12 @@ export default function BrutalistHome() {
     };
     let coverScales: number[] = [];
     const recomputeCovers = () => {
+      for (const s of STs) {
+        if (s.focal) {
+          s.focal.style.fontSize = "";
+          s.focalBaseSize = parseFloat(getComputedStyle(s.focal).fontSize) || 140;
+        }
+      }
       coverScales = STs.map(computeCoverScale);
     };
 
@@ -556,7 +563,9 @@ export default function BrutalistHome() {
           const fScale = 1 + eased * (cover - 1);
           const fx = s.focal.style.getPropertyValue("--fx") || "50%";
           const fy = s.focal.style.getPropertyValue("--fy") || "50%";
-          s.focal.style.transform = `translate(calc(-1 * ${fx}), calc(-1 * ${fy})) scale(${fScale.toFixed(3)})`;
+          const base = s.focalBaseSize || 140;
+          s.focal.style.transform = `translate(calc(-1 * ${fx}), calc(-1 * ${fy}))`;
+          s.focal.style.fontSize = `${(base * fScale).toFixed(2)}px`;
         }
         if (s.sub) {
           const subOp = Math.max(0, 1 - zoomT * 3) * 0.55;
