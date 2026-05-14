@@ -30,22 +30,28 @@ export default function BrutalistHome() {
     let rx = mx,
       ry = my;
 
-    const onMouseMove = (e: MouseEvent) => {
-      mx = e.clientX;
-      my = e.clientY;
-      if (dot) dot.style.transform = `translate(${mx}px, ${my}px) translate(-50%,-50%)`;
-    };
-    window.addEventListener("mousemove", onMouseMove);
-
     let cursorRafId = 0;
     const cursorRaf = () => {
       rx += (mx - rx) * 0.18;
       ry += (my - ry) * 0.18;
       if (ring) ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%,-50%)`;
       if (label) label.style.transform = `translate(${rx}px, ${ry + 2}px) translate(-50%,-50%)`;
+      if (Math.abs(mx - rx) < 0.5 && Math.abs(my - ry) < 0.5) {
+        cursorRafId = 0;
+        return;
+      }
       cursorRafId = requestAnimationFrame(cursorRaf);
     };
-    if (!reduceMotion) cursorRafId = requestAnimationFrame(cursorRaf);
+    const ensureCursorRaf = () => {
+      if (!cursorRafId && !reduceMotion) cursorRafId = requestAnimationFrame(cursorRaf);
+    };
+    const onMouseMove = (e: MouseEvent) => {
+      mx = e.clientX;
+      my = e.clientY;
+      if (dot) dot.style.transform = `translate(${mx}px, ${my}px) translate(-50%,-50%)`;
+      ensureCursorRaf();
+    };
+    window.addEventListener("mousemove", onMouseMove);
 
     const cursorEls = document.querySelectorAll<HTMLElement>("[data-cursor]");
     const cursorListeners: Array<{ el: HTMLElement; enter: () => void; leave: () => void }> = [];
@@ -92,10 +98,12 @@ export default function BrutalistHome() {
         m.tix = x * 0.28;
         m.tiy = y * 0.42;
         m.following = true;
+        ensureMagnetRaf();
       };
       const leave = () => {
         m.tx = 0; m.ty = 0; m.tix = 0; m.tiy = 0;
         m.following = false;
+        ensureMagnetRaf();
       };
       btn.addEventListener("mousemove", move);
       btn.addEventListener("mouseleave", leave);
@@ -109,6 +117,7 @@ export default function BrutalistHome() {
     const RETURN_SPRING = 0.006, RETURN_DAMP = 0.94;
     let magnetRafId = 0;
     const magnetRaf = () => {
+      let busy = false;
       for (const m of magnets) {
         const SPRING = m.following ? FOLLOW_SPRING : RETURN_SPRING;
         const DAMP   = m.following ? FOLLOW_DAMP   : RETURN_DAMP;
@@ -120,41 +129,58 @@ export default function BrutalistHome() {
         m.ix += m.ivx; m.iy += m.ivy;
         m.btn.style.transform = `translate(${m.x.toFixed(2)}px, ${m.y.toFixed(2)}px)`;
         if (m.inner) m.inner.style.transform = `translate(${m.ix.toFixed(2)}px, ${m.iy.toFixed(2)}px)`;
+        if (m.following || Math.abs(m.x) > 0.05 || Math.abs(m.y) > 0.05 || Math.abs(m.vx) > 0.05 || Math.abs(m.vy) > 0.05) busy = true;
+      }
+      if (!busy) {
+        magnetRafId = 0;
+        return;
       }
       magnetRafId = requestAnimationFrame(magnetRaf);
     };
-    if (!reduceMotion) magnetRafId = requestAnimationFrame(magnetRaf);
+    const ensureMagnetRaf = () => {
+      if (!magnetRafId && !reduceMotion) magnetRafId = requestAnimationFrame(magnetRaf);
+    };
 
     // ===== STICKY ELASTIC ON CONTACT LINKS =====
     type Sticky = { el: HTMLElement; tx: number; ty: number; x: number; y: number; vx: number; vy: number };
     const stickies: Sticky[] = [];
     const stickyListeners: Array<{ el: HTMLElement; move: (e: MouseEvent) => void; leave: () => void }> = [];
+    let stickyRafId = 0;
+    const stickyRaf = () => {
+      let busy = false;
+      for (const s of stickies) {
+        s.vx = (s.vx + (s.tx - s.x) * 0.18) * 0.7;
+        s.vy = (s.vy + (s.ty - s.y) * 0.18) * 0.7;
+        s.x += s.vx; s.y += s.vy;
+        s.el.style.transform = `translate(${s.x.toFixed(2)}px, ${s.y.toFixed(2)}px)`;
+        if (Math.abs(s.x) > 0.05 || Math.abs(s.y) > 0.05 || Math.abs(s.vx) > 0.05 || Math.abs(s.vy) > 0.05) busy = true;
+      }
+      if (!busy) {
+        stickyRafId = 0;
+        return;
+      }
+      stickyRafId = requestAnimationFrame(stickyRaf);
+    };
+    const ensureStickyRaf = () => {
+      if (!stickyRafId && !reduceMotion) stickyRafId = requestAnimationFrame(stickyRaf);
+    };
     document.querySelectorAll<HTMLElement>(".contact-grid a.link").forEach((el) => {
       const s: Sticky = { el, tx: 0, ty: 0, x: 0, y: 0, vx: 0, vy: 0 };
       const move = (e: MouseEvent) => {
         const r = el.getBoundingClientRect();
         s.tx = (e.clientX - (r.left + r.width / 2)) * 0.15;
         s.ty = (e.clientY - (r.top + r.height / 2)) * 0.25;
+        ensureStickyRaf();
       };
       const leave = () => {
         s.tx = 0; s.ty = 0;
+        ensureStickyRaf();
       };
       el.addEventListener("mousemove", move);
       el.addEventListener("mouseleave", leave);
       stickies.push(s);
       stickyListeners.push({ el, move, leave });
     });
-    let stickyRafId = 0;
-    const stickyRaf = () => {
-      for (const s of stickies) {
-        s.vx = (s.vx + (s.tx - s.x) * 0.18) * 0.7;
-        s.vy = (s.vy + (s.ty - s.y) * 0.18) * 0.7;
-        s.x += s.vx; s.y += s.vy;
-        s.el.style.transform = `translate(${s.x.toFixed(2)}px, ${s.y.toFixed(2)}px)`;
-      }
-      stickyRafId = requestAnimationFrame(stickyRaf);
-    };
-    if (!reduceMotion) stickyRafId = requestAnimationFrame(stickyRaf);
 
     // ===== HERO REVEAL =====
     const heroTitle = document.getElementById("heroTitle");
@@ -391,10 +417,12 @@ export default function BrutalistHome() {
         if (!wasShown) pvLerp = PVLERP_INTRO;
         targetScale = 1;
         preview?.classList.add("show");
+        ensurePreviewRaf();
       };
       const move = (e: MouseEvent) => {
         ptx = e.clientX;
         pty = e.clientY;
+        ensurePreviewRaf();
       };
       const leave = () => {
         // Debounce the hide — if the cursor lands on another work-item within
@@ -406,6 +434,7 @@ export default function BrutalistHome() {
           targetScale = 0.85;
           preview?.classList.remove("show");
           hideTimer = null;
+          ensurePreviewRaf();
         }, 140);
       };
       item.addEventListener("mouseenter", enter);
@@ -424,9 +453,6 @@ export default function BrutalistHome() {
       const dx = ptx - pvx;
       const dy = pty - pvy;
       // Decay the intro boost back toward the steady follow lerp each frame.
-      // The preview never glues to the cursor — at steady state it trails
-      // by a distance proportional to cursor velocity, and only converges
-      // exponentially when the cursor stops moving.
       pvLerp = PVLERP + (pvLerp - PVLERP) * PVLERP_DECAY;
       const newPvx = pvx + dx * pvLerp;
       const newPvy = pvy + dy * pvLerp;
@@ -440,9 +466,20 @@ export default function BrutalistHome() {
       if (preview) {
         preview.style.transform = `translate(${pvx}px, ${pvy}px) translate(-50%,-50%) rotate(${pvRot.toFixed(2)}deg) scale(${pvScale.toFixed(4)})`;
       }
+      const isHidden = !preview?.classList.contains("show");
+      const settled =
+        Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5 &&
+        Math.abs(targetRot - pvRot) < 0.05 &&
+        Math.abs(targetScale - pvScale) < 0.001;
+      if (isHidden && settled) {
+        previewRafId = 0;
+        return;
+      }
       previewRafId = requestAnimationFrame(previewRaf);
     };
-    if (!reduceMotion) previewRafId = requestAnimationFrame(previewRaf);
+    const ensurePreviewRaf = () => {
+      if (!previewRafId && !reduceMotion) previewRafId = requestAnimationFrame(previewRaf);
+    };
 
     // ===== ZOOM-LETTER TRANSITIONS =====
     const _hex = (c: string): [number, number, number] => {
@@ -476,7 +513,6 @@ export default function BrutalistHome() {
       ruleB: HTMLElement | null;
       fromBg: string; fromFg: string; toBg: string; toFg: string;
       _curBg?: string;
-      focalBaseSize?: number;
     };
     const STs: ST[] = [];
     document.querySelectorAll<HTMLElement>("[data-st]").forEach((st) => {
@@ -525,12 +561,6 @@ export default function BrutalistHome() {
     };
     let coverScales: number[] = [];
     const recomputeCovers = () => {
-      for (const s of STs) {
-        if (s.focal) {
-          s.focal.style.fontSize = "";
-          s.focalBaseSize = parseFloat(getComputedStyle(s.focal).fontSize) || 140;
-        }
-      }
       coverScales = STs.map(computeCoverScale);
     };
 
@@ -563,9 +593,7 @@ export default function BrutalistHome() {
           const fScale = 1 + eased * (cover - 1);
           const fx = s.focal.style.getPropertyValue("--fx") || "50%";
           const fy = s.focal.style.getPropertyValue("--fy") || "50%";
-          const base = s.focalBaseSize || 140;
-          s.focal.style.transform = `translate(calc(-1 * ${fx}), calc(-1 * ${fy}))`;
-          s.focal.style.fontSize = `${(base * fScale).toFixed(2)}px`;
+          s.focal.style.transform = `translate(calc(-1 * ${fx}), calc(-1 * ${fy})) scale(${fScale.toFixed(3)})`;
         }
         if (s.sub) {
           const subOp = Math.max(0, 1 - zoomT * 3) * 0.55;
@@ -602,8 +630,16 @@ export default function BrutalistHome() {
         if (s.progress) s.progress.style.width = (p * 100).toFixed(2) + "%";
       }
     };
-    window.addEventListener("scroll", updateSTs, { passive: true });
-    window.addEventListener("resize", updateSTs);
+    let stRafQueued = 0;
+    const scheduleUpdateSTs = () => {
+      if (stRafQueued) return;
+      stRafQueued = requestAnimationFrame(() => {
+        stRafQueued = 0;
+        updateSTs();
+      });
+    };
+    window.addEventListener("scroll", scheduleUpdateSTs, { passive: true });
+    window.addEventListener("resize", scheduleUpdateSTs);
     window.addEventListener("resize", recomputeCovers);
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => {
@@ -811,9 +847,10 @@ export default function BrutalistHome() {
       cancelAnimationFrame(previewRafId);
       stopCycle();
       window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("scroll", updateSTs);
-      window.removeEventListener("resize", updateSTs);
+      window.removeEventListener("scroll", scheduleUpdateSTs);
+      window.removeEventListener("resize", scheduleUpdateSTs);
       window.removeEventListener("resize", recomputeCovers);
+      if (stRafQueued) cancelAnimationFrame(stRafQueued);
       window.removeEventListener("keydown", onKeyDown);
       menuBtn?.removeEventListener("click", onMenuBtnClick);
       cursorListeners.forEach(({ el, enter, leave }) => {

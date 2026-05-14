@@ -5,14 +5,16 @@ type Opts = {
   ease?: number;
 };
 
-export function useSmoothScroll({ lockRef, ease = 0.085 }: Opts = {}) {
+export function useSmoothScroll({ lockRef, ease = 0.22 }: Opts = {}) {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.matchMedia("(pointer: coarse)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     let targetY = window.scrollY;
     let currentY = window.scrollY;
     let raf = 0;
+    let idleFrames = 0;
 
     const onWheel = (e: WheelEvent) => {
       if (lockRef?.current) return;
@@ -24,11 +26,28 @@ export function useSmoothScroll({ lockRef, ease = 0.085 }: Opts = {}) {
           document.documentElement.scrollHeight - window.innerHeight
         )
       );
+      ensureTicking();
     };
     const tick = () => {
-      currentY += (targetY - currentY) * ease;
-      window.scrollTo(0, currentY);
+      const delta = targetY - currentY;
+      if (Math.abs(delta) < 0.5) {
+        currentY = targetY;
+        if (++idleFrames > 4) {
+          raf = 0;
+          return;
+        }
+      } else {
+        idleFrames = 0;
+        currentY += delta * ease;
+        window.scrollTo(0, currentY);
+      }
       raf = requestAnimationFrame(tick);
+    };
+    const ensureTicking = () => {
+      if (!raf) {
+        idleFrames = 0;
+        raf = requestAnimationFrame(tick);
+      }
     };
     const onTouchStart = () => {
       targetY = window.scrollY;
@@ -50,13 +69,13 @@ export function useSmoothScroll({ lockRef, ease = 0.085 }: Opts = {}) {
         top,
         document.documentElement.scrollHeight - window.innerHeight
       );
+      ensureTicking();
     };
 
     window.addEventListener("wheel", onWheel, { passive: false });
     document.addEventListener("touchstart", onTouchStart);
     window.addEventListener("scroll", onScrollResync, { passive: true });
     window.addEventListener("smooth:scroll-to", onProgScroll as EventListener);
-    raf = requestAnimationFrame(tick);
 
     return () => {
       cancelAnimationFrame(raf);

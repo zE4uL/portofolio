@@ -8314,7 +8314,7 @@ body.has-custom-cursor .more-tile { cursor: none; }
   .tl-row--now { padding-bottom: 24px; }
 }
 
-/* trigger hmr · glyph-fontsize-zoom-image-compression-2026-05-14 */
+/* trigger hmr · perf-idle-rafs-snappier-smooth-scroll-2026-05-15 */
 
 /* ─── Figure caption (below image): accent meta on top, descriptive sentence below ─── */
 .fig-cap {
