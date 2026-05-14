@@ -4278,11 +4278,7 @@ footer.cs-foot a:hover { color: var(--accent); }
   background: #0d0c0b;
   color: #f0e9d6;
   position: relative;
-  flex: 1;
-  min-height: 0;
   width: 100%;
-  display: flex;
-  flex-direction: column;
 }
 
 /* ===== PLAYGROUND PARALLAX PIN =====
@@ -4310,12 +4306,34 @@ footer.cs-foot a:hover { color: var(--accent); }
 .playground-frame .playground-head {
   margin-top: 0;
   padding-top: 0;
-  padding-bottom: clamp(16px, 2.5vh, 32px);
+  padding-bottom: clamp(48px, 7vh, 96px);
   flex: 0 0 auto;
   text-align: left;
 }
 .playground-frame .playground-head .section-tag {
   margin-bottom: 0;
+  font-size: clamp(40px, 5.5vw, 84px);
+}
+/* Scale playground internals down so the whole cluster (head + rack + console)
+   fits inside the 100vh sticky frame. Without this, vertical centering pushes
+   the head above the viewport. */
+.playground-frame .playground-stage {
+  padding: 0 32px 16px;
+}
+.playground-frame .stage-grid {
+  margin-top: 0;
+  gap: 48px;
+}
+@media (min-width: 1024px) {
+  .playground-frame .stage-grid { gap: 56px; }
+}
+.playground-frame .cassette-rack {
+  min-height: 0;
+  padding: 28px 24px 36px;
+  gap: 36px 28px;
+}
+.playground-frame .playground-intro {
+  margin: 6px 0 14px;
 }
 
 /* Section that comes AFTER the pinned playground needs to slide up over it
@@ -8293,7 +8311,7 @@ body.has-custom-cursor .more-tile { cursor: none; }
   .tl-row--now { padding-bottom: 24px; }
 }
 
-/* trigger hmr · playground-vcenter-left-align-2026-05-14 */
+/* trigger hmr · playground-head-bigger-gap-2026-05-14 */
 
 /* ─── Figure caption (below image): accent meta on top, descriptive sentence below ─── */
 .fig-cap {
