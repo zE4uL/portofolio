@@ -1427,9 +1427,6 @@ export default function BrutalistHome() {
             <a href="mailto:ziaul.islam14@gmail.com" className="btn-magnet primary" data-magnet data-cursor="send">
               <span className="inner"><span className="dot"></span>ziaul.islam14@gmail.com<span>↗</span></span>
             </a>
-            <a href="https://www.linkedin.com/in/ziaulislam14/" target="_blank" rel="noopener" className="btn-magnet" data-magnet data-cursor="book">
-              <span className="inner"><span className="dot"></span>Connect on LinkedIn<span>↗</span></span>
-            </a>
             <a href="/cv.pdf" target="_blank" rel="noopener" download="Ziaul-Islam-Resume-2026.pdf" className="btn-magnet" data-magnet data-cursor="link">
               <span className="inner"><span className="dot"></span>Download CV<span>↓</span></span>
             </a>
