@@ -44,18 +44,13 @@ export const metadata: Metadata = {
     title: "Ziaul Islam — Senior Product Designer",
     description: DESCRIPTION,
     locale: "en_US",
-    images: [
-      {
-        url: "/images/profile/ziaul.jpg",
-        alt: "Ziaul Islam — Senior Product Designer, BlueStacks / now.gg / 6labs.ai",
-      },
-    ],
+    // og:image is sourced from app/opengraph-image.png (Next.js metadata file)
   },
   twitter: {
     card: "summary_large_image",
     title: "Ziaul Islam — Senior Product Designer",
     description: DESCRIPTION,
-    images: ["/images/profile/ziaul.jpg"],
+    // twitter:image is sourced from app/twitter-image.png (Next.js metadata file)
   },
   category: "Design",
 };
