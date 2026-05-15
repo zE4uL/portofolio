@@ -120,6 +120,9 @@ export default function HeroCRT() {
             })}
           </div>
         </div>
+        <span className="crt-knob crt-knob-1" aria-hidden="true" />
+        <span className="crt-knob crt-knob-2" aria-hidden="true" />
+        <span className="crt-vent" aria-hidden="true" />
         <div className="crt-base">
           <div className="crt-stand" />
           <div className="crt-foot" />

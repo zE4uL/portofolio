@@ -1282,7 +1282,7 @@ export default function BrutalistHome() {
               </dl>
               <dl>
                 <dt>Reading</dt>
-                <dd>Long-form essays, design-engineering blogs, the occasional cricket biography. Print, mostly.</dd>
+                <dd>Hacker News rabbit holes, design-engineering Substacks, and social media threads from folks I follow in tech and design.</dd>
               </dl>
             </div>
           </div>

@@ -164,11 +164,6 @@ export default function CRTPopup({ cassette, onClose }: Props) {
               </div>
             )}
           </div>
-          <div className="crt-base">
-            <span className="crt-base-badge">PHOSPHOR · 14&quot;</span>
-            <span className="crt-base-led" />
-            <span className="crt-base-text">VHF / UHF</span>
-          </div>
         </div>
 
         <div className="crt-meta">
