@@ -1433,6 +1433,9 @@ export default function BrutalistHome() {
             <a href="/cv.pdf" target="_blank" rel="noopener" download="Ziaul-Islam-Resume-2026.pdf" className="btn-magnet" data-magnet data-cursor="link">
               <span className="inner"><span className="dot"></span>Download CV<span>↓</span></span>
             </a>
+            <a href="tel:+919560377940" className="btn-magnet" data-magnet data-cursor="send" aria-label="Call +91 95603 77940">
+              <span className="inner"><span className="dot"></span>+91 95603 77940<span>↗</span></span>
+            </a>
           </div>
           <div className="contact-grid">
             <div>
@@ -1524,6 +1527,10 @@ export default function BrutalistHome() {
           <div className="menu-block">
             <h5>Write</h5>
             <a className="big" href="mailto:ziaul.islam14@gmail.com">ziaul.islam14@gmail.com ↗</a>
+          </div>
+          <div className="menu-block">
+            <h5>Call</h5>
+            <a className="big" href="tel:+919560377940">+91 95603 77940 ↗</a>
           </div>
           <div className="menu-block">
             <h5>Elsewhere</h5>
