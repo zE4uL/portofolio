@@ -2396,7 +2396,16 @@ body.has-custom-cursor .work-item { cursor: none; }
 
 .cta-wrap {
   margin-top: 60px;
-  display: flex; gap: 96px; flex-wrap: wrap;
+  display: flex; gap: 48px; flex-wrap: wrap;
+  align-items: center;
+}
+/* Write + Call sit together — they're the same intent (start a
+   conversation), so the visual pair telegraphs that. CV is a different
+   intent (artifact download) and lives at a wider gap from the pair. */
+.cta-primary {
+  display: inline-flex;
+  gap: 14px;
+  flex-wrap: wrap;
   align-items: center;
 }
 .btn-magnet {
@@ -8471,7 +8480,7 @@ section.inv .scroll-hint,
   .scroll-hint, .scroll-hint-dot { animation: none; }
 }
 
-/* trigger hmr · case-study-chrome-uses-logo-mark-svg-2026-05-16 */
+/* trigger hmr · cta-write-call-primary-pair-2026-05-16 */
 
 /* ─── Figure caption (below image): accent meta on top, descriptive sentence below ─── */
 .fig-cap {

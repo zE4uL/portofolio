@@ -1424,14 +1424,16 @@ export default function BrutalistHome() {
             <span className="line"><span><em>something useful.</em></span></span>
           </h2>
           <div className="cta-wrap">
-            <a href="mailto:ziaul.islam14@gmail.com" className="btn-magnet primary" data-magnet data-cursor="send">
-              <span className="inner"><span className="dot"></span>ziaul.islam14@gmail.com<span>↗</span></span>
-            </a>
+            <div className="cta-primary">
+              <a href="mailto:ziaul.islam14@gmail.com" className="btn-magnet primary" data-magnet data-cursor="send" aria-label="Email ziaul.islam14@gmail.com">
+                <span className="inner"><span className="dot"></span>Write<span>↗</span></span>
+              </a>
+              <a href="tel:+919560377940" className="btn-magnet primary" data-magnet data-cursor="send" aria-label="Call +91 95603 77940">
+                <span className="inner"><span className="dot"></span>Call<span>↗</span></span>
+              </a>
+            </div>
             <a href="/cv.pdf" target="_blank" rel="noopener" download="Ziaul-Islam-Resume-2026.pdf" className="btn-magnet" data-magnet data-cursor="link">
               <span className="inner"><span className="dot"></span>Download CV<span>↓</span></span>
-            </a>
-            <a href="tel:+919560377940" className="btn-magnet" data-magnet data-cursor="send" aria-label="Call +91 95603 77940">
-              <span className="inner"><span className="dot"></span>Call<span>↗</span></span>
             </a>
           </div>
           <div className="contact-grid">
