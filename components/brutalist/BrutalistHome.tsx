@@ -6,6 +6,7 @@ import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import { workPreviews } from "@/assets/work-previews";
 import PlaygroundStage from "@/components/playground/PlaygroundStage";
 import RotatingStamp from "@/components/brutalist/RotatingStamp";
+import ScrollHint from "@/components/brutalist/ScrollHint";
 import HeroMagneticGrid from "@/components/brutalist/HeroMagneticGrid";
 import HeroCRT from "@/components/brutalist/HeroCRT";
 
@@ -983,6 +984,7 @@ export default function BrutalistHome() {
             spinDuration={16}
             variant="cream"
           />
+          <ScrollHint label="Scroll" />
         </section>
 
 
@@ -1373,6 +1375,7 @@ export default function BrutalistHome() {
               <div className="section-tag">THE <span className="accent">PLAYGROUND</span></div>
             </div>
             <PlaygroundStage />
+            <ScrollHint label="Keep scrolling" />
           </div>
         </section>
 

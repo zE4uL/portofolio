@@ -386,24 +386,32 @@ section, .marquee, .playground, footer { position: relative; z-index: 1; }
   .logo-mark--svg { width: 44px; height: 44px; }
 }
 
-/* ---- FLOATING MENU BUTTON (top-right) ---- */
+/* ---- FLOATING MENU BUTTON (top-right) ----
+   Outline-only by default (no fill) — `mix-blend-mode: difference` on the
+   button inverts the stroke, label, and icon against whatever sits behind
+   it, the same auto-contrast trick the floating Z monogram uses. The button
+   is a sibling of <main> (not a descendant), so its stacking-context root is
+   the body and the blend can actually reach the section pixels behind it —
+   which doesn't work for elements rendered inside main's own stacking
+   context. Solid fill returns only on hover. */
 .menu-btn {
   position: fixed;
   top: 36px; right: 40px;
   display: inline-flex; align-items: center; gap: 18px;
   padding: 18px 28px 18px 22px;
-  border: 2px solid var(--accent);
+  border: 2px solid #ffffff;
   border-radius: 200px;
-  background: #0a0a0a;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.18), 0 0 0 6px rgba(123,168,137,.10);
-  color: var(--paper);
+  background: transparent;
+  box-shadow: none;
+  color: #ffffff;
+  mix-blend-mode: difference;
   font-family: var(--font-jetbrains);
   font-size: 13px;
   letter-spacing: .22em;
   text-transform: uppercase;
   font-weight: 600;
   overflow: hidden;
-  transition: border-color .3s var(--ease), color .3s var(--ease), background .3s var(--ease), box-shadow .3s var(--ease);
+  transition: border-color .3s var(--ease), color .3s var(--ease), background .3s var(--ease), box-shadow .3s var(--ease), mix-blend-mode 0s;
   z-index: 70;
   will-change: transform;
 }
@@ -424,7 +432,16 @@ section, .marquee, .playground, footer { position: relative; z-index: 1; }
   transition: transform .5s var(--ease);
   z-index: 0;
 }
-.menu-btn:hover { box-shadow: 0 6px 16px rgba(0,0,0,0.22), 0 0 0 8px rgba(123,168,137,.18); color: #0a0a0a; border-color: var(--accent); background: #0a0a0a; }
+.menu-btn:hover {
+  /* Hover restores intentional colors — turn off the difference blend so the
+     accent fill, halo, and ink-on-accent label render in their real palette
+     instead of the inverted-of-backdrop version. */
+  mix-blend-mode: normal;
+  background: #0a0a0a;
+  color: #0a0a0a;
+  border-color: var(--accent);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.22), 0 0 0 8px rgba(123,168,137,.18);
+}
 .menu-btn:hover::before { transform: translateY(0); }
 body.menu-open .menu-btn-pulse { display: none; }
 .menu-btn .inner {
@@ -8433,7 +8450,67 @@ body.has-custom-cursor .more-tile { cursor: none; }
   .tl-row--now { padding-bottom: 24px; }
 }
 
-/* trigger hmr · logo-backdrop-invert-100pct-2026-05-15 */
+/* ---- ScrollHint — small mouse-shape affordance pinned at the bottom of
+   full-bleed 100vh sections (.hero, .playground-frame) where the next
+   section is below the fold. Dismisses itself once scrolled past. ---- */
+.scroll-hint {
+  position: absolute;
+  bottom: clamp(24px, 4vh, 40px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-2);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 5;
+  transition: opacity .4s var(--ease), transform .4s var(--ease);
+  animation: scroll-hint-bob 2.2s ease-in-out infinite;
+}
+.scroll-hint--gone {
+  opacity: 0;
+  transform: translate(-50%, 12px);
+}
+.scroll-hint svg {
+  width: 22px;
+  height: 36px;
+  display: block;
+}
+.scroll-hint-dot {
+  transform-origin: center;
+  animation: scroll-hint-dot 1.8s ease-in-out infinite;
+}
+.scroll-hint-label {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+/* On dark sections the hint reads as a muted off-white; on cream .inv
+   sections, fall back to a low-contrast ink. */
+section.inv .scroll-hint,
+.inv .scroll-hint { color: rgba(10, 10, 10, 0.55); }
+.playground-frame .scroll-hint,
+.hero .scroll-hint { color: rgba(255, 255, 255, 0.55); }
+
+@keyframes scroll-hint-dot {
+  0%   { transform: translateY(0); opacity: 1; }
+  50%  { transform: translateY(8px); opacity: 0.25; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes scroll-hint-bob {
+  0%, 100% { transform: translate(-50%, 0); }
+  50%      { transform: translate(-50%, -2px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-hint, .scroll-hint-dot { animation: none; }
+}
+
+/* trigger hmr · menu-btn-blend-and-scroll-hint-2026-05-15 */
 
 /* ─── Figure caption (below image): accent meta on top, descriptive sentence below ─── */
 .fig-cap {
