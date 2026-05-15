@@ -343,7 +343,7 @@ export default function BluestacksCaseStudy() {
         {/* 2C — Game Browser, promoted to decision card */}
         <article className="decision-card">
           <div className="decision-no">02.C · Decision</div>
-          <h3 className="decision-title"><em>Game Browser</em> — the bet on a pattern, not a surface.</h3>
+          <h3 className="decision-title"><em>Game Browser</em></h3>
           <p className="decision-body">An in-product discovery surface inside the App Player. Prototyped, never shipped — the user signal was real, but the feed-based discovery pattern that captured it ended up being Moments. The Game Browser surface died; the bet underneath it survived in a different room.</p>
           <p className="decision-takeaway"><b>Takeaway:</b> Bet on the pattern, not the surface.</p>
         </article>
