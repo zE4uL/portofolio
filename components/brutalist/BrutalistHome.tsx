@@ -679,6 +679,43 @@ export default function BrutalistHome() {
       secIo.observe(el);
     });
 
+    // ===== LOGO THEME (light-section auto-contrast) =====
+    // The fixed Z monogram in the top-left lives at top:36px / left:40px. We
+    // can't use mix-blend-mode for contrast because the blended fixed element
+    // composes against the body's stacking root (always dark), not the
+    // section behind it. So we hit-test the section sitting under the logo's
+    // centre and toggle `.on-light` whenever that section is `.inv` (cream
+    // background) — CSS then inverts the white SVG to black.
+    const logoEl = document.querySelector<HTMLElement>(".logo-mark--svg");
+    let logoThemeRaf = 0;
+    const probeLogoTheme = () => {
+      logoThemeRaf = 0;
+      if (!logoEl) return;
+      const r = logoEl.getBoundingClientRect();
+      const px = r.left + r.width / 2;
+      const py = r.top + r.height / 2;
+      const prevPe = logoEl.style.pointerEvents;
+      logoEl.style.pointerEvents = "none";
+      const stack = document.elementsFromPoint(px, py);
+      logoEl.style.pointerEvents = prevPe;
+      let onLight = false;
+      for (const el of stack) {
+        if (el === logoEl || logoEl.contains(el)) continue;
+        const section = (el as HTMLElement).closest("section[data-section], .scroll-transition");
+        if (section) {
+          onLight = section.classList.contains("inv");
+          break;
+        }
+      }
+      logoEl.classList.toggle("on-light", onLight);
+    };
+    const scheduleLogoTheme = () => {
+      if (!logoThemeRaf) logoThemeRaf = requestAnimationFrame(probeLogoTheme);
+    };
+    scheduleLogoTheme();
+    window.addEventListener("scroll", scheduleLogoTheme, { passive: true });
+    window.addEventListener("resize", scheduleLogoTheme);
+
     // ===== FULLSCREEN MENU =====
     const menuBtn = document.getElementById("menuBtn") as HTMLButtonElement | null;
     const menuBtnLabel = document.getElementById("menuBtnLabel") as HTMLElement | null;
@@ -850,6 +887,9 @@ export default function BrutalistHome() {
       window.removeEventListener("scroll", scheduleUpdateSTs);
       window.removeEventListener("resize", scheduleUpdateSTs);
       window.removeEventListener("resize", recomputeCovers);
+      window.removeEventListener("scroll", scheduleLogoTheme);
+      window.removeEventListener("resize", scheduleLogoTheme);
+      if (logoThemeRaf) cancelAnimationFrame(logoThemeRaf);
       if (stRafQueued) cancelAnimationFrame(stRafQueued);
       window.removeEventListener("keydown", onKeyDown);
       menuBtn?.removeEventListener("click", onMenuBtnClick);
@@ -894,18 +934,25 @@ export default function BrutalistHome() {
       <div className="cursor-dot" id="cursorDot"></div>
 
       <main>
-        {/* FLOATING LOGO — Twin-Orbit Caret + wordmark */}
-        <a href="#hero" className="logo-mark logo-mark--orb" data-cursor="home" data-target="hero" data-magnet>
-          <span className="logo-orb" aria-hidden="true">
-            <span className="logo-orb-ring" />
-            <span className="logo-orb-ring logo-orb-ring-2" />
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 5h14L5 19h14" />
-            </svg>
-          </span>
-          <span className="logo-wordmark">
-            <span className="logo-name">Ziaul Islam</span>
-            <span className="logo-role">Sr. Product Designer</span>
+        {/* FLOATING LOGO — Z monogram, mix-blend-mode difference for auto-contrast */}
+        <a
+          href="#hero"
+          className="logo-mark logo-mark--svg"
+          data-cursor="home"
+          data-target="hero"
+          data-magnet
+          aria-label="Ziaul Islam — Senior Product Designer, home"
+        >
+          <span className="inner">
+            <img
+              src="/images/profile/Logo.svg"
+              alt=""
+              aria-hidden="true"
+              className="logo-svg"
+              width={56}
+              height={56}
+              draggable={false}
+            />
           </span>
         </a>
 

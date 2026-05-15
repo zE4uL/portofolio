@@ -334,6 +334,59 @@ section, .marquee, .playground, footer { position: relative; z-index: 1; }
 @keyframes logo-orb-spin { to { transform: rotate(360deg); } }
 @keyframes logo-orb-spin-rev { to { transform: rotate(-360deg); } }
 
+/* ---- SVG monogram variant — strips the pill chrome and inverts against
+   whatever sits behind it (sage hero, light §03, dark §04) via
+   mix-blend-mode: difference. Same magnetic interaction as the original pill
+   — the wrapper carries data-magnet; the .inner span gets the parallax. ---- */
+.logo-mark--svg {
+  padding: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  gap: 0;
+  width: 56px;
+  height: 56px;
+  /* No `isolation` here — `mix-blend-mode: difference` on the inner SVG must
+     be able to blend against the page background, not an isolated context. */
+}
+.logo-mark--svg .inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+}
+.logo-mark--svg .logo-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* Logo.svg ships as solid white on transparent. We can't use
+     `mix-blend-mode: difference` here because the fixed logo's stacking
+     context root is the viewport, not the per-section background — the blend
+     would always run against the body color, not the white .inv sections.
+     Instead, BrutalistHome.tsx tracks which section sits under the logo and
+     toggles `.on-light` on the anchor; `filter: invert(1)` flips white → black. */
+  filter: none;
+  transition: filter .35s var(--ease), transform .25s var(--ease);
+  pointer-events: none;
+}
+.logo-mark--svg.on-light .logo-svg {
+  filter: invert(1);
+}
+.logo-mark--svg:hover .logo-svg {
+  filter: drop-shadow(0 0 12px rgba(255,255,255,0.35));
+}
+.logo-mark--svg.on-light:hover .logo-svg {
+  filter: invert(1) drop-shadow(0 0 12px rgba(0,0,0,0.25));
+}
+@media (max-width: 720px) {
+  .logo-mark--svg { width: 44px; height: 44px; }
+}
+
 /* ---- FLOATING MENU BUTTON (top-right) ---- */
 .menu-btn {
   position: fixed;
@@ -8381,7 +8434,7 @@ body.has-custom-cursor .more-tile { cursor: none; }
   .tl-row--now { padding-bottom: 24px; }
 }
 
-/* trigger hmr · crt-hero-knobs-vent-popup-gap-2026-05-15 */
+/* trigger hmr · logo-svg-on-light-toggle-2026-05-15 */
 
 /* ─── Figure caption (below image): accent meta on top, descriptive sentence below ─── */
 .fig-cap {
