@@ -364,24 +364,23 @@ section, .marquee, .playground, footer { position: relative; z-index: 1; }
   width: 100%;
   height: 100%;
   display: block;
-  /* Logo.svg ships as solid white on transparent. We can't use
-     `mix-blend-mode: difference` here because the fixed logo's stacking
-     context root is the viewport, not the per-section background — the blend
-     would always run against the body color, not the white .inv sections.
-     Instead, BrutalistHome.tsx tracks which section sits under the logo and
-     toggles `.on-light` on the anchor; `filter: invert(1)` flips white → black. */
-  filter: none;
-  transition: filter .35s var(--ease), transform .25s var(--ease);
+  /* The mark is rendered as the inverted backdrop, clipped to the SVG's
+     silhouette via mask-image. backdrop-filter samples the composited
+     backdrop pixels at this element's box — so it works pixel-perfect across
+     section boundaries (white where the page is dark, dark where the page
+     is light, complementary on a coloured section, and a clean split when
+     the mark straddles a boundary). Crucially, backdrop-filter sees the
+     actual painted pixels regardless of stacking context, which mix-blend-
+     mode does not (mix-blend on a fixed element composes against the body
+     root and never reaches the .inv section backgrounds). */
+  -webkit-mask: url(/images/profile/Logo.svg) center / contain no-repeat;
+  mask: url(/images/profile/Logo.svg) center / contain no-repeat;
+  /* invert(100%) — Lightning CSS (Next's CSS optimizer) eats invert(1) as a
+     parsing edge case, dropping the value down to invert() which browsers
+     ignore. Percent syntax survives. */
+  backdrop-filter: invert(100%);
+  -webkit-backdrop-filter: invert(100%);
   pointer-events: none;
-}
-.logo-mark--svg.on-light .logo-svg {
-  filter: invert(1);
-}
-.logo-mark--svg:hover .logo-svg {
-  filter: drop-shadow(0 0 12px rgba(255,255,255,0.35));
-}
-.logo-mark--svg.on-light:hover .logo-svg {
-  filter: invert(1) drop-shadow(0 0 12px rgba(0,0,0,0.25));
 }
 @media (max-width: 720px) {
   .logo-mark--svg { width: 44px; height: 44px; }
@@ -8434,7 +8433,7 @@ body.has-custom-cursor .more-tile { cursor: none; }
   .tl-row--now { padding-bottom: 24px; }
 }
 
-/* trigger hmr · logo-svg-on-light-toggle-2026-05-15 */
+/* trigger hmr · logo-backdrop-invert-100pct-2026-05-15 */
 
 /* ─── Figure caption (below image): accent meta on top, descriptive sentence below ─── */
 .fig-cap {
