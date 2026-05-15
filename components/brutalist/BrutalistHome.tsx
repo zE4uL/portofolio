@@ -1431,7 +1431,7 @@ export default function BrutalistHome() {
               <span className="inner"><span className="dot"></span>Download CV<span>↓</span></span>
             </a>
             <a href="tel:+919560377940" className="btn-magnet" data-magnet data-cursor="send" aria-label="Call +91 95603 77940">
-              <span className="inner"><span className="dot"></span>+91 95603 77940<span>↗</span></span>
+              <span className="inner"><span className="dot"></span>Call<span>↗</span></span>
             </a>
           </div>
           <div className="contact-grid">
