@@ -286,7 +286,7 @@ export default function AmwayIndiaCaseStudy() {
         </div>
 
         <p className="ctx-lede ctx-lede-intro">
-          A 2020 contract — three years before Float, my first real design-system effort, and the only B2C consumer surface in this portfolio. The work didn&apos;t fully ship under my hand (I rolled off mid-rollout), but the instincts it taught me show up in everything since. Listed below: what it proves, and what I&apos;d push harder on next time.
+          A 2020 contract — three years before Float, my first real design-system effort. The work didn&apos;t fully ship under my hand (I rolled off mid-rollout), but the instincts it taught me show up in everything since. Listed below: what it proves, and what I&apos;d push harder on next time.
         </p>
 
         <div className="reflect-stack">
