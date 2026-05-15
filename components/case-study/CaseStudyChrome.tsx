@@ -116,17 +116,22 @@ export default function CaseStudyChrome({ context, rightSlot }: CaseStudyChromeP
       <Link
         ref={logoRef}
         href="/"
-        className="cs-orb-logo"
+        className="cs-orb-logo logo-mark--svg"
         data-magnet
         data-cursor="go"
         aria-label="Back to index"
       >
-        <span ref={logoInnerRef} className="cs-orb inner" aria-hidden="true">
-          <span className="cs-orb-ring" />
-          <span className="cs-orb-ring cs-orb-ring-2" />
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M5 5h14L5 19h14" />
-          </svg>
+        <span ref={logoInnerRef} className="inner" aria-hidden="true">
+          {/* inline backdropFilter — Lightning CSS strips `invert(...)` to
+              `invert()` from globals.css, so we keep it inline. */}
+          <span
+            className="logo-svg"
+            aria-hidden="true"
+            style={{
+              backdropFilter: "invert(100%)",
+              WebkitBackdropFilter: "invert(100%)",
+            }}
+          />
         </span>
       </Link>
 

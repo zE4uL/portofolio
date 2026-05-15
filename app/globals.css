@@ -2624,53 +2624,16 @@ footer.brutalist-footer a:hover { color: var(--accent); }
 }
 
 /* Floating orb logo — top-left, magnetic (Twin-Orbit Caret · 06.1) */
+/* Case study pages reuse the same Z-monogram chrome as the home page
+   (.logo-mark--svg). The only thing case-study-specific is the higher
+   z-index so it sits above the page's grain/wash overlays. */
 .cs-orb-logo {
   position: fixed;
   top: 36px; left: 40px;
   z-index: 85;
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 68px; height: 68px;
-  border-radius: 50%;
   text-decoration: none;
-  /* No transition — JS rAF drives transform smoothly */
   will-change: transform;
 }
-.cs-orb {
-  position: relative;
-  width: 68px; height: 68px;
-  border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  color: var(--accent);
-  background: radial-gradient(circle at 35% 30%, #181818, #050505);
-  border: 1px solid rgba(255,255,255,0.22);
-  box-shadow: 0 14px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.5) inset;
-  will-change: transform;
-}
-.cs-orb svg {
-  width: 26px; height: 26px;
-  position: relative; z-index: 3;
-}
-.cs-orb-ring {
-  position: absolute; inset: 4px;
-  border-radius: 50%;
-  border: 1px dashed rgba(var(--accent-rgb), 0.55);
-  animation: cs-orb-spin 8s linear infinite;
-  pointer-events: none;
-}
-.cs-orb-ring-2 {
-  inset: -4px;
-  border: 1px dashed rgba(245, 241, 232, 0.18);
-  animation: cs-orb-spin-rev 14s linear infinite;
-}
-.cs-orb-logo:hover .cs-orb-ring { animation-duration: 3.2s; }
-.cs-orb-logo:hover .cs-orb-ring-2 { animation-duration: 5.5s; }
-.cs-orb-logo:hover .cs-orb {
-  border-color: var(--accent);
-  box-shadow: 0 12px 36px rgba(var(--accent-rgb), 0.28);
-}
-
-@keyframes cs-orb-spin { to { transform: rotate(360deg); } }
-@keyframes cs-orb-spin-rev { to { transform: rotate(-360deg); } }
 
 /* Floating context label — top center */
 .cs-float-context {
@@ -2820,9 +2783,7 @@ footer.brutalist-footer a:hover { color: var(--accent); }
 
 @media (max-width: 720px) {
   .cs-float-context { display: none; }
-  .cs-orb-logo { top: 18px; left: 18px; width: 52px; height: 52px; }
-  .cs-orb { width: 52px; height: 52px; }
-  .cs-orb svg { width: 20px; height: 20px; }
+  .cs-orb-logo { top: 18px; left: 18px; }
   .cs-float-menu { top: 18px; right: 18px; padding: 12px 18px; font-size: 9px; gap: 12px; }
   .cs-back-to-top { bottom: 22px; right: 22px; padding: 12px 18px 12px 14px; font-size: 9px; }
   .logo-mark { top: 16px; left: 16px; }
@@ -8510,7 +8471,7 @@ section.inv .scroll-hint,
   .scroll-hint, .scroll-hint-dot { animation: none; }
 }
 
-/* trigger hmr · menu-btn-blend-and-scroll-hint-2026-05-15 */
+/* trigger hmr · case-study-chrome-uses-logo-mark-svg-2026-05-16 */
 
 /* ─── Figure caption (below image): accent meta on top, descriptive sentence below ─── */
 .fig-cap {
