@@ -762,7 +762,12 @@ export default function BrutalistHome() {
       const fn = (e: Event) => {
         e.preventDefault();
         const labelEl = a.querySelector(".label");
-        const labelText = (labelEl?.textContent || "").replace(/[,.]/g, "").trim();
+        // Each .label reads "Word<em>, the secondary clause</em>" — the
+        // curtain should only flash the headline word ("HOME", "WORK"…),
+        // not the full phrase. So take the first text node, not the entire
+        // textContent.
+        const firstText = labelEl?.childNodes?.[0]?.textContent ?? labelEl?.textContent ?? "";
+        const labelText = firstText.replace(/[,.]/g, "").trim();
         if (curtainWord) curtainWord.textContent = labelText.toUpperCase();
         if (menuCurtainWord) menuCurtainWord.textContent = labelText.toUpperCase();
         closeMenu();
