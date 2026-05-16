@@ -2583,6 +2583,9 @@ footer.brutalist-footer a:hover { color: var(--accent); }
   .menu { grid-template-columns: 1fr; }
   .menu-right { display: none; }
   .menu-left { padding: 90px 20px 24px; }
+  .menu-item { font-size: clamp(40px, 11vw, 56px); padding: 10px 60px 10px 0; gap: 16px; }
+  .menu-item .num { font-size: 10px; min-width: 36px; padding-top: 14px; }
+  .menu-item .arrow { font-size: 24px; padding-top: 20px; }
   section { padding: 88px 28px; }
   .hero { padding-top: 96px; padding-bottom: 32px; min-height: auto; }
   .hero-lead {
@@ -8529,7 +8532,7 @@ section.inv .scroll-hint,
   .scroll-hint, .scroll-hint-dot { animation: none; }
 }
 
-/* trigger hmr · mobile-contact-padding-2026-05-16 */
+/* trigger hmr · mobile-menu-compact-2026-05-16 */
 
 /* ============ MOBILE NOTICE TOAST ============
    Bottom-anchored dismissible banner. Rendered only at <=720px via the
