@@ -95,6 +95,8 @@ export default function SiteChrome({ page = "home" }: Props) {
 
   return (
     <>
+      <div className="site-header-bar" aria-hidden="true" />
+
       <Link href="/" className="logo-mark" data-cursor="home">
         <span className="dot"></span>ZIAUL ISLAM<span className="slash">/</span>SR. PRODUCT DESIGNER
       </Link>

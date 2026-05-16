@@ -383,7 +383,7 @@ section, .marquee, .playground, footer { position: relative; z-index: 1; }
   pointer-events: none;
 }
 @media (max-width: 720px) {
-  .logo-mark--svg { width: 44px; height: 44px; }
+  .logo-mark--svg { width: 56px; height: 56px; }
 }
 
 /* ---- FLOATING MENU BUTTON (top-right) ----
@@ -1839,8 +1839,34 @@ body.has-custom-cursor .work-item { cursor: none; }
 .inv .work-item .metric { color: var(--accent) !important; }
 .inv .work-item:hover .metric { color: var(--ink) !important; }
 @media (max-width: 720px) {
+  /* Drop the desktop grid entirely on mobile and stack flush-left.
+     Each child takes full width and aligns text-left from the leading
+     edge — no narrow title column squeezing words. */
+  .work-item {
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 28px 4px;
+    text-align: left;
+  }
+  .work-item .no { align-self: flex-start; }
+  .work-item .title-stack { gap: 10px; min-width: 0; width: 100%; }
+  .work-item .title {
+    font-size: clamp(28px, 7.5vw, 40px);
+    line-height: 1.08;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
   .work-item .metric { font-size: 11px; letter-spacing: .1em; }
-  .work-item .title-stack { gap: 10px; }
+  .work-item .tags { flex-wrap: wrap; }
+  .work-item .year { text-align: left; }
+  .work-item .arrow { align-self: flex-start; font-size: 22px; }
+  .work-item:hover { padding-left: 4px; }
+  /* Drop the per-item separator on mobile — the stack reads cleaner
+     without the horizontal rule between cards. */
+  .work-item { border-bottom: none !important; }
+  .work-list { border-top: none !important; }
 }
 .work-item .title em {
   font-style: italic; font-weight: 300; color: var(--accent);
@@ -2185,12 +2211,13 @@ body.has-custom-cursor .work-item { cursor: none; }
 .method-card--04 { background: #c97b63; color: #1a0c08; }
 
 @media (max-width: 900px) {
-  .method { padding: 100px 24px 0; }
+  .method { padding: 100px 28px 0; }
   .method-head { grid-template-columns: 1fr; gap: 24px; }
   .method-deck { justify-self: start; max-width: 100%; }
-  .method-stack { margin-inline: -24px; }
+  .method-stack { margin-inline: -28px; }
   .method-card { min-height: auto; position: relative; top: auto; }
-  .method-card-inner { grid-template-columns: 1fr; row-gap: 40px; padding: 48px 24px; }
+  .method-card-inner { grid-template-columns: 1fr; row-gap: 44px; padding: 64px 32px; }
+  .method-card-lead { gap: 28px; }
   .method-card-display { align-items: flex-start; text-align: left; }
   .method-card-label { font-size: clamp(48px, 13vw, 96px); }
   .method-card-overlay { display: none; }
@@ -2548,8 +2575,8 @@ footer.brutalist-footer a:hover { color: var(--accent); }
   .menu { grid-template-columns: 1fr; }
   .menu-right { display: none; }
   .menu-left { padding: 90px 20px 24px; }
-  section { padding: 80px 24px; }
-  .hero { padding-top: 80px; padding-bottom: 24px; min-height: auto; }
+  section { padding: 88px 28px; }
+  .hero { padding-top: 96px; padding-bottom: 32px; min-height: auto; }
   .hero-lead {
     flex-direction: column;
     align-items: flex-start;
@@ -2792,7 +2819,9 @@ footer.brutalist-footer a:hover { color: var(--accent); }
 
 @media (max-width: 720px) {
   .cs-float-context { display: none; }
-  .cs-orb-logo { top: 18px; left: 18px; }
+  .cs-orb-logo { top: 10px; left: 14px; width: 36px; height: 36px; }
+  .cs-orb-logo.logo-mark--svg { width: 36px; height: 36px; }
+  .cs-float-menu { top: 10px; right: 14px; padding: 10px 14px; font-size: 9px; gap: 10px; }
   .cs-float-menu { top: 18px; right: 18px; padding: 12px 18px; font-size: 9px; gap: 12px; }
   .cs-back-to-top { bottom: 22px; right: 22px; padding: 12px 18px 12px 14px; font-size: 9px; }
   .logo-mark { top: 16px; left: 16px; }
@@ -4538,6 +4567,13 @@ footer.cs-foot a:hover { color: var(--accent); }
 }
 @media (max-width: 1023px) {
   .playground-hint { top: -48px; font-size: 10px; padding: 6px 12px; }
+}
+/* On mobile the drag-to-console interaction doesn't exist (tap loads
+   the cassette), and the absolutely-positioned hint sits above the
+   console-stack — which on phones lands inside the rack visually. Hide
+   it on mobile to stop the visual collision. */
+@media (max-width: 760px) {
+  .playground-hint { display: none; }
 }
 
 /* Featured cassette: CV — visually prominent */
@@ -7851,7 +7887,9 @@ body.has-custom-cursor .more-tile { cursor: none; }
 }
 .cs-nowstudio .dec-pair .dec-row { margin-top: 0; height: 100%; min-width: 0; }
 @media (max-width: 900px) {
-  .cs-nowstudio .dec-pair { grid-template-columns: 1fr; }
+  /* !important matches the base rule's specificity to actually win the
+     cascade — without it the desktop 1fr 1fr !important keeps applying. */
+  .cs-nowstudio .dec-pair { grid-template-columns: 1fr !important; }
 }
 @media (max-width: 1100px) {
   .cs-nowstudio .dec-pair { padding: 0 64px !important; }
@@ -8480,7 +8518,241 @@ section.inv .scroll-hint,
   .scroll-hint, .scroll-hint-dot { animation: none; }
 }
 
-/* trigger hmr · cta-write-call-primary-pair-2026-05-16 */
+/* trigger hmr · mobile-notice-2026-05-16 */
+
+/* ============ MOBILE NOTICE TOAST ============
+   Bottom-anchored dismissible banner. Rendered only at <=720px via the
+   React component's matchMedia check; dismissal persists in localStorage
+   so it never reappears for that user. */
+.mobile-notice {
+  position: fixed;
+  left: 12px; right: 12px; bottom: 16px;
+  z-index: 100;
+  pointer-events: none;
+  animation: mobile-notice-in 0.45s cubic-bezier(.22, 1, .36, 1) both;
+}
+.mobile-notice-inner {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px 12px 16px;
+  background: #0a0a0a;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  font-family: var(--font-grotesk);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.mobile-notice-inner p { margin: 0; flex: 1; color: rgba(255,255,255,0.86); }
+.mobile-notice-inner b { color: var(--accent); font-weight: 600; }
+.mobile-notice-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+  flex-shrink: 0;
+}
+.mobile-notice-close {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+.mobile-notice-close:hover,
+.mobile-notice-close:focus-visible {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.45);
+}
+@keyframes mobile-notice-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============ ADAPTIVE MENU BUTTON FILL — mobile ============
+   Phones have no :hover, so the outline-only state of .menu-btn and
+   the static dark fill of .cs-float-menu can both blend into similar-
+   coloured sections (light pill on light .inv block, dark pill on dark
+   hero). Combine a solid white fill with mix-blend-mode: difference so
+   the button auto-flips to white on dark backgrounds and black on
+   light backgrounds — same auto-contrast trick the floating Z monogram
+   already uses. */
+@media (max-width: 720px) {
+  /* Suppress the home menu pill's hover slide-up overlay + pulse halo
+     on mobile (no hover, and they fight the filled-white style above). */
+  .menu-btn::before { display: none; }
+  .menu-btn-pulse { display: none; }
+}
+
+/* ============ UNIFIED HEADER BAR ============
+   White-tinted frosted bar that visually contains the floating logo + menu.
+   Sits below the chrome (z-index < 70/85) so logo/menu interactions
+   are unaffected. Uses `position: fixed` so it stays glued to the
+   viewport like the chrome it backs. */
+/* Mobile-only header bar — hidden on desktop so existing chrome is
+   untouched. Solid black, 56px tall, sits behind the logo + menu pill. */
+.site-header-bar { display: none; }
+@media (max-width: 720px) {
+  /* Bar is 60px content + 12px bottom padding zone = 72px total. */
+  .site-header-bar {
+    display: block;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 72px;
+    z-index: 60;
+    pointer-events: none;
+    background: #0a0a0a;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  body.menu-open .site-header-bar { opacity: 0; }
+  /* Logo on mobile: paint as solid white instead of sampling the page. */
+  .logo-mark--svg .logo-svg {
+    background: #ffffff;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  /* Bar 72px tall. Logo 56×56 (the SVG mask has internal whitespace, so
+     the box reads smaller than its declared size) → top (72-56)/2 = 8px.
+     Menu pill ~40px → top (72-40)/2 = 16px. */
+  .logo-mark--svg { width: 56px !important; height: 56px !important; top: 8px !important; left: 12px !important; }
+  .cs-orb-logo { top: 8px !important; left: 12px !important; width: 56px !important; height: 56px !important; }
+  .cs-orb-logo.logo-mark--svg { width: 56px !important; height: 56px !important; }
+
+  /* Filled white menu button — dark text, no blend tricks. */
+  .menu-btn {
+    top: 16px !important;
+    right: 16px !important;
+    padding: 10px 16px !important;
+    background: #ffffff !important;
+    color: #0a0a0a !important;
+    border-color: #ffffff !important;
+  }
+  .menu-btn .icon i { background: #0a0a0a !important; }
+
+  .cs-float-menu {
+    top: 16px !important;
+    right: 16px !important;
+    padding: 10px 16px !important;
+    font-size: 10px !important;
+    gap: 10px;
+    background: #ffffff !important;
+    border-color: #ffffff !important;
+    color: #0a0a0a !important;
+    box-shadow: none;
+  }
+  .cs-float-menu a,
+  .cs-float-menu .cs-float-menu-arrow,
+  .cs-float-menu-sep { color: #0a0a0a !important; }
+  .cs-float-menu a + a { border-left-color: rgba(10,10,10,0.2) !important; }
+  /* Mobile has no hover/mousemove — neutralise the JS-driven magnetic
+     transforms so the chrome stays anchored at its CSS-defined spot
+     instead of carrying any leftover translate from the rAF loop. */
+  [data-magnet],
+  [data-magnet] .inner,
+  .cs-orb-logo,
+  .cs-float-menu,
+  .cs-back-to-top,
+  .menu-btn,
+  .logo-mark { transform: none !important; }
+}
+
+/* ============ MOBILE GRID COLLAPSE — case-study ============
+   On phones the 3/4-column grids cause horizontal cramping and text
+   slivers. Force single-column at <=720px. */
+@media (max-width: 720px) {
+  .cs-workflow .framing-grid,
+  .cs-workflow .tool-grid-3,
+  .cs-workflow .tool-grid-4,
+  .cs-workflow .pillars-grid,
+  .cs-workflow .workshop-grid,
+  .cs-workflow .reflect-3,
+  .cs-workflow .stats-grid,
+  .cs-workflow .stats-grid.stats-4,
+  .cs-6labs .framing-grid,
+  .cs-gamification .framing-grid {
+    grid-template-columns: 1fr;
+  }
+  .cs-workflow .roundtrip-row {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* ============ HERO SLAB — mobile sizing ============
+   The 80px "round-trip" word overflows a 16/9 slab on a 360px phone.
+   Scale it down + relax the aspect so the label fits. */
+@media (max-width: 720px) {
+  .hero-slab {
+    aspect-ratio: auto;
+    min-height: 280px;
+    padding: 56px 16px;
+  }
+  .slab-label .big { font-size: clamp(40px, 13vw, 64px); }
+  .slab-corner { font-size: 9px; letter-spacing: .16em; }
+  .slab-corner.tl, .slab-corner.tr { top: 12px; }
+  .slab-corner.bl, .slab-corner.br { bottom: 12px; }
+}
+
+/* ============ PLAYGROUND — mobile overflow ============
+   Desktop pins the playground at 100vh and clips overflow so head + rack
+   + console fit a single viewport. On mobile that constraint clips
+   content — release the pin and let it flow naturally, then shrink
+   cassettes so two columns sit comfortably inside the phone width. */
+@media (max-width: 760px) {
+  .playground-pin {
+    height: auto;
+    min-height: 0;
+  }
+  .playground-frame {
+    position: static;
+    height: auto;
+    overflow: visible;
+    padding: 56px 0 64px;
+  }
+  .playground-frame .playground-stage { padding: 0 16px; }
+  .playground-frame .stage-grid { gap: 36px; margin-top: 0; }
+  .playground-frame .playground-head { padding-bottom: 28px; }
+
+  .cassette-rack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 12px;
+    padding: 20px 12px 28px;
+    justify-content: stretch;
+    min-height: 0;
+  }
+  .cassette {
+    width: 100%;
+    max-width: 140px;
+    height: auto;
+    aspect-ratio: 156 / 196;
+    margin: 0 auto;
+  }
+  .cassette-title { font-size: 15px; }
+  .cassette-rib { height: 20px; margin: 7px 11px 0; }
+  .cassette-pins { height: 12px; margin: 7px 12px 7px; }
+  .cassette-tag { font-size: 8px; }
+  .cassette-num { font-size: 8.5px; }
+  .cassette-sub { font-size: 8px; }
+
+  .console { min-width: 0; }
+  .console-slot-zone { padding: 20px 16px 16px; }
+  .console-screen, .console-ports { min-width: 0; }
+}
+@media (max-width: 420px) {
+  .playground-frame .playground-stage { padding: 0 12px; }
+  .cassette-rack { padding: 16px 8px 24px; gap: 14px 10px; }
+  .cassette { max-width: 124px; }
+  .cassette-title { font-size: 14px; }
+}
 
 /* ─── Figure caption (below image): accent meta on top, descriptive sentence below ─── */
 .fig-cap {
@@ -8660,8 +8932,12 @@ section.inv .scroll-hint,
     border-bottom: 1px solid rgba(10, 10, 10, 0.10);
     grid-template-rows: auto auto auto;
   }
-  .cs-nowstudio .outcome-metric-cell:last-child { border-bottom: none; padding-bottom: 0; }
-  .cs-nowstudio .outcome-metric-cell:first-child { padding-top: 22px; }
+  /* Reset desktop-only :first-child / :last-child horizontal padding so all
+     cells share the same flush-left baseline in single-column. Without this,
+     :last-child's padding-left:48px wins over the @media rule via specificity
+     (0,3,0 vs 0,2,0). */
+  .cs-nowstudio .outcome-metric-cell:first-child { padding: 22px 0; padding-top: 22px; }
+  .cs-nowstudio .outcome-metric-cell:last-child { padding: 22px 0; padding-bottom: 0; border-bottom: none; }
 }
 
 /* ─── nowstudio · §04 OUTCOMES — merged-Distribution row + 2-up below ─── */

@@ -113,6 +113,8 @@ export default function CaseStudyChrome({ context, rightSlot }: CaseStudyChromeP
 
       <div className="cs-scroll-prog" id="scrollProg" />
 
+      <div className="site-header-bar" aria-hidden="true" />
+
       <Link
         ref={logoRef}
         href="/"

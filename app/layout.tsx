@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { sans, mono, serif } from "@/lib/fonts";
 import "./globals.css";
+import MobileNotice from "@/components/layout/MobileNotice";
 
 const SITE_URL = "https://ziaulislam.me";
 const DESCRIPTION =
@@ -108,7 +109,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <MobileNotice />
+      </body>
     </html>
   );
 }

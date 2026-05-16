@@ -900,6 +900,8 @@ export default function BrutalistHome() {
       <div className="cursor-dot" id="cursorDot"></div>
 
       <main>
+        <div className="site-header-bar" aria-hidden="true" />
+
         {/* FLOATING LOGO — Z monogram, mix-blend-mode difference for auto-contrast */}
         <a
           href="#hero"
