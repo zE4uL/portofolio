@@ -8526,7 +8526,7 @@ section.inv .scroll-hint,
   .scroll-hint, .scroll-hint-dot { animation: none; }
 }
 
-/* trigger hmr · mobile-logo-shrink-2026-05-16 */
+/* trigger hmr · mobile-logo-scope-2026-05-16 */
 
 /* ============ MOBILE NOTICE TOAST ============
    Bottom-anchored dismissible banner. Rendered only at <=720px via the
@@ -8628,12 +8628,12 @@ section.inv .scroll-hint,
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
-  /* Bar 72px tall. Logo 40×40 (the SVG mask has internal whitespace, so
-     the box reads smaller than its declared size) → top (72-40)/2 = 16px.
-     Menu pill ~40px → top (72-40)/2 = 16px. */
-  .logo-mark--svg { width: 40px !important; height: 40px !important; top: 16px !important; left: 14px !important; }
-  .cs-orb-logo { top: 16px !important; left: 14px !important; width: 40px !important; height: 40px !important; }
-  .cs-orb-logo.logo-mark--svg { width: 40px !important; height: 40px !important; }
+  /* Home page logo: keep prominent (56×56) — anchors the brutalist hero.
+     Case-study logo (.cs-orb-logo): smaller (40×40) — sits inside the
+     fixed 72px header bar next to a compact menu pill. */
+  .logo-mark--svg:not(.cs-orb-logo) { width: 56px !important; height: 56px !important; top: 8px !important; left: 12px !important; }
+  .cs-orb-logo,
+  .cs-orb-logo.logo-mark--svg { width: 40px !important; height: 40px !important; top: 16px !important; left: 14px !important; }
 
   /* Filled white menu button — dark text, no blend tricks. */
   .menu-btn {
