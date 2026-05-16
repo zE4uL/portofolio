@@ -113,54 +113,26 @@ export default function CRTPopup({ cassette, onClose }: Props) {
           <span className="crt-knob crt-knob-2" aria-hidden />
           <span className="crt-vent" aria-hidden />
           <div className={`crt-screen${isPdf ? " pdf" : ""}`}>
-            {isPdf ? (
-              <object
-                data={`${cassette.pdf}#view=FitH&toolbar=0&navpanes=0`}
-                type="application/pdf"
-                className="crt-pdf"
-                aria-label={`${cassette.title} PDF`}
-              >
-                <div className="crt-pdf-fallback">
-                  <p>Your browser can&apos;t preview this PDF inline.</p>
-                  {cassette.download && (
-                    <a className="crt-download" href={cassette.download.href} download={cassette.download.filename}>
-                      {cassette.download.label}
-                    </a>
-                  )}
-                </div>
-              </object>
-            ) : (
-              <>
-                {shots.map((src, i) => (
-                  <img
-                    key={src}
-                    src={src}
-                    className={`crt-img${i === idx ? " active" : ""}`}
-                    alt=""
-                  />
-                ))}
-              </>
-            )}
+            {shots.map((src, i) => (
+              <img
+                key={src}
+                src={src}
+                className={`crt-img${i === idx ? " active" : ""}`}
+                alt=""
+              />
+            ))}
             <div className="crt-glare" aria-hidden />
             <div className="crt-scanlines" aria-hidden />
             <div className="crt-vignette" aria-hidden />
-            {!isPdf && (
-              <>
-                <div className="crt-osd">
-                  <span className="crt-osd-dot" /> CH-{String(idx + 1).padStart(2, "0")}
-                </div>
-                {shots.length > 1 && (
-                  <div className="crt-pager" aria-hidden>
-                    {shots.map((_, i) => (
-                      <span key={i} className={`crt-pager-dot${i === idx ? " active" : ""}`} />
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-            {isPdf && (
-              <div className="crt-osd">
-                <span className="crt-osd-dot" /> RESUME · 2026
+            <div className="crt-osd">
+              <span className="crt-osd-dot" />{" "}
+              {isPdf ? "RESUME · 2026" : `CH-${String(idx + 1).padStart(2, "0")}`}
+            </div>
+            {!isPdf && shots.length > 1 && (
+              <div className="crt-pager" aria-hidden>
+                {shots.map((_, i) => (
+                  <span key={i} className={`crt-pager-dot${i === idx ? " active" : ""}`} />
+                ))}
               </div>
             )}
           </div>
