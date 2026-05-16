@@ -8526,7 +8526,7 @@ section.inv .scroll-hint,
   .scroll-hint, .scroll-hint-dot { animation: none; }
 }
 
-/* trigger hmr · mobile-section-size-up-2026-05-16 */
+/* trigger hmr · mobile-cs-chrome-grids-2026-05-16 */
 
 /* ============ MOBILE NOTICE TOAST ============
    Bottom-anchored dismissible banner. Rendered only at <=720px via the
@@ -8648,19 +8648,44 @@ section.inv .scroll-hint,
 
   .cs-float-menu {
     top: 16px !important;
-    right: 16px !important;
-    padding: 10px 16px !important;
-    font-size: 10px !important;
-    gap: 10px;
+    right: 12px !important;
+    padding: 9px 12px !important;
+    font-size: 9px !important;
+    letter-spacing: 0.16em !important;
+    gap: 8px !important;
+    max-width: calc(100vw - 80px);
     background: #ffffff !important;
     border-color: #ffffff !important;
     color: #0a0a0a !important;
     box-shadow: none;
+    white-space: nowrap;
   }
+  .cs-float-menu-inner { max-width: 100%; }
   .cs-float-menu a,
   .cs-float-menu .cs-float-menu-arrow,
   .cs-float-menu-sep { color: #0a0a0a !important; }
-  .cs-float-menu a + a { border-left-color: rgba(10,10,10,0.2) !important; }
+  .cs-float-menu a + a {
+    border-left-color: rgba(10,10,10,0.2) !important;
+    padding-left: 8px !important;
+    margin-left: 4px !important;
+  }
+  /* Two-link menus (Behance | All Work) overflow at 360px — drop the
+     external Behance/repeat link on phones; it reappears as a CTA later
+     in the page. Keep only the last link (typically "All Work"). */
+  .cs-float-menu-inner > a:not(:last-child) { display: none; }
+  .cs-float-menu-inner > a:not(:last-child) + a { border-left: 0 !important; padding-left: 0 !important; margin-left: 0 !important; }
+
+  /* Back-to-top: tighter padding + safer inset so the pill never sits
+     under the viewport edge. */
+  .cs-back-to-top {
+    bottom: 18px !important;
+    right: 14px !important;
+    padding: 10px 16px 10px 12px !important;
+    font-size: 9px !important;
+    gap: 8px !important;
+    letter-spacing: 0.18em !important;
+  }
+  .cs-btt-arrow { width: 22px !important; height: 22px !important; font-size: 12px !important; }
   /* Mobile has no hover/mousemove — neutralise the JS-driven magnetic
      transforms so the chrome stays anchored at its CSS-defined spot
      instead of carrying any leftover translate from the rAF loop. */
@@ -8675,7 +8700,7 @@ section.inv .scroll-hint,
 
 /* ============ MOBILE GRID COLLAPSE — case-study ============
    On phones the 3/4-column grids cause horizontal cramping and text
-   slivers. Force single-column at <=720px. */
+   slivers. Force single-column at <=720px across every case study. */
 @media (max-width: 720px) {
   .cs-workflow .framing-grid,
   .cs-workflow .tool-grid-3,
@@ -8686,13 +8711,56 @@ section.inv .scroll-hint,
   .cs-workflow .stats-grid,
   .cs-workflow .stats-grid.stats-4,
   .cs-6labs .framing-grid,
-  .cs-gamification .framing-grid {
-    grid-template-columns: 1fr;
+  .cs-6labs .stats-grid,
+  .cs-gamification .framing-grid,
+  .cs-gamification .stats-grid,
+  .stats-grid,
+  .stats-grid.stats-4,
+  .pillars,
+  .pillars.pillars--3,
+  .pillars-grid,
+  .metrics,
+  .stores,
+  .art-quad,
+  .art-quad.art-quad--2,
+  .workshop-grid,
+  .tool-grid,
+  .tool-grid-3,
+  .tool-grid-4,
+  .reflect-3,
+  .float-recog-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px;
   }
   .cs-workflow .roundtrip-row {
     grid-template-columns: 1fr;
     gap: 24px;
   }
+  /* Drop the column-divider lines that only make sense in multi-column mode */
+  .pillar, .metric, .store {
+    border-right: 0 !important;
+  }
+  .pillar:not(:last-child),
+  .metric:not(:last-child),
+  .store:not(:last-child) {
+    border-bottom: 1px solid var(--line);
+  }
+}
+/* Base for grids that previously used inline styles in JSX. */
+.float-recog-grid { display: grid; gap: 32px; margin-top: 64px; }
+.art-quad.art-quad--2 { gap: 24px; }
+.pillars.pillars--3 { grid-template-columns: repeat(3, 1fr); }
+/* Tablet (721–1100px): keep 2-up where 3+ columns were forced inline. */
+@media (min-width: 721px) and (max-width: 1100px) {
+  .pillars.pillars--3,
+  .art-quad.art-quad--2,
+  .float-recog-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (min-width: 1101px) {
+  .art-quad.art-quad--2 { grid-template-columns: 1fr 1fr; }
+  .float-recog-grid { grid-template-columns: 1fr 1fr; gap: 60px; }
 }
 
 /* ============ HERO SLAB — mobile sizing ============

@@ -190,7 +190,7 @@ export default function AmwayIndiaCaseStudy() {
           The redesign couldn&apos;t happen in series — both surfaces were live and the brand team was actively shipping. We worked in parallel and built the <em>system</em> alongside the screens, so each one could feed the next.
         </p>
 
-        <div className="pillars" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
+        <div className="pillars pillars--3">
           <div className="pillar">
             <div className="num">01 — APP</div>
             <h4>Rework the <em>mobile</em> surface</h4>
@@ -217,7 +217,7 @@ export default function AmwayIndiaCaseStudy() {
           <span>iOS / Android</span>
         </div>
 
-        <div className="art-quad" style={{ gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+        <div className="art-quad art-quad--2">
           <Slot id="appShot01" project="amway-india" entry={amwayAssets.appShot01} aspect="4:5">
             <div className="ph-grid"></div>
           </Slot>

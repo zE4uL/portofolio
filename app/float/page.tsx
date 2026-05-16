@@ -565,7 +565,7 @@ export default function FloatCaseStudy() {
           </div>
         </div>
 
-        <div style={{ marginTop: 64, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60 }}>
+        <div className="float-recog-grid">
           <div>
             <h6 style={{ fontFamily: "var(--font-jetbrains)", fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase", color: "rgba(10,10,10,0.55)", marginBottom: 16 }}>RECOGNITION</h6>
             <p style={{ fontFamily: "var(--font-grotesk)", fontSize: 24, lineHeight: 1.3, letterSpacing: "-.02em", color: "#0a0a0a", maxWidth: "36ch" }}>
