@@ -2606,7 +2606,10 @@ footer.brutalist-footer a:hover { color: var(--accent); }
   .work-item .tags, .work-item .year { display: none; }
   .process-item { grid-template-columns: 60px 1fr 30px; }
   .process-item p { grid-column: 2 / 4; max-width: none; }
-  .contact-grid { grid-template-columns: 1fr 1fr; }
+  .contact { padding: 96px 28px 40px; }
+  .cta-wrap { margin-top: 32px; gap: 24px; }
+  .contact-grid { grid-template-columns: 1fr 1fr; margin-top: 48px; padding-top: 24px; gap: 20px; }
+  footer.brutalist-footer { padding: 18px 24px; }
   .work-preview { display: none; }
   body.has-custom-cursor { cursor: auto; }
   body.has-custom-cursor .cursor-dot,
@@ -8526,7 +8529,7 @@ section.inv .scroll-hint,
   .scroll-hint, .scroll-hint-dot { animation: none; }
 }
 
-/* trigger hmr · mobile-logo-scope-2026-05-16 */
+/* trigger hmr · mobile-contact-padding-2026-05-16 */
 
 /* ============ MOBILE NOTICE TOAST ============
    Bottom-anchored dismissible banner. Rendered only at <=720px via the
